@@ -1,0 +1,9 @@
+@theme {
+  --color-primary: #000000;
+  --color-secondary: #333333;
+  --color-accent: #0C2619;
+  --color-background: #FFFFFF;
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+}
+
