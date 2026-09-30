@@ -4308,7 +4308,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "eba1eece-6643-4117-a185-15b110759613",
+    "buildId": "327960c3-4610-4ec9-a0a9-6d3b0a48b2f1",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -5167,47 +5167,19 @@ const plugins = [
 ];
 
 const assets = {
-  "/index.html": {
-    "type": "text/html;charset=utf-8",
-    "etag": "\"7b1f-zlHd2pYePqYROys/+zJ/UQeRito\"",
-    "mtime": "2026-09-18T22:07:14.179Z",
-    "size": 31519,
-    "path": "../public/index.html"
-  },
   "/_payload.json": {
     "type": "application/json;charset=utf-8",
-    "etag": "\"b1c-cssD/K4q4XZS7MIlD9+2HafhHis\"",
-    "mtime": "2026-09-18T22:07:14.191Z",
+    "etag": "\"b1c-DwlgQFtMh2eUHTjwczETZlKwLkg\"",
+    "mtime": "2026-09-28T20:06:32.662Z",
     "size": 2844,
     "path": "../public/_payload.json"
   },
-  "/nosotros/index.html": {
+  "/index.html": {
     "type": "text/html;charset=utf-8",
-    "etag": "\"3d8c-Y+xk4Wp3MMqAapBzgS3S7grLlSs\"",
-    "mtime": "2026-09-18T22:07:14.173Z",
-    "size": 15756,
-    "path": "../public/nosotros/index.html"
-  },
-  "/recursos/_payload.json": {
-    "type": "application/json;charset=utf-8",
-    "etag": "\"45-kWrf3bo/8iMcn9msj0bfH0JkZUw\"",
-    "mtime": "2026-09-18T22:07:14.191Z",
-    "size": 69,
-    "path": "../public/recursos/_payload.json"
-  },
-  "/nosotros/_payload.json": {
-    "type": "application/json;charset=utf-8",
-    "etag": "\"45-kWrf3bo/8iMcn9msj0bfH0JkZUw\"",
-    "mtime": "2026-09-18T22:07:14.190Z",
-    "size": 69,
-    "path": "../public/nosotros/_payload.json"
-  },
-  "/documents/PAGARE-CLINIPLANES.pdf": {
-    "type": "application/pdf",
-    "etag": "\"2d199-ExKoPPavz2Axw/NFsljTMVuix+s\"",
-    "mtime": "2026-06-06T18:36:44.909Z",
-    "size": 184729,
-    "path": "../public/documents/PAGARE-CLINIPLANES.pdf"
+    "etag": "\"7b21-2V3hWafjdB1zDkSotb022VuWXAo\"",
+    "mtime": "2026-09-28T20:06:32.648Z",
+    "size": 31521,
+    "path": "../public/index.html"
   },
   "/documents/2.-AUTORIZACION-CENTRALES-CLINIPLANES.pdf": {
     "type": "application/pdf",
@@ -5216,173 +5188,201 @@ const assets = {
     "size": 125274,
     "path": "../public/documents/2.-AUTORIZACION-CENTRALES-CLINIPLANES.pdf"
   },
+  "/documents/PAGARE-CLINIPLANES.pdf": {
+    "type": "application/pdf",
+    "etag": "\"2d199-ExKoPPavz2Axw/NFsljTMVuix+s\"",
+    "mtime": "2026-06-06T18:36:44.909Z",
+    "size": 184729,
+    "path": "../public/documents/PAGARE-CLINIPLANES.pdf"
+  },
+  "/nosotros/index.html": {
+    "type": "text/html;charset=utf-8",
+    "etag": "\"3d8e-0Id2+BikLoDZk0ilJlFtJ4eKFps\"",
+    "mtime": "2026-09-28T20:06:32.639Z",
+    "size": 15758,
+    "path": "../public/nosotros/index.html"
+  },
+  "/nosotros/_payload.json": {
+    "type": "application/json;charset=utf-8",
+    "etag": "\"45-kPW16rB9Ox8Jyngu+g7xOjmvEqo\"",
+    "mtime": "2026-09-28T20:06:32.658Z",
+    "size": 69,
+    "path": "../public/nosotros/_payload.json"
+  },
   "/recursos/index.html": {
     "type": "text/html;charset=utf-8",
-    "etag": "\"3034-iJBUjUa2h8LRwwm3fAjHjC/zh8Y\"",
-    "mtime": "2026-09-18T22:07:14.172Z",
-    "size": 12340,
+    "etag": "\"3036-IFqRgYtBWSoc90wBChrgmJMXiUE\"",
+    "mtime": "2026-09-28T20:06:32.648Z",
+    "size": 12342,
     "path": "../public/recursos/index.html"
   },
-  "/_nuxt/b2ztQ-Zd.js": {
+  "/_nuxt/B58wzJK4.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"c99-7d1RMRJWu50wTHhlKwbBwhUjhkA\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 3225,
-    "path": "../public/_nuxt/b2ztQ-Zd.js"
+    "etag": "\"10f9-9aMBeTCUX5QRm7Wf/JX3aWh6L28\"",
+    "mtime": "2026-09-28T20:06:19.150Z",
+    "size": 4345,
+    "path": "../public/_nuxt/B58wzJK4.js"
   },
-  "/_nuxt/B5TrKkDC.js": {
+  "/_nuxt/1p_6BCQb.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"10f7-Ol/tFtJ+xFFXO3kpb76Ft/LP29g\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 4343,
-    "path": "../public/_nuxt/B5TrKkDC.js"
-  },
-  "/_nuxt/BhFqHS9S.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"de0-ZfMX6ENkbQHTnlgXjhJkqnvyXLY\"",
-    "mtime": "2026-09-18T22:07:06.942Z",
-    "size": 3552,
-    "path": "../public/_nuxt/BhFqHS9S.js"
-  },
-  "/_nuxt/BiTHpmDe.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3c94-s+DzswKds3f1A6pWTN3+WRnPtp4\"",
-    "mtime": "2026-09-18T22:07:06.939Z",
-    "size": 15508,
-    "path": "../public/_nuxt/BiTHpmDe.js"
-  },
-  "/_nuxt/2T3GZrBQ.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"6060-1/4P/vrLIvbweegISKn4/A7L9L4\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 24672,
-    "path": "../public/_nuxt/2T3GZrBQ.js"
-  },
-  "/_nuxt/BIu0XS66.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"aef-7NiCz7H3TkTq2eKLxuy6rmvyCTM\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 2799,
-    "path": "../public/_nuxt/BIu0XS66.js"
-  },
-  "/_nuxt/BMMKbzoe.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f19-7lMUiuiL2WldBFXTznYMAgweFUg\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 7961,
-    "path": "../public/_nuxt/BMMKbzoe.js"
-  },
-  "/_nuxt/Bu6QlzLn.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1026-C1wYvARmD9fDORKBgiAm1tAALwg\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
+    "etag": "\"1026-vLcUF/irnuRZEHZm7XJJnBhPf10\"",
+    "mtime": "2026-09-28T20:06:19.150Z",
     "size": 4134,
-    "path": "../public/_nuxt/Bu6QlzLn.js"
+    "path": "../public/_nuxt/1p_6BCQb.js"
   },
-  "/_nuxt/BRyeZyYT.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"d96-u0Oq6Pyrr0Q/fEqi3iF9SeWUS5E\"",
-    "mtime": "2026-09-18T22:07:06.939Z",
-    "size": 3478,
-    "path": "../public/_nuxt/BRyeZyYT.js"
+  "/recursos/_payload.json": {
+    "type": "application/json;charset=utf-8",
+    "etag": "\"45-kPW16rB9Ox8Jyngu+g7xOjmvEqo\"",
+    "mtime": "2026-09-28T20:06:32.661Z",
+    "size": 69,
+    "path": "../public/recursos/_payload.json"
   },
-  "/_nuxt/CmLBrira.js": {
+  "/_nuxt/CAZ9vA13.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"534-GDni0eMvmDl2ghEPKxOxgbPVzHc\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 1332,
-    "path": "../public/_nuxt/CmLBrira.js"
+    "etag": "\"aef-7fKRnfKnvXM1HsCIkCDZMJBqyTE\"",
+    "mtime": "2026-09-28T20:06:19.149Z",
+    "size": 2799,
+    "path": "../public/_nuxt/CAZ9vA13.js"
   },
-  "/_nuxt/CJ6oWEqU.js": {
+  "/_nuxt/1O3g23nr.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"db4-o5/JP63HBaH/DiMtMModnBEN98k\"",
-    "mtime": "2026-09-18T22:07:06.939Z",
-    "size": 3508,
-    "path": "../public/_nuxt/CJ6oWEqU.js"
+    "etag": "\"128c-dtXc4eZ3pFKHPE9ud4iVzwbgR/Q\"",
+    "mtime": "2026-09-28T20:06:19.150Z",
+    "size": 4748,
+    "path": "../public/_nuxt/1O3g23nr.js"
   },
-  "/_nuxt/CrC_j_nx.js": {
+  "/_nuxt/C9LyWRJk.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1ed0-V6WL4qbctpubaWXgeD4CMTBpYEk\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 7888,
-    "path": "../public/_nuxt/CrC_j_nx.js"
+    "etag": "\"3c94-lyJXBi6zwOUXgoZP92BDx7uhjdg\"",
+    "mtime": "2026-09-28T20:06:19.150Z",
+    "size": 15508,
+    "path": "../public/_nuxt/C9LyWRJk.js"
   },
-  "/_nuxt/CuzDef1I.js": {
+  "/_nuxt/BgXJ5bdF.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"cd9-OmdU/EO9gjBkqeJRYPQbxdtH4Uw\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
+    "etag": "\"1f1d-qFPRCeLSOcEe4z2C3gWrX9eF/hk\"",
+    "mtime": "2026-09-28T20:06:19.149Z",
+    "size": 7965,
+    "path": "../public/_nuxt/BgXJ5bdF.js"
+  },
+  "/_nuxt/CDkbSR2Y.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"3413-DeogGwiO1PmP1F5TcR1y1wpk9Lw\"",
+    "mtime": "2026-09-28T20:06:19.149Z",
+    "size": 13331,
+    "path": "../public/_nuxt/CDkbSR2Y.js"
+  },
+  "/_nuxt/CoqQPWB2.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"cd9-qwhm7nN4M+ZlB53Q12quUq0FBuU\"",
+    "mtime": "2026-09-28T20:06:19.150Z",
     "size": 3289,
-    "path": "../public/_nuxt/CuzDef1I.js"
+    "path": "../public/_nuxt/CoqQPWB2.js"
   },
-  "/_nuxt/DJ-FsATY.js": {
+  "/_nuxt/CYtt-rIE.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"f75-vtUkzlpjNgeebdq10uwS98lpyok\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 3957,
-    "path": "../public/_nuxt/DJ-FsATY.js"
+    "etag": "\"1ed0-8NlECx7ew49NXBraFh8yq6Funyc\"",
+    "mtime": "2026-09-28T20:06:19.149Z",
+    "size": 7888,
+    "path": "../public/_nuxt/CYtt-rIE.js"
   },
-  "/_nuxt/DhV33-WM.js": {
+  "/_nuxt/D1PJAwsU.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"ecf-q2k+yVKps+Mx6fa9CEhiECNSS5Y\"",
-    "mtime": "2026-09-18T22:07:06.939Z",
+    "etag": "\"db4-Ds21MqFVP60ptTJsIwVJbCGk05c\"",
+    "mtime": "2026-09-28T20:06:19.151Z",
+    "size": 3508,
+    "path": "../public/_nuxt/D1PJAwsU.js"
+  },
+  "/_nuxt/Db1iKxc-.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"de0-DmL85RUcmZMCeOsAicMw2mcz2jA\"",
+    "mtime": "2026-09-28T20:06:19.153Z",
+    "size": 3552,
+    "path": "../public/_nuxt/Db1iKxc-.js"
+  },
+  "/_nuxt/DcVq5eY0.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"41c9-x1C0eR9T3Ku/KHuY6xcSO6pu7Pc\"",
+    "mtime": "2026-09-28T20:06:19.156Z",
+    "size": 16841,
+    "path": "../public/_nuxt/DcVq5eY0.js"
+  },
+  "/_nuxt/Dgi5QcJI.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"c99-CX6JKzJDBcRq/kRpasajaO4grKM\"",
+    "mtime": "2026-09-28T20:06:19.149Z",
+    "size": 3225,
+    "path": "../public/_nuxt/Dgi5QcJI.js"
+  },
+  "/_nuxt/9g7FE5Mr.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"32f20-z0ghkvFoSYtz/oe78OP3YfF8RgU\"",
+    "mtime": "2026-09-28T20:06:19.148Z",
+    "size": 208672,
+    "path": "../public/_nuxt/9g7FE5Mr.js"
+  },
+  "/_nuxt/DfYvope8.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"ecf-TKxDKUEHJqugUtQHexbgfPjyklM\"",
+    "mtime": "2026-09-28T20:06:19.149Z",
     "size": 3791,
-    "path": "../public/_nuxt/DhV33-WM.js"
+    "path": "../public/_nuxt/DfYvope8.js"
+  },
+  "/_nuxt/DJv_d0Pj.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"3e97-fRJWHIdY7KmdYNCJm9W9XRFQXiA\"",
+    "mtime": "2026-09-28T20:06:19.151Z",
+    "size": 16023,
+    "path": "../public/_nuxt/DJv_d0Pj.js"
   },
   "/_nuxt/DlAUqK2U.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"5b-eFCz/UrraTh721pgAl0VxBNR1es\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
+    "mtime": "2026-09-28T20:06:19.156Z",
     "size": 91,
     "path": "../public/_nuxt/DlAUqK2U.js"
   },
-  "/_nuxt/DLzA1t9R.js": {
+  "/_nuxt/DKGn8tQ6.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"da4-6PzNvKCDOkTSv7dv4DCmxl7EeL0\"",
-    "mtime": "2026-09-18T22:07:06.943Z",
-    "size": 3492,
-    "path": "../public/_nuxt/DLzA1t9R.js"
-  },
-  "/_nuxt/Dk0MCQRt.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"41c5-xU+uRbio8txrxdSL59W9GQo3FxU\"",
-    "mtime": "2026-09-18T22:07:06.941Z",
-    "size": 16837,
-    "path": "../public/_nuxt/Dk0MCQRt.js"
-  },
-  "/_nuxt/entry.BFyAuQe9.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"dd8e-CfSVbjL9GmrRbTKMe2KlmahMd1k\"",
-    "mtime": "2026-09-18T22:07:06.939Z",
-    "size": 56718,
-    "path": "../public/_nuxt/entry.BFyAuQe9.css"
+    "etag": "\"161b-tyOb60lkfHTB4s7NzRdz7iD2MBw\"",
+    "mtime": "2026-09-28T20:06:19.155Z",
+    "size": 5659,
+    "path": "../public/_nuxt/DKGn8tQ6.js"
   },
   "/_nuxt/error-404.BBhU_iaz.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"97e-eCOlDpp0jm/5BdOYfmSvByotCe4\"",
-    "mtime": "2026-09-18T22:07:06.939Z",
+    "mtime": "2026-09-28T20:06:19.146Z",
     "size": 2430,
     "path": "../public/_nuxt/error-404.BBhU_iaz.css"
+  },
+  "/_nuxt/entry.BFyAuQe9.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"dd8e-CfSVbjL9GmrRbTKMe2KlmahMd1k\"",
+    "mtime": "2026-09-28T20:06:19.141Z",
+    "size": 56718,
+    "path": "../public/_nuxt/entry.BFyAuQe9.css"
   },
   "/_nuxt/error-500.Da-Z0YA7.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"773-YzukniqV1OgCg4eTbl4RF+M08kk\"",
-    "mtime": "2026-09-18T22:07:06.939Z",
+    "mtime": "2026-09-28T20:06:19.148Z",
     "size": 1907,
     "path": "../public/_nuxt/error-500.Da-Z0YA7.css"
   },
-  "/_nuxt/BLUENha6.js": {
+  "/_nuxt/DOOYBj11.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"32f20-72WKMOAdrcDuzIrkcOY5reFUiD8\"",
-    "mtime": "2026-09-18T22:07:06.939Z",
-    "size": 208672,
-    "path": "../public/_nuxt/BLUENha6.js"
+    "etag": "\"d96-0pSfYR735sYUktSld+BKG++5B/Y\"",
+    "mtime": "2026-09-28T20:06:19.148Z",
+    "size": 3478,
+    "path": "../public/_nuxt/DOOYBj11.js"
   },
-  "/_nuxt/DzSZuk9H.js": {
+  "/_nuxt/DLzA1t9R.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"3403-n4PZCv468qivNzxANH5b0BRl7+A\"",
-    "mtime": "2026-09-18T22:07:06.939Z",
-    "size": 13315,
-    "path": "../public/_nuxt/DzSZuk9H.js"
+    "etag": "\"da4-6PzNvKCDOkTSv7dv4DCmxl7EeL0\"",
+    "mtime": "2026-09-28T20:06:19.153Z",
+    "size": 3492,
+    "path": "../public/_nuxt/DLzA1t9R.js"
   },
   "/images/allies/CEP.png": {
     "type": "image/png",
@@ -5391,12 +5391,12 @@ const assets = {
     "size": 12790,
     "path": "../public/images/allies/CEP.png"
   },
-  "/images/allies/Laser.png": {
-    "type": "image/png",
-    "etag": "\"19c9-LX2smxuP3r4RLOUEyDkoH5UNMzI\"",
-    "mtime": "2026-06-06T18:29:11.472Z",
-    "size": 6601,
-    "path": "../public/images/allies/Laser.png"
+  "/_nuxt/DzKPM86H.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"f75-8pWE19kPPabMMNk0NMdNqcV1n38\"",
+    "mtime": "2026-09-28T20:06:19.150Z",
+    "size": 3957,
+    "path": "../public/_nuxt/DzKPM86H.js"
   },
   "/images/allies/multiestetica.png": {
     "type": "image/png",
@@ -5405,19 +5405,12 @@ const assets = {
     "size": 19011,
     "path": "../public/images/allies/multiestetica.png"
   },
-  "/images/allies/resurlaser.png": {
+  "/images/allies/Laser.png": {
     "type": "image/png",
-    "etag": "\"5f18-OdEQpBeenMC+Xae3f5ifne8CKIk\"",
-    "mtime": "2026-06-06T18:27:31.836Z",
-    "size": 24344,
-    "path": "../public/images/allies/resurlaser.png"
-  },
-  "/_nuxt/DsK1QDIb.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"128c-t9RsERC/rg+/yFUBue9m3iNrWQ4\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 4748,
-    "path": "../public/_nuxt/DsK1QDIb.js"
+    "etag": "\"19c9-LX2smxuP3r4RLOUEyDkoH5UNMzI\"",
+    "mtime": "2026-06-06T18:29:11.472Z",
+    "size": 6601,
+    "path": "../public/images/allies/Laser.png"
   },
   "/images/allies/telesalud.png": {
     "type": "image/png",
@@ -5426,12 +5419,19 @@ const assets = {
     "size": 44439,
     "path": "../public/images/allies/telesalud.png"
   },
-  "/images/branding/logo-ico.ico": {
-    "type": "image/vnd.microsoft.icon",
-    "etag": "\"3248-YRp2X7xlB8l/htPTPM8JYatPgxU\"",
-    "mtime": "2026-09-01T15:21:05.178Z",
-    "size": 12872,
-    "path": "../public/images/branding/logo-ico.ico"
+  "/images/allies/resurlaser.png": {
+    "type": "image/png",
+    "etag": "\"5f18-OdEQpBeenMC+Xae3f5ifne8CKIk\"",
+    "mtime": "2026-06-06T18:27:31.836Z",
+    "size": 24344,
+    "path": "../public/images/allies/resurlaser.png"
+  },
+  "/_nuxt/uz8zCbrK.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"534-qHPm3J4ODadVxhHFJe/5f9EspYk\"",
+    "mtime": "2026-09-28T20:06:19.151Z",
+    "size": 1332,
+    "path": "../public/_nuxt/uz8zCbrK.js"
   },
   "/images/branding/logo-blanco.jpg": {
     "type": "image/jpeg",
@@ -5439,6 +5439,13 @@ const assets = {
     "mtime": "2026-09-01T20:26:56.870Z",
     "size": 30634,
     "path": "../public/images/branding/logo-blanco.jpg"
+  },
+  "/images/branding/logo-ico.ico": {
+    "type": "image/vnd.microsoft.icon",
+    "etag": "\"3248-YRp2X7xlB8l/htPTPM8JYatPgxU\"",
+    "mtime": "2026-09-01T15:21:05.178Z",
+    "size": 12872,
+    "path": "../public/images/branding/logo-ico.ico"
   },
   "/images/branding/logo.ico": {
     "type": "image/vnd.microsoft.icon",
@@ -5468,6 +5475,13 @@ const assets = {
     "size": 971348,
     "path": "../public/images/branding/logo.jpg"
   },
+  "/images/procedures/lipoabdominoplastia.png": {
+    "type": "image/png",
+    "etag": "\"b53b0-kQpPsolPSuDvcfK9L9yXNf2/hYw\"",
+    "mtime": "2026-06-09T17:09:17.112Z",
+    "size": 742320,
+    "path": "../public/images/procedures/lipoabdominoplastia.png"
+  },
   "/images/branding/logo-blanco-transparente.png": {
     "type": "image/png",
     "etag": "\"14fe9d-VOruq0KN0nGvLZWFQsZBH+b35UQ\"",
@@ -5481,6 +5495,13 @@ const assets = {
     "mtime": "2026-06-09T17:09:09.886Z",
     "size": 111043,
     "path": "../public/images/procedures/mamoplastia.jpeg"
+  },
+  "/_nuxt/R51dmIt3.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"6060-PBsw068o7OYs1PO4TtDN95LqkhA\"",
+    "mtime": "2026-09-28T20:06:19.150Z",
+    "size": 24672,
+    "path": "../public/_nuxt/R51dmIt3.js"
   },
   "/images/procedures/liposuccion.jpeg": {
     "type": "image/jpeg",
@@ -5496,20 +5517,6 @@ const assets = {
     "size": 151153,
     "path": "../public/images/procedures/mastopexia.jpeg"
   },
-  "/_nuxt/zxtQYWNw.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3e97-TvgoEubjygvXcUuDBO008qGw4Tw\"",
-    "mtime": "2026-09-18T22:07:06.940Z",
-    "size": 16023,
-    "path": "../public/_nuxt/zxtQYWNw.js"
-  },
-  "/images/procedures/lipoabdominoplastia.png": {
-    "type": "image/png",
-    "etag": "\"b53b0-kQpPsolPSuDvcfK9L9yXNf2/hYw\"",
-    "mtime": "2026-06-09T17:09:17.112Z",
-    "size": 742320,
-    "path": "../public/images/procedures/lipoabdominoplastia.png"
-  },
   "/images/procedures/lipoabdominoplastia(2).png": {
     "type": "image/png",
     "etag": "\"190d8f-vtfUoHa3L5E/kAIX3duHhjbvyoQ\"",
@@ -5517,19 +5524,19 @@ const assets = {
     "size": 1641871,
     "path": "../public/images/procedures/lipoabdominoplastia(2).png"
   },
-  "/images/web/simulador_hero.png": {
-    "type": "image/png",
-    "etag": "\"9dbf0-YXdiwaQlSI3glGpjEUFXRmADPOU\"",
-    "mtime": "2026-06-13T16:33:04.693Z",
-    "size": 646128,
-    "path": "../public/images/web/simulador_hero.png"
-  },
   "/images/team/equipo-crediestetica_2.jpg": {
     "type": "image/jpeg",
     "etag": "\"1a915-qc6o9d5q5H4XqCqRiAZetkj185o\"",
     "mtime": "2026-06-13T16:33:04.545Z",
     "size": 108821,
     "path": "../public/images/team/equipo-crediestetica_2.jpg"
+  },
+  "/images/web/simulador_hero.png": {
+    "type": "image/png",
+    "etag": "\"9dbf0-YXdiwaQlSI3glGpjEUFXRmADPOU\"",
+    "mtime": "2026-06-13T16:33:04.693Z",
+    "size": 646128,
+    "path": "../public/images/web/simulador_hero.png"
   },
   "/images/procedures/liposuccion(2).png": {
     "type": "image/png",
@@ -5545,12 +5552,19 @@ const assets = {
     "size": 1566124,
     "path": "../public/images/procedures/mastopexia(2).png"
   },
-  "/_nuxt/Ixb6bmhN.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"161b-8yRzxDq4vLNXgG1MvSSE0AIbKoE\"",
-    "mtime": "2026-09-18T22:07:06.943Z",
-    "size": 5659,
-    "path": "../public/_nuxt/Ixb6bmhN.js"
+  "/_nuxt/builds/latest.json": {
+    "type": "application/json",
+    "etag": "\"47-WaNWV8VJpfQbTJGUGGfqlSOcHnQ\"",
+    "mtime": "2026-09-28T20:06:32.709Z",
+    "size": 71,
+    "path": "../public/_nuxt/builds/latest.json"
+  },
+  "/_nuxt/builds/meta/327960c3-4610-4ec9-a0a9-6d3b0a48b2f1.json": {
+    "type": "application/json",
+    "etag": "\"73-srjYX1iNCeE7BmSye6Ng3QhpKVs\"",
+    "mtime": "2026-09-28T20:06:32.711Z",
+    "size": 115,
+    "path": "../public/_nuxt/builds/meta/327960c3-4610-4ec9-a0a9-6d3b0a48b2f1.json"
   },
   "/images/web/confianza.png": {
     "type": "image/png",
@@ -5559,20 +5573,6 @@ const assets = {
     "size": 1680033,
     "path": "../public/images/web/confianza.png"
   },
-  "/images/web/autorizacion_centrales.png": {
-    "type": "image/png",
-    "etag": "\"1bcb74-1Vw0eItlSKlK+ulgPJRYVnPTaW8\"",
-    "mtime": "2026-06-13T16:33:04.557Z",
-    "size": 1821556,
-    "path": "../public/images/web/autorizacion_centrales.png"
-  },
-  "/images/web/guia_diligenciamiento.png": {
-    "type": "image/png",
-    "etag": "\"1c1708-68VAO9EJja2ggT+6Zu0ozxThkFo\"",
-    "mtime": "2026-06-13T16:33:04.613Z",
-    "size": 1840904,
-    "path": "../public/images/web/guia_diligenciamiento.png"
-  },
   "/images/web/confianza_1.png": {
     "type": "image/png",
     "etag": "\"198831-WtlCJJd6gJnXQoGT77qLaszScHs\"",
@@ -5580,33 +5580,12 @@ const assets = {
     "size": 1673265,
     "path": "../public/images/web/confianza_1.png"
   },
-  "/images/web/home.png": {
+  "/images/web/autorizacion_centrales.png": {
     "type": "image/png",
-    "etag": "\"1ae2da-WDsSosUZzWm3bfx5kiiaavU4JL0\"",
-    "mtime": "2026-09-01T15:43:27.395Z",
-    "size": 1762010,
-    "path": "../public/images/web/home.png"
-  },
-  "/images/web/nosotros.png": {
-    "type": "image/png",
-    "etag": "\"1c56fc-6E2ze/B9JiP69KuIzgw61YBUR4s\"",
-    "mtime": "2026-06-13T16:33:04.644Z",
-    "size": 1857276,
-    "path": "../public/images/web/nosotros.png"
-  },
-  "/images/web/home2.png": {
-    "type": "image/png",
-    "etag": "\"1b1e4d-gsW55TtGLJQiNefL4var/QuBBac\"",
-    "mtime": "2026-06-13T16:33:04.629Z",
-    "size": 1777229,
-    "path": "../public/images/web/home2.png"
-  },
-  "/images/web/pagare.png": {
-    "type": "image/png",
-    "etag": "\"1df68f-3k4a/sGYs5K3N7KtcdhUeyMRItA\"",
-    "mtime": "2026-06-13T16:33:04.658Z",
-    "size": 1963663,
-    "path": "../public/images/web/pagare.png"
+    "etag": "\"1bcb74-1Vw0eItlSKlK+ulgPJRYVnPTaW8\"",
+    "mtime": "2026-06-13T16:33:04.557Z",
+    "size": 1821556,
+    "path": "../public/images/web/autorizacion_centrales.png"
   },
   "/images/web/formulario_solicitud.png": {
     "type": "image/png",
@@ -5615,12 +5594,12 @@ const assets = {
     "size": 1971755,
     "path": "../public/images/web/formulario_solicitud.png"
   },
-  "/images/web/procedures.png": {
+  "/images/web/home2.png": {
     "type": "image/png",
-    "etag": "\"195a7f-NWMQiNZUUwjBKf4vh63Kpc+2uGA\"",
-    "mtime": "2026-06-13T16:33:04.671Z",
-    "size": 1661567,
-    "path": "../public/images/web/procedures.png"
+    "etag": "\"1b1e4d-gsW55TtGLJQiNefL4var/QuBBac\"",
+    "mtime": "2026-06-13T16:33:04.629Z",
+    "size": 1777229,
+    "path": "../public/images/web/home2.png"
   },
   "/images/web/portada_simulador.png": {
     "type": "image/png",
@@ -5629,26 +5608,47 @@ const assets = {
     "size": 1815135,
     "path": "../public/images/web/portada_simulador.png"
   },
+  "/images/web/home.png": {
+    "type": "image/png",
+    "etag": "\"1ae2da-WDsSosUZzWm3bfx5kiiaavU4JL0\"",
+    "mtime": "2026-09-01T15:43:27.395Z",
+    "size": 1762010,
+    "path": "../public/images/web/home.png"
+  },
+  "/images/web/guia_diligenciamiento.png": {
+    "type": "image/png",
+    "etag": "\"1c1708-68VAO9EJja2ggT+6Zu0ozxThkFo\"",
+    "mtime": "2026-06-13T16:33:04.613Z",
+    "size": 1840904,
+    "path": "../public/images/web/guia_diligenciamiento.png"
+  },
+  "/images/web/procedures.png": {
+    "type": "image/png",
+    "etag": "\"195a7f-NWMQiNZUUwjBKf4vh63Kpc+2uGA\"",
+    "mtime": "2026-06-13T16:33:04.671Z",
+    "size": 1661567,
+    "path": "../public/images/web/procedures.png"
+  },
+  "/images/web/nosotros.png": {
+    "type": "image/png",
+    "etag": "\"1c56fc-6E2ze/B9JiP69KuIzgw61YBUR4s\"",
+    "mtime": "2026-06-13T16:33:04.644Z",
+    "size": 1857276,
+    "path": "../public/images/web/nosotros.png"
+  },
+  "/images/web/pagare.png": {
+    "type": "image/png",
+    "etag": "\"1df68f-3k4a/sGYs5K3N7KtcdhUeyMRItA\"",
+    "mtime": "2026-06-13T16:33:04.658Z",
+    "size": 1963663,
+    "path": "../public/images/web/pagare.png"
+  },
   "/images/web/simulador.png": {
     "type": "image/png",
     "etag": "\"1a1d21-tLvQKtR278cGnhwxdHC5jih/kOE\"",
     "mtime": "2026-06-13T16:33:04.683Z",
     "size": 1711393,
     "path": "../public/images/web/simulador.png"
-  },
-  "/_nuxt/builds/latest.json": {
-    "type": "application/json",
-    "etag": "\"47-R+GerrXhQX2bMnnA9XGqhDebKg8\"",
-    "mtime": "2026-09-18T22:07:14.218Z",
-    "size": 71,
-    "path": "../public/_nuxt/builds/latest.json"
-  },
-  "/_nuxt/builds/meta/eba1eece-6643-4117-a185-15b110759613.json": {
-    "type": "application/json",
-    "etag": "\"73-I1OKTx4ayyBrrGuty+Fc98R7Fsc\"",
-    "mtime": "2026-09-18T22:07:14.219Z",
-    "size": 115,
-    "path": "../public/_nuxt/builds/meta/eba1eece-6643-4117-a185-15b110759613.json"
   },
   "/images/web/simulador_image.png": {
     "type": "image/png",
@@ -5664,19 +5664,19 @@ const assets = {
     "size": 1935154,
     "path": "../public/images/team/equipo-planmed.png"
   },
-  "/images/clinics/cep/institutional/nosotros_cep.png": {
-    "type": "image/png",
-    "etag": "\"1422a5-bWjGqeFUwTeZPFQJnhQF0ep6p7M\"",
-    "mtime": "2026-06-09T19:20:05.883Z",
-    "size": 1319589,
-    "path": "../public/images/clinics/cep/institutional/nosotros_cep.png"
-  },
   "/images/clinics/cep/institutional/quirofano_cep.png": {
     "type": "image/png",
     "etag": "\"12e86f-E/FPP5FFD9/HJ0Z+c5lYTPcIpkE\"",
     "mtime": "2026-06-09T19:09:35.120Z",
     "size": 1239151,
     "path": "../public/images/clinics/cep/institutional/quirofano_cep.png"
+  },
+  "/images/clinics/cep/institutional/nosotros_cep.png": {
+    "type": "image/png",
+    "etag": "\"1422a5-bWjGqeFUwTeZPFQJnhQF0ep6p7M\"",
+    "mtime": "2026-06-09T19:20:05.883Z",
+    "size": 1319589,
+    "path": "../public/images/clinics/cep/institutional/nosotros_cep.png"
   }
 };
 

@@ -8,7 +8,7 @@
           Volver a Noticias
         </NuxtLink>
         <h2 class="text-3xl font-serif text-[#0C2619] mb-1 uppercase">{{ isNew ? 'Nueva Noticia' : 'Editar Noticia' }}</h2>
-        <p class="text-gray-500 font-light">{{ isNew ? 'Redacta un nuevo' : 'Modifica este' }} artculo editorial.</p>
+        <p class="text-gray-500 font-light">{{ isNew ? 'Redacta un nuevo' : 'Modifica este' }} artículo editorial.</p>
       </div>
       <div class="flex items-center gap-3">
         <button 
@@ -27,20 +27,20 @@
       <!-- Columna Principal -->
       <div class="lg:col-span-2 space-y-6">
         
-        <!-- Informacin Principal -->
+        <!-- Información Principal -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
-          <h3 class="text-xs font-bold tracking-widest text-[#0C2619] uppercase mb-6 border-b border-gray-100 pb-4">Informacin Principal</h3>
+          <h3 class="text-xs font-bold tracking-widest text-[#0C2619] uppercase mb-6 border-b border-gray-100 pb-4">Información Principal</h3>
           
           <div class="space-y-6">
             <div>
-              <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Ttulo *</label>
-              <input v-model="form.title" required type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent" placeholder="Ttulo del artculo" />
+              <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Título *</label>
+              <input v-model="form.title" required type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent" placeholder="Título del artículo" />
             </div>
 
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Slug *</label>
               <input v-model="form.slug" :required="!isNew" type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent font-mono text-sm" placeholder="se-generara-automaticamente-si-lo-dejas-vacio" />
-              <p class="text-[10px] text-gray-500 mt-1">Identificador de la URL. Si se deja vaco al crear, se generar desde el ttulo.</p>
+              <p class="text-[10px] text-gray-500 mt-1">Identificador de la URL. Si se deja vacío al crear, se generar desde el título.</p>
             </div>
 
             <div>
@@ -136,7 +136,7 @@
           <div class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Meta Title</label>
-              <input v-model="form.seo.metaTitle" type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent text-sm" placeholder="Ttulo para Google" />
+              <input v-model="form.seo.metaTitle" type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent text-sm" placeholder="Título para Google" />
             </div>
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Meta Description</label>

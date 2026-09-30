@@ -20,7 +20,7 @@ export class MockNewsProvider implements NewsProvider {
     
     // Validar slug unico
     if (mockData.some(n => n.slug === slug)) {
-      throw new Error('Ya existe una noticia con un ttulo similar (slug duplicado).')
+      throw new Error('Ya existe una noticia con un título similar (slug duplicado).')
     }
 
     const newArticle: NewsArticle = { ...data, id: newId, slug }

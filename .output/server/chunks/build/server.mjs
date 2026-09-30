@@ -812,7 +812,7 @@ const _routes = [
     name: "admin-noticias-slug",
     path: "/admin/noticias/:slug()",
     meta: __nuxt_page_meta$5 || {},
-    component: () => import('./_slug_-CiUFYo0n.mjs')
+    component: () => import('./_slug_-CoJSaQ7t.mjs')
   },
   {
     name: "admin-procedimientos-slug",
@@ -830,7 +830,7 @@ const _routes = [
     name: "admin-noticias",
     path: "/admin/noticias",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./index-D_QrQE4d.mjs')
+    component: () => import('./index-CwMutGgx.mjs')
   },
   {
     name: "admin-procedimientos",
@@ -841,7 +841,7 @@ const _routes = [
   {
     name: "noticias-slug",
     path: "/noticias/:slug()",
-    component: () => import('./_slug_-C-wdIuUM.mjs')
+    component: () => import('./_slug_-CFzi--7u.mjs')
   },
   {
     name: "procedimientos-slug",
@@ -862,7 +862,7 @@ const _routes = [
   {
     name: "noticias",
     path: "/noticias",
-    component: () => import('./index-B_sH7JhX.mjs')
+    component: () => import('./index-C0kHIHv7.mjs')
   },
   {
     name: "procedimientos",
@@ -2085,7 +2085,7 @@ const plugins = [
 ];
 const layouts = {
   admin: defineAsyncComponent(() => import('./admin-Bzq82pRD.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-DE2ReRuu.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-I-p-CgQC.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

@@ -21,7 +21,7 @@
         
         <NuxtLink to="/admin/login" class="text-[11px] font-bold tracking-[0.1em] text-[#0C2619] hover:text-black transition-colors uppercase ml-4 flex items-center gap-1 border border-[#0C2619] px-3 py-2 rounded-[2px]">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-          INICIAR SESIN
+          INICIAR SESIÓN
         </NuxtLink>
       </div>
 
@@ -50,7 +50,7 @@
         SIMULAR FINANCIACIÓN
       </NuxtLink>
       <NuxtLink to="/admin/login" @click="isMobileMenuOpen = false" class="text-[#0C2619] font-bold text-sm tracking-widest uppercase">
-        INICIAR SESIN
+        INICIAR SESIÓN
       </NuxtLink>
     </div>
   </nav>

@@ -21,7 +21,7 @@
         <input 
           v-model="searchQuery" 
           type="text" 
-          placeholder="Buscar por ttulo o extracto..." 
+          placeholder="Buscar por título o extracto..." 
           class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent transition-all"
         />
       </div>
@@ -44,7 +44,7 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200 text-[10px] font-bold tracking-widest text-gray-500 uppercase">
-              <th class="p-4 font-medium">Artculo</th>
+              <th class="p-4 font-medium">Artículo</th>
               <th class="p-4 font-medium text-center">Estado</th>
               <th class="p-4 font-medium text-center">Fecha</th>
               <th class="p-4 font-medium text-right">Acciones</th>
