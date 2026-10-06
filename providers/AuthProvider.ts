@@ -1,7 +1,8 @@
 import type { AdminUser } from '~/types/auth'
 
+// La sesión vive en el servidor (cookie httpOnly): el provider nunca maneja tokens.
 export interface AuthProvider {
-  login(email: string, password: string): Promise<{ user: AdminUser, token: string }>
+  login(email: string, password: string): Promise<AdminUser>
   logout(): Promise<void>
-  getCurrentUser(token: string): Promise<AdminUser | null>
+  getCurrentUser(): Promise<AdminUser | null>
 }

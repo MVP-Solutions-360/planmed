@@ -176,6 +176,7 @@
 </template>
 
 <script setup lang="ts">
+const notify = useNotify()
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter, useHead } from '#imports'
 import { procedureService } from '~/services/ProcedureService'
@@ -301,7 +302,7 @@ async function submitForm() {
     router.push('/admin/procedimientos')
   } catch (error) {
     console.error('Error saving procedure:', error)
-    alert('Ocurrió un error al guardar.')
+    notify.error('Ocurrió un error al guardar.')
   } finally {
     isSubmitting.value = false
   }

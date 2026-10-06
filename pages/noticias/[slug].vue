@@ -13,8 +13,8 @@
         <!-- HEADER -->
         <header class="mb-12">
           <div class="flex items-center gap-4 text-[11px] font-bold tracking-[0.15em] text-[#0C2619] uppercase mb-6">
-            <time :datetime="article.publishedAt">
-              {{ new Date(article.publishedAt).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+            <time :datetime="article.publishedAt!">
+              {{ new Date(article.publishedAt!).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) }}
             </time>
             <span v-if="article.author" class="w-1 h-1 rounded-full bg-[#D3A76A]"></span>
             <span v-if="article.author" class="text-[#848484]">{{ article.author }}</span>
@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter, useSeoMeta, createError, useAsyncData } from '#imports'
+import { useRoute, useRouter, useSeoMeta, createError, useAsyncData, showError, onMounted } from '#imports'
 import { newsService } from '~/services/NewsService'
 
 const route = useRoute()
@@ -61,13 +61,24 @@ const slug = route.params.slug as string
 
 const { data: article } = await useAsyncData('news-' + slug, () => newsService.getNewsBySlug(slug))
 
-if (!article.value) {
+type PublishedArticle = NonNullable<typeof article.value> & { publishedAt: string }
+const isVisible = (a: typeof article.value): a is PublishedArticle => !!a && !!a.publishedAt
+
+if (!isVisible(article.value)) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Noticia no encontrada',
     fatal: true
   })
 }
+
+// Tras la hidratación, validar con los datos del navegador (borradores no son públicos)
+onMounted(async () => {
+  article.value = await newsService.getNewsBySlug(slug)
+  if (!isVisible(article.value)) {
+    showError(createError({ statusCode: 404, statusMessage: 'Noticia no encontrada' }))
+  }
+})
 
 // SEO
 useSeoMeta({
@@ -78,6 +89,6 @@ useSeoMeta({
   ogImage: article.value.coverImage,
   ogType: 'article',
   articlePublishedTime: article.value.publishedAt,
-  articleAuthor: article.value.author
+  articleAuthor: article.value.author ? [article.value.author] : undefined
 })
 </script>

@@ -35,7 +35,7 @@ Decisiones ya tomadas con el equipo:
 
 - Sigue la arquitectura **UI → Service → Provider**, con la regla de no hacer llamadas HTTP desde componentes (`documentacion/architecture.md`).
 - Ya existe un admin en `/admin` con login, protegido por `middleware/admin-auth.global.ts`, y un CRUD de noticias y procedimientos.
-- **Los providers activos son Mock**: `MockAuthProvider`, `MockLeadProvider`, `MockNewsProvider`, `LocalTrackingProvider` (solo hace `console.log`). El login acepta cualquier contraseña si el correo existe en la lista de prueba.
+- **La autenticación del admin ya es real** (`WellezyAuthProvider` → rutas Nitro `/api/auth/*` → Wellezy Hub, sesión httpOnly en el servidor, acceso por `user.role.id`). **Los demás providers activos siguen siendo Mock**: `MockLeadProvider`, `MockNewsProvider`, `LocalTrackingProvider` (solo hace `console.log`).
 - El contenido de las noticias es HTML en un textarea, renderizado con `v-html` sin sanitizar (el propio código lo marca como pendiente).
 - Ya hay componentes reutilizables, útiles si las noticias necesitan secciones: `CtaSection`, `TrustSection`, `ProcessSection`, `MedicalLeadershipSection`, `YouTubeEmbed`, `InstagramEmbed`.
 - `LeadForm.vue` está pensado para el simulador (procedimiento, monto, cuotas); no es el formulario de referido.
@@ -166,7 +166,7 @@ Las páginas nuevas deben llevar `noindex` y no aparecer en el blog.
 
 ### Fase 0 — Conexión real con el CRM
 - Resolver la contradicción documental (sección 3, punto 1) y actualizar la documentación.
-- Reemplazar `MockAuthProvider` por un provider que haga login contra el CRM con Sanctum.
+- ~~Reemplazar `MockAuthProvider` por un provider que haga login contra el CRM con Sanctum.~~ Hecho: login real vía Nitro contra `POST /api/auth/login` de Wellezy Hub (Sanctum), con el Bearer solo en el servidor.
 - Reemplazar `MockLeadProvider` por uno que envíe a `POST /api/v1/leads`.
 - Reemplazar `LocalTrackingProvider` por uno que envíe a `POST /api/v1/web-events`.
 - Configurar `.env` (URL del CRM y tenant) y CORS en el CRM para los dominios de Planmed. El documento `legacy/cors_config.md` describe el procedimiento, aunque sus dominios son de otro proyecto.

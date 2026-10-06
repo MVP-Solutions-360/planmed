@@ -110,6 +110,7 @@
 </template>
 
 <script setup lang="ts">
+const notify = useNotify()
 import { ref, computed } from 'vue'
 import { useHead, useAsyncData, refreshNuxtData } from '#imports'
 import { procedureService } from '~/services/ProcedureService'
@@ -130,7 +131,7 @@ const { data: procedures, pending } = await useAsyncData('admin-procedures-list'
 const filteredProcedures = computed(() => {
   if (!procedures.value) return []
   const q = searchQuery.value.toLowerCase()
-  return procedures.value.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.procedure.toLowerCase().includes(q))
+  return procedures.value.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
 })
 
 async function toggleDestacado(proc: Procedure) {
@@ -142,7 +143,7 @@ async function toggleDestacado(proc: Procedure) {
     }
   } catch (e) {
     console.error('Error toggling destacado', e)
-    alert('Ocurrió un error al actualizar el estado destacado.')
+    notify.error('No se pudo actualizar el estado destacado.')
   }
 }
 
@@ -159,7 +160,7 @@ async function executeDelete() {
     }
   } catch (e) {
     console.error('Error deleting procedure', e)
-    alert('Ocurrió un error al eliminar el procedimiento.')
+    notify.error('No se pudo eliminar el procedimiento.')
   } finally {
     deletingProc.value = null
   }

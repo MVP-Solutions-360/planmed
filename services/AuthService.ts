@@ -1,7 +1,7 @@
-import { MockAuthProvider } from '~/providers/MockAuthProvider'
+import { WellezyAuthProvider } from '~/providers/WellezyAuthProvider'
 import type { AuthProvider } from '~/providers/AuthProvider'
 import type { AdminUser } from '~/types/auth'
-import { useCookie, useState } from '#imports'
+import { useState } from '#imports'
 
 class AuthService {
   private provider: AuthProvider;
@@ -10,85 +10,49 @@ class AuthService {
     this.provider = provider;
   }
 
-  // Reactive state getters
+  // Estado reactivo (por petición en SSR). La sesión real vive en el servidor (cookie httpOnly).
   public getUser() {
     return useState<AdminUser | null>('auth-user', () => null)
   }
 
-  public getToken() {
-    return useCookie<string | null>('admin-auth-token', {
-      watch: true,
-      path: '/admin',
-      maxAge: 60 * 60 * 24 // 1 day
-    })
-  }
-
+  // Autenticado = hay un usuario autorizado cargado desde una sesión válida del servidor.
   public isAuthenticated(): boolean {
-    return !!this.getToken().value
+    return !!this.getUser().value
   }
 
-  public can(permission: string): boolean {
-    const user = this.getUser().value
-    if (!user) return false;
-    
-    // CRÍTICO: Ambos roles tienen exactamente los mismos privilegios en Planmed.
-    // 'Administrador' y 'Diseñador gráfico' pueden hacer todo en el CMS.
-    return true; 
+  public can(_permission: string): boolean {
+    // Los roles autorizados tienen exactamente los mismos privilegios en el CMS Planmed.
+    // La autorización real (user.role.id) la aplica el servidor en /api/auth/*.
+    return this.isAuthenticated()
   }
 
   public async login(email: string, password: string): Promise<void> {
-    try {
-      const { user, token } = await this.provider.login(email, password)
-      
-      const tokenCookie = this.getToken()
-      tokenCookie.value = token
-      
-      const userState = this.getUser()
-      userState.value = user
-    } catch (error) {
-      throw error
-    }
+    const userState = this.getUser()
+    userState.value = await this.provider.login(email, password)
   }
 
   public async logout(): Promise<void> {
-    await this.provider.logout()
-    
-    const tokenCookie = this.getToken()
-    tokenCookie.value = null
-    
+    // Los composables se resuelven antes de cualquier await.
     const userState = this.getUser()
-    userState.value = null
+    try {
+      await this.provider.logout()
+    } catch {
+      // El servidor destruye la sesión local pase lo que pase; el cliente siempre queda sin usuario.
+    } finally {
+      userState.value = null
+    }
   }
 
   public async loadUserSession(): Promise<boolean> {
-    const token = this.getToken().value
+    // Los composables se resuelven antes de cualquier await.
     const userState = this.getUser()
 
-    if (!token) {
-      userState.value = null
-      return false
-    }
-
     // Si ya tenemos el usuario en estado, no recargamos
-    if (userState.value) return true;
+    if (userState.value) return true
 
-    try {
-      const user = await this.provider.getCurrentUser(token)
-      if (user) {
-        userState.value = user
-        return true
-      } else {
-        // Token inválido
-        this.getToken().value = null
-        userState.value = null
-        return false
-      }
-    } catch (e) {
-      this.getToken().value = null
-      userState.value = null
-      return false
-    }
+    userState.value = await this.provider.getCurrentUser()
+    return !!userState.value
   }
 }
 
-export const authService = new AuthService(new MockAuthProvider())
+export const authService = new AuthService(new WellezyAuthProvider())

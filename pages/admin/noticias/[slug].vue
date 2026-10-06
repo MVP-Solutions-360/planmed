@@ -81,10 +81,10 @@
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#FF0000]" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                Video de YouTube (URL de Embebido)
+                Video de YouTube (enlace)
               </label>
-              <input v-model="form.youtubeUrl" type="url" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF0000] focus:border-transparent" placeholder="https://www.youtube.com/embed/tPAVprOsJF0" />
-              <p class="text-[10px] text-gray-500 mt-1">Usa la URL de 'embed', no la del reproductor normal.</p>
+              <input v-model="form.youtubeUrl" type="url" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF0000] focus:border-transparent" placeholder="https://www.youtube.com/watch?v=tPAVprOsJF0" />
+              <p class="text-[10px] text-gray-500 mt-1">Copia el enlace del video desde YouTube y pégalo aquí tal cual. Se mostrará como video dentro de la noticia.</p>
             </div>
           </div>
         </div>
@@ -124,8 +124,14 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">URL de la Imagen *</label>
-            <input v-model="form.coverImage" required type="url" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent text-sm" placeholder="/images/..." />
+            <input ref="coverInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="onCoverSelected" />
+            <div class="flex gap-2">
+              <button type="button" @click="coverInput?.click()" :disabled="isUploading" class="flex-1 px-4 py-3 bg-[#0C2619] text-white text-xs font-bold tracking-widest uppercase rounded-lg hover:bg-[#143c28] transition-colors disabled:opacity-60">
+                {{ isUploading ? 'Procesando...' : (form.coverImage ? 'Cambiar imagen' : 'Subir imagen *') }}
+              </button>
+              <button v-if="form.coverImage" type="button" @click="form.coverImage = ''" class="px-4 py-3 border border-gray-200 text-gray-500 text-xs font-bold uppercase rounded-lg hover:bg-gray-50">Quitar</button>
+            </div>
+            <p class="text-[10px] text-gray-500 mt-2">JPG, PNG o WebP. Se optimiza automáticamente. Recomendado: formato horizontal (16:9).</p>
           </div>
         </div>
 
@@ -153,6 +159,54 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { clearNuxtData } from '#app'
+
+const notify = useNotify()
+
+const coverInput = ref<HTMLInputElement | null>(null)
+const isUploading = ref(false)
+
+// Redimensiona (máx. 1600px) y comprime la imagen elegida; se guarda como data URL
+// hasta que exista un backend con almacenamiento de archivos.
+function fileToOptimizedDataUrl(file: File, maxSize = 1600, quality = 0.82): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo.'))
+    reader.onload = () => {
+      const img = new Image()
+      img.onerror = () => reject(new Error('El archivo no es una imagen válida.'))
+      img.onload = () => {
+        const ratio = Math.min(1, maxSize / Math.max(img.width, img.height))
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.round(img.width * ratio)
+        canvas.height = Math.round(img.height * ratio)
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+        resolve(canvas.toDataURL('image/jpeg', quality))
+      }
+      img.src = reader.result as string
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
+async function onCoverSelected(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  if (file.size > 10 * 1024 * 1024) {
+    notify.error('La imagen no puede superar los 10 MB.')
+    input.value = ''
+    return
+  }
+  isUploading.value = true
+  try {
+    form.value.coverImage = await fileToOptimizedDataUrl(file)
+  } catch (err: any) {
+    notify.error(err.message)
+  } finally {
+    isUploading.value = false
+    input.value = ''
+  }
+}
 import { useRoute, useRouter, useHead } from '#imports'
 import { newsService } from '~/services/NewsService'
 import type { NewsArticle } from '~/types/news'
@@ -215,7 +269,8 @@ onMounted(async () => {
         form.value.publishedAtStr = (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 16)
       }
     } else {
-      clearNuxtData().then(() => router.push('/admin/noticias'))
+      clearNuxtData()
+      router.push('/admin/noticias')
     }
   } else {
     // Si es nueva, pre-marcamos publicado pero con la fecha actual
@@ -232,6 +287,10 @@ watch(isPublished, (val) => {
 })
 
 async function submitForm() {
+  if (!form.value.coverImage) {
+    notify.error('Sube una imagen de portada para la noticia.', 'Falta la portada')
+    return
+  }
   isSubmitting.value = true
   try {
     
@@ -262,16 +321,17 @@ async function submitForm() {
         delete payload.slug;
       }
       await newsService.createNews(payload as Omit<NewsArticle, 'id' | 'slug'>)
-      alert(isPublished.value ? 'Noticia publicada correctamente.' : 'Borrador creado correctamente.')
+      notify.success(isPublished.value ? 'Noticia publicada correctamente' : 'Borrador creado correctamente')
     } else {
       await newsService.updateNews(slugParam, payload)
-      alert(isPublished.value ? 'Noticia publicada correctamente.' : 'Noticia despublicada correctamente.')
+      notify.success(isPublished.value ? 'Noticia publicada correctamente' : 'Noticia despublicada correctamente')
     }
 
-    clearNuxtData().then(() => router.push('/admin/noticias'))
+    clearNuxtData()
+    await router.push('/admin/noticias')
   } catch (error: any) {
     console.error('Error saving news:', error)
-    alert(error.message || 'Ocurrió un error al guardar.')
+    notify.error(error.message || 'Ocurrió un error al guardar.')
   } finally {
     isSubmitting.value = false
   }

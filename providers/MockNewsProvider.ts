@@ -2,7 +2,26 @@ import type { NewsProvider } from './NewsProvider'
 import type { NewsArticle } from '~/types/news'
 import { mockNewsData } from '~/data/news'
 
-let mockData: NewsArticle[] = [...mockNewsData]
+const STORAGE_KEY = 'planmed-mock-news'
+
+// El mock vive en memoria; en el navegador se persiste en localStorage para que
+// los cambios del panel admin sobrevivan a recargas completas de la página.
+function load(): NewsArticle[] {
+  if (import.meta.client) {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) return JSON.parse(raw)
+    } catch {}
+  }
+  return [...mockNewsData]
+}
+
+function save() {
+  if (!import.meta.client) return
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(mockData)) } catch {}
+}
+
+let mockData: NewsArticle[] = load()
 
 export class MockNewsProvider implements NewsProvider {
   async getNews(): Promise<NewsArticle[]> {
@@ -25,6 +44,7 @@ export class MockNewsProvider implements NewsProvider {
 
     const newArticle: NewsArticle = { ...data, id: newId, slug }
     mockData.push(newArticle)
+    save()
     return newArticle
   }
 
@@ -38,8 +58,9 @@ export class MockNewsProvider implements NewsProvider {
       }
     }
 
-    const updated = { ...mockData[index], ...data }
+    const updated = { ...mockData[index]!, ...data } as NewsArticle
     mockData[index] = updated
+    save()
     return updated
   }
 
@@ -47,6 +68,7 @@ export class MockNewsProvider implements NewsProvider {
     const index = mockData.findIndex(n => n.slug === slug)
     if (index === -1) return false
     mockData.splice(index, 1)
+    save()
     return true
   }
 }

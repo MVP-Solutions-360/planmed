@@ -39,7 +39,7 @@
           <!-- Contenido -->
           <div class="flex-grow flex flex-col p-8">
             <div class="text-[10px] font-bold tracking-widest text-[#848484] uppercase mb-3">
-              {{ new Date(article.publishedAt).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+              {{ new Date(article.publishedAt!).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) }}
             </div>
             <h3 class="font-serif text-2xl font-medium text-black mb-4 group-hover:text-[#0C2619] transition-colors leading-snug">
               {{ article.title }}
@@ -64,8 +64,18 @@
 import { useSeoMeta, useAsyncData } from '#imports'
 import { newsService } from '~/services/NewsService'
 
-const { data: news } = await useAsyncData('news-list', async () => { const all = await newsService.getNews(); return all.filter(n => n.publishedAt !== null && n.publishedAt !== undefined) }, {
+const fetchPublished = async () => {
+  const all = await newsService.getNews()
+  return all.filter(n => n.publishedAt !== null && n.publishedAt !== undefined)
+}
+
+const { data: news } = await useAsyncData('news-list', fetchPublished, {
   default: () => []
+})
+
+// Tras la hidratación, releer con los datos del navegador (cambios del panel admin)
+onMounted(async () => {
+  news.value = await fetchPublished()
 })
 
 useSeoMeta({

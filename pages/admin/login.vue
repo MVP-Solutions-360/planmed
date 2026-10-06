@@ -29,7 +29,6 @@
               type="email" 
               required
               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent transition-all"
-              placeholder="admin@planmed.com.co"
             />
           </div>
 
@@ -58,13 +57,6 @@
 
         </form>
 
-      </div>
-
-      <!-- Hint para Devs -->
-      <div class="mt-8 text-center text-xs text-gray-400 font-medium">
-        <p>Roles de prueba:</p>
-        <p class="mt-1">admin@planmed.com.co | diseno@planmed.com.co</p>
-        <p class="mt-1">Cualquier contraseña es válida en el entorno de desarrollo.</p>
       </div>
 
     </div>

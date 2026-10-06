@@ -1,6 +1,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { quotationService, type QuotationResult } from '~/services/QuotationService'
+import { quotationService } from '~/services/QuotationService'
+import type { QuotationResult } from '~/providers/MockQuotationProvider'
 import { trackingService } from '~/services/TrackingService'
 import { procedureService } from '~/services/ProcedureService'
 import type { Procedure } from '~/types/procedure'
@@ -33,7 +34,7 @@ export function useSimulator() {
       if (queryProcedureId && newProcs.some(p => p.id === queryProcedureId)) {
         procedure.value = queryProcedureId
       } else {
-        procedure.value = newProcs[0].id
+        procedure.value = newProcs[0]!.id
       }
     }
   }, { immediate: true })

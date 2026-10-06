@@ -6,6 +6,7 @@
         class="absolute inset-0 w-full h-full"
         title="YouTube video player"
         frameborder="0"
+        referrerpolicy="strict-origin-when-cross-origin"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen
       ></iframe>
@@ -30,6 +31,10 @@ const embedUrl = computed(() => {
     } else if (urlObj.hostname.includes('youtu.be')) {
       const v = urlObj.pathname.slice(1)
       if (v) return 'https://www.youtube.com/embed/' + v
+    }
+    if (urlObj.hostname.includes('youtube.com')) {
+      const m = urlObj.pathname.match(/^\/(?:shorts|live)\/([\w-]+)/)
+      if (m) return 'https://www.youtube.com/embed/' + m[1]
     }
   } catch (e) {}
   return props.url;

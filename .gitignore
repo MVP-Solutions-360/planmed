@@ -1,1 +1,11 @@
 node_modules
+
+# Entorno local (los secretos nunca se versionan; .env.example sí)
+.env
+.env.*
+!.env.example
+
+# Artefactos generados
+.nuxt/
+.output/
+dist/

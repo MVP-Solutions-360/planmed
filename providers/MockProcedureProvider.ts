@@ -29,7 +29,7 @@ export class MockProcedureProvider implements ProcedureProvider {
     
     // Si cambia el nombre, podríamos cambiar el slug, pero para el MVP mock mantendremos el slug original o lo actualizamos.
     // Lo más seguro en un update es mantener el slug o generar uno nuevo. Mantenemos el slug para simplificar.
-    const updatedProcedure = { ...mockData[index], ...data }
+    const updatedProcedure = { ...mockData[index]!, ...data } as Procedure
     mockData[index] = updatedProcedure
     return updatedProcedure
   }

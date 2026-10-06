@@ -2,12 +2,27 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
   runtimeConfig: {
+    // Solo servidor (nunca expuestos al cliente). Se sobrescriben con NUXT_WELLEZY_*, NUXT_PLANMED_ADMIN_ROLE_IDS
+    // y NUXT_SESSION_PASSWORD (mínimo 32 caracteres aleatorios).
+    // Autenticación contra Wellezy Hub: p. ej. https://wellezyhub.com/api (local: http://localhost:8000/api).
+    wellezyApiBaseUrl: '',
+    wellezyCompanySlug: 'planmed',
+    wellezyLineSlug: 'planmed',
+    // IDs de rol (users.role.id de Wellezy) autorizados para el CMS, separados por coma.
+    planmedAdminRoleIds: '19',
+    sessionPassword: '',
     public: {
       appName: 'Planmed',
       localDomain: 'planmed.com',
       // Wellezy Hub settings removed/disabled for now
       // apiBaseUrl: '',
       // tenantSlug: ''
+    }
+  },
+  typescript: {
+    tsConfig: {
+      // Scripts sueltos de mantenimiento (no forman parte de la aplicación); el typecheck solo cubre el código de la app.
+      exclude: ['../*.js', '../*.cjs', '../scratch', '../scripts']
     }
   },
   modules: [

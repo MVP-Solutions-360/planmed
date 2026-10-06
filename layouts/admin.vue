@@ -54,7 +54,7 @@
         <div class="flex items-center gap-6" v-if="user">
           <div class="text-right hidden sm:block">
             <p class="text-sm font-bold text-gray-900">{{ user.name }}</p>
-            <p class="text-[11px] font-medium text-[#D3A76A] uppercase tracking-wider">{{ user.role }}</p>
+            <p class="text-[11px] font-medium text-[#D3A76A] uppercase tracking-wider">{{ user.role.name }}</p>
           </div>
           
           <div class="h-8 w-px bg-gray-200 hidden sm:block"></div>

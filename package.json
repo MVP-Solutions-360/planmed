@@ -7,16 +7,20 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "@nuxtjs/sitemap": "^8.0.15",
     "nuxt": "latest",
+    "sweetalert2": "^11.26.25",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
     "@tailwindcss/vite": "latest",
-    "tailwindcss": "latest"
+    "tailwindcss": "latest",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.3.12"
   }
 }

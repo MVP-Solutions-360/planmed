@@ -119,6 +119,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { clearNuxtData } from '#app'
+
+const notify = useNotify()
 import { useHead, useAsyncData } from '#imports'
 import { newsService } from '~/services/NewsService'
 import type { NewsArticle } from '~/types/news'
@@ -134,7 +136,7 @@ const searchQuery = ref('')
 const statusFilter = ref('all')
 const deletingNews = ref<NewsArticle | null>(null)
 
-const { data: newsList, pending } = await useAsyncData('admin-news-list', () => newsService.getNews(), { default: () => [] })
+const { data: newsList, pending } = await useAsyncData('admin-news-list', () => newsService.getNews(), { default: () => [], server: false })
 
 const filteredNews = computed(() => {
   if (!newsList.value) return []
@@ -167,7 +169,7 @@ async function togglePublish(item: NewsArticle) {
     }
   } catch (e) {
     console.error('Error toggling publish', e)
-    alert('Ocurrió un error al cambiar el estado de publicacin.')
+    notify.error('No se pudo cambiar el estado de publicación.')
   }
 }
 
@@ -182,10 +184,11 @@ async function executeDelete() {
     if (success) {
       newsList.value = newsList.value!.filter(n => n.slug !== deletingNews.value!.slug)
       clearNuxtData()
+      notify.success('Noticia eliminada')
     }
   } catch (e) {
     console.error('Error deleting news', e)
-    alert('Ocurrió un error al eliminar la noticia.')
+    notify.error('No se pudo eliminar la noticia.')
   } finally {
     deletingNews.value = null
   }
