@@ -24,6 +24,9 @@
           <NuxtLink to="/admin/noticias" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Noticias
           </NuxtLink>
+          <NuxtLink to="/admin/micrositios" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
+            Micrositios
+          </NuxtLink>
         </div>
 
         <div>

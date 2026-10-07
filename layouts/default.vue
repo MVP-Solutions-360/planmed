@@ -16,7 +16,16 @@
       </span>
     </a>
 
-    <!-- Modal Precontractual Global -->
-    <CommonPrecontractualModal />
+    <!-- Modal Precontractual Global (no se monta en los micrositios PRP: /prp/**) -->
+    <CommonPrecontractualModal v-if="!isPrpPage" />
   </div>
 </template>
+
+<script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+// Los micrositios de referidos (/prp/**) no muestran la información precontractual global.
+const isPrpPage = computed(() => /^\/prp(\/|$)/.test(route.path))
+</script>

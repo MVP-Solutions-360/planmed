@@ -1,6 +1,6 @@
 <!-- components/common/PrecontractualModal.vue -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const STORAGE_KEY = 'planmed_precontractual_v1'
 const isOpen = ref(false)
@@ -12,6 +12,10 @@ onMounted(() => {
     // Bloquear el scroll de la página de fondo
     document.body.style.overflow = 'hidden'
   }
+})
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
 })
 
 const handleAccept = () => {

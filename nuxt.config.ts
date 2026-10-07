@@ -14,6 +14,8 @@ export default defineNuxtConfig({
     public: {
       appName: 'Planmed',
       localDomain: 'planmed.com',
+      // Formulario público de PRP del CRM médico externo (POST directo desde el navegador). Se sobrescribe con NUXT_PUBLIC_CRM_PRP_FORM_URL.
+      crmPrpFormUrl: 'https://pdtclientsolutions.com/crm-public/api/forms-px-prp',
       // Wellezy Hub settings removed/disabled for now
       // apiBaseUrl: '',
       // tenantSlug: ''
@@ -54,6 +56,7 @@ export default defineNuxtConfig({
     '/recursos': { prerender: true },
     '/blog/**': { isr: 3600 },
     '/procedimientos/**': { ssr: true },
+    '/prp/**': { ssr: true },
     '/casos-clinicos/**': { ssr: true },
     '/clinicas/**': { ssr: true }
   }

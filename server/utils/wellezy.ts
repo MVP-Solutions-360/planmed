@@ -24,17 +24,18 @@ function baseUrl(event: H3Event): string {
   return base
 }
 
-async function call<T>(event: H3Event, path: string, options: { method: 'GET' | 'POST', body?: Record<string, unknown>, token?: string }): Promise<WellezyResult<T>> {
+async function call<T>(event: H3Event, path: string, options: { method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: Record<string, unknown>, query?: Record<string, unknown>, token?: string, headers?: Record<string, string> }): Promise<WellezyResult<T>> {
   const base = baseUrl(event)
   if (!base) return { status: 0 }
 
-  const headers: Record<string, string> = { Accept: 'application/json' }
+  const headers: Record<string, string> = { Accept: 'application/json', ...options.headers }
   if (options.token) headers.Authorization = `Bearer ${options.token}`
 
   try {
     const res = await $fetch.raw<T>(`${base}${path}`, {
       method: options.method,
       body: options.body,
+      query: options.query,
       headers,
       timeout: TIMEOUT_MS,
       retry: 0,
@@ -75,4 +76,23 @@ export async function wellezyMe(event: H3Event, token: string): Promise<WellezyR
 
 export async function wellezyLogout(event: H3Event, token: string): Promise<number> {
   return (await call(event, '/auth/logout', { method: 'POST', token })).status
+}
+
+// Llamada autenticada genérica (Bearer de la sesión del servidor) para los módulos del CMS.
+export function wellezyRequest<T>(
+  event: H3Event,
+  token: string,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  path: string,
+  options: { body?: Record<string, unknown>, query?: Record<string, unknown> } = {}
+): Promise<WellezyResult<T>> {
+  return call<T>(event, path, { method, token, ...options })
+}
+
+// Lectura pública (sin Bearer) de la API web de Hub. El tenant lo resuelve Hub con el header
+// X-Tenant-Linea, cuyo valor sale de la configuración de Planmed (wellezyLineSlug), nunca del navegador.
+export function wellezyPublicGet<T>(event: H3Event, path: string): Promise<WellezyResult<T>> {
+  const lineSlug = String(useRuntimeConfig(event).wellezyLineSlug || '')
+  if (!lineSlug) console.error('[prp] NUXT_WELLEZY_LINE_SLUG no está configurada.')
+  return call<T>(event, path, { method: 'GET', headers: { 'X-Tenant-Linea': lineSlug } })
 }
