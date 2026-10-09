@@ -60,7 +60,7 @@
                   </div>
                   <div>
                     <h3 class="font-bold text-gray-900 text-sm line-clamp-1" :title="item.title">{{ item.title }}</h3>
-                    <p class="text-xs text-gray-500 line-clamp-1 max-w-[300px]" :title="item.excerpt">{{ item.excerpt }}</p>
+                    <p class="text-xs text-gray-500 line-clamp-1 max-w-[300px]" :title="richHtmlToText(item.excerpt)">{{ richHtmlToText(item.excerpt) }}</p>
                   </div>
                 </div>
               </td>
@@ -119,6 +119,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { clearNuxtData } from '#app'
+import { richHtmlToText } from '~/utils/richText'
 
 const notify = useNotify()
 import { useHead, useAsyncData } from '#imports'
@@ -145,7 +146,7 @@ const filteredNews = computed(() => {
     const q = searchQuery.value.toLowerCase()
     const matchSearch = n.title.toLowerCase().includes(q) || 
                         n.slug.toLowerCase().includes(q) || 
-                        n.excerpt.toLowerCase().includes(q)
+                        richHtmlToText(n.excerpt).toLowerCase().includes(q)
     
     let matchStatus = true
     if (statusFilter.value === 'published') {
@@ -184,7 +185,7 @@ async function executeDelete() {
     if (success) {
       newsList.value = newsList.value!.filter(n => n.slug !== deletingNews.value!.slug)
       clearNuxtData()
-      notify.success('Noticia eliminada')
+      notify.success('Noticia despublicada (se conserva como borrador en Wellezy Hub)')
     }
   } catch (e) {
     console.error('Error deleting news', e)

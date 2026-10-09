@@ -34,12 +34,11 @@
         </div>
 
         <!-- CONTENIDO EDITORIAL HTML -->
-        <div 
-          class="prose prose-lg prose-headings:font-serif prose-headings:font-medium prose-headings:uppercase prose-headings:tracking-[-0.01em] prose-a:text-[#0C2619] prose-a:font-bold prose-img:rounded-lg max-w-none text-[#4c4546] font-light leading-relaxed"
-          v-html="article.content"
-        ></div>
-        <!-- NOTA DE SEGURIDAD: En esta fase usamos v-html directo porque los datos provienen de MockNewsProvider local. 
-             Cuando se conecte a Wellezy Hub, este contenido deberá ser sanitizado con DOMPurify o similar para prevenir XSS. -->
+        <CommonRichContent
+          :html="article.content"
+          class="text-[#4c4546] font-light leading-relaxed text-lg"
+        />
+        <!-- El HTML se sanitiza (lista blanca) dentro de CommonRichContent antes de renderizarse. -->
 
         <!-- EMBEDS CONDICIONALES -->
         <!-- Temporalmente renderizamos componentes dedicados si el JSON trae las URLs -->
@@ -52,19 +51,17 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter, useSeoMeta, createError, useAsyncData, showError, onMounted } from '#imports'
-import { newsService } from '~/services/NewsService'
+import { useRoute, useSeoMeta, createError, useAsyncData } from '#imports'
+import { publicNewsService } from '~/services/PublicNewsService'
+import { richHtmlToText } from '~/utils/richText'
 
 const route = useRoute()
-const router = useRouter()
 const slug = route.params.slug as string
 
-const { data: article } = await useAsyncData('news-' + slug, () => newsService.getNewsBySlug(slug))
+// Wellezy Hub decide qué es público (publicada, vigente, de esta línea). Si no existe → 404 real también en SSR.
+const { data: article } = await useAsyncData('news-' + slug, () => publicNewsService.getNewsBySlug(slug))
 
-type PublishedArticle = NonNullable<typeof article.value> & { publishedAt: string }
-const isVisible = (a: typeof article.value): a is PublishedArticle => !!a && !!a.publishedAt
-
-if (!isVisible(article.value)) {
+if (!article.value) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Noticia no encontrada',
@@ -72,20 +69,12 @@ if (!isVisible(article.value)) {
   })
 }
 
-// Tras la hidratación, validar con los datos del navegador (borradores no son públicos)
-onMounted(async () => {
-  article.value = await newsService.getNewsBySlug(slug)
-  if (!isVisible(article.value)) {
-    showError(createError({ statusCode: 404, statusMessage: 'Noticia no encontrada' }))
-  }
-})
-
 // SEO
 useSeoMeta({
   title: article.value.seo?.metaTitle || (article.value.title + ' | Planmed Noticias'),
-  description: article.value.seo?.metaDescription || article.value.excerpt,
+  description: article.value.seo?.metaDescription || richHtmlToText(article.value.excerpt),
   ogTitle: article.value.title,
-  ogDescription: article.value.excerpt,
+  ogDescription: article.value.seo?.metaDescription || richHtmlToText(article.value.excerpt),
   ogImage: article.value.coverImage,
   ogType: 'article',
   articlePublishedTime: article.value.publishedAt,

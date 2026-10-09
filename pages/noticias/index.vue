@@ -45,7 +45,7 @@
               {{ article.title }}
             </h3>
             <p class="text-gray-600 text-sm leading-relaxed font-light mb-6 flex-grow">
-              {{ article.excerpt }}
+              {{ richHtmlToText(article.excerpt) }}
             </p>
             <div class="inline-flex items-center text-xs font-bold tracking-widest uppercase text-black group-hover:text-[#0C2619] transition-colors self-start">
               Leer más
@@ -62,20 +62,12 @@
 
 <script setup lang="ts">
 import { useSeoMeta, useAsyncData } from '#imports'
-import { newsService } from '~/services/NewsService'
+import { publicNewsService } from '~/services/PublicNewsService'
+import { richHtmlToText } from '~/utils/richText'
 
-const fetchPublished = async () => {
-  const all = await newsService.getNews()
-  return all.filter(n => n.publishedAt !== null && n.publishedAt !== undefined)
-}
-
-const { data: news } = await useAsyncData('news-list', fetchPublished, {
+// Fuente de verdad: Wellezy Hub (vía Nitro). Mismo resultado en SSR, navegación interna, recarga e incógnito.
+const { data: news } = await useAsyncData('news-list', () => publicNewsService.getNews(), {
   default: () => []
-})
-
-// Tras la hidratación, releer con los datos del navegador (cambios del panel admin)
-onMounted(async () => {
-  news.value = await fetchPublished()
 })
 
 useSeoMeta({

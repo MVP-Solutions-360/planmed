@@ -43,14 +43,10 @@
               <p class="text-[10px] text-gray-500 mt-1">Identificador de la URL. Si se deja vacío al crear, se generar desde el título.</p>
             </div>
 
-            <div>
-              <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Autor</label>
-              <input v-model="form.author" type="text" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent" placeholder="Ej: Equipo Planmed" />
-            </div>
 
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Extracto (Excerpt) *</label>
-              <textarea v-model="form.excerpt" required rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent resize-none" placeholder="Breve resumen que aparece en las listas de noticias..."></textarea>
+              <AdminRichTextEditor v-model="form.excerpt" min-height="5rem" />
             </div>
           </div>
         </div>
@@ -59,8 +55,8 @@
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
           <h3 class="text-xs font-bold tracking-widest text-[#0C2619] uppercase mb-6 border-b border-gray-100 pb-4">Contenido Editorial *</h3>
           <div>
-            <textarea v-model="form.content" required rows="15" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent font-mono text-sm leading-relaxed" placeholder="<p>Escribe tu contenido aqu...</p>"></textarea>
-            <p class="text-[10px] text-gray-500 mt-2">En esta fase, puedes usar etiquetas HTML bsicas (p, h2, ul, li) para estructurar el contenido.</p>
+            <AdminRichTextEditor v-model="form.content" min-height="20rem" />
+            <p class="text-[10px] text-gray-500 mt-2">Usa la barra de herramientas para dar formato: títulos, listas, negrita, cursiva y enlaces.</p>
           </div>
         </div>
 
@@ -210,6 +206,7 @@ async function onCoverSelected(e: Event) {
 import { useRoute, useRouter, useHead } from '#imports'
 import { newsService } from '~/services/NewsService'
 import type { NewsArticle } from '~/types/news'
+import { isRichHtmlEmpty } from '~/utils/richText'
 
 useHead({
   title: 'Editor de Noticias | Admin Planmed'
@@ -233,7 +230,6 @@ const form = ref({
   excerpt: '',
   content: '',
   coverImage: '',
-  author: '',
   publishedAtStr: '',
   instagramUrl: '',
   youtubeUrl: '',
@@ -252,7 +248,6 @@ onMounted(async () => {
       form.value.excerpt = data.excerpt || ''
       form.value.content = data.content || ''
       form.value.coverImage = data.coverImage || ''
-      form.value.author = data.author || ''
       form.value.instagramUrl = data.instagramUrl || ''
       form.value.youtubeUrl = data.youtubeUrl || ''
       
@@ -287,6 +282,10 @@ watch(isPublished, (val) => {
 })
 
 async function submitForm() {
+  if (isRichHtmlEmpty(form.value.excerpt) || isRichHtmlEmpty(form.value.content)) {
+    notify.error("Completa el extracto y el contenido editorial.", "Falta información")
+    return
+  }
   if (!form.value.coverImage) {
     notify.error('Sube una imagen de portada para la noticia.', 'Falta la portada')
     return
@@ -308,7 +307,6 @@ async function submitForm() {
       excerpt: form.value.excerpt,
       content: form.value.content,
       coverImage: form.value.coverImage,
-      author: form.value.author,
       instagramUrl: form.value.instagramUrl || undefined,
       youtubeUrl: form.value.youtubeUrl || undefined,
       publishedAt: finalPublishedAt,

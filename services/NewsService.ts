@@ -1,12 +1,14 @@
 import type { NewsProvider } from '~/providers/NewsProvider'
 import type { NewsArticle } from '~/types/news'
-import { MockNewsProvider } from '~/providers/MockNewsProvider'
+import { HubNewsProvider } from '~/providers/HubNewsProvider'
 
+// Servicio ADMINISTRATIVO de noticias (CMS): Wellezy Hub es la fuente de verdad.
+// Para lectura pública usa PublicNewsService.
 export class NewsService {
   private provider: NewsProvider
 
   constructor(provider?: NewsProvider) {
-    this.provider = provider || new MockNewsProvider();
+    this.provider = provider || new HubNewsProvider();
   }
 
   async getNews(): Promise<NewsArticle[]> {
