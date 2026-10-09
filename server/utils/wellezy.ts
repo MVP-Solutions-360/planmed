@@ -10,6 +10,8 @@ export interface WellezyUser {
   name: string
   email: string
   role: { id: number, name: string } | null
+  /** personnels.is_area_leader del Hub (líder de la línea). */
+  is_area_leader?: boolean
 }
 
 export interface WellezyResult<T = unknown> {

@@ -8,4 +8,6 @@ export interface AdminUser {
   name: string;
   email: string;
   role: AdminUserRole;
+  /** Líder de la línea (solo informativo para la UI; el servidor es la autoridad). */
+  isAreaLeader: boolean;
 }
