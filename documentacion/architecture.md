@@ -32,8 +32,11 @@ uxt.config.ts o comentarios en LeadForm.vue), estas deben considerarse estrictam
 
 ## PROCEDIMIENTOS (DATA)
 
-Actualmente la fuente de verdad de los procedimientos utilizados por el frontend es:
-data/procedures.ts
+La fuente de verdad de los procedimientos es Wellezy Hub (tablas `cirugias` y `cirugia_linea`). No hay copia local.
+
+- Público: `PublicProcedureService` → `/api/public/procedures*` (Nitro) → Hub `GET /api/v1/web/cirugias[/{slug}]`, con el tenant de `NUXT_WELLEZY_LINE_SLUG`.
+- Administración: `ProcedureService` → `/api/admin/procedures*` (Nitro, Bearer de la sesión) → Hub `/api/cms/procedures`. Hub deriva empresa/línea del token.
+- Las URLs de imágenes las genera el Hub a partir de su `APP_URL`; Planmed solo las reenvía.
 
 **Revisión Pendiente (Legacy):**
 El composable composables/useCatalogo.ts fue identificado como posible remanente legacy. Debe ser revisado posteriormente para comprobar si tiene consumidores activos y, de lo contrario, eliminarse.

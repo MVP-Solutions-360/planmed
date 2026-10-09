@@ -1,12 +1,14 @@
 import type { ProcedureProvider } from '~/providers/ProcedureProvider'
 import type { Procedure } from '~/types/procedure'
-import { MockProcedureProvider } from '~/providers/MockProcedureProvider'
+import { HubProcedureProvider } from '~/providers/HubProcedureProvider'
 
+// Servicio ADMINISTRATIVO de procedimientos (CMS): Wellezy Hub es la fuente de verdad.
+// Para lectura pública usa PublicProcedureService.
 export class ProcedureService {
   private provider: ProcedureProvider
 
   constructor(provider?: ProcedureProvider) {
-    this.provider = provider || new MockProcedureProvider();
+    this.provider = provider || new HubProcedureProvider();
   }
 
   async getProcedures(): Promise<Procedure[]> {
@@ -17,7 +19,7 @@ export class ProcedureService {
     return this.provider.getProcedureBySlug(slug);
   }
 
-  async createProcedure(data: Omit<Procedure, 'id' | 'slug'>): Promise<Procedure> {
+  async createProcedure(data: Omit<Procedure, 'id' | 'slug'> & { slug?: string }): Promise<Procedure> {
     return this.provider.createProcedure(data);
   }
 

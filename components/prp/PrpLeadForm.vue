@@ -75,7 +75,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { prpLeadService } from '~/services/PrpLeadService'
-import { procedureService } from '~/services/ProcedureService'
+import { publicProcedureService } from '~/services/PublicProcedureService'
 import { PrpLeadError } from '~/types/prpPublic'
 
 // `codePrp` es el código externo del PRP recuperado desde Hub; la persona nunca lo ve ni lo escribe.
@@ -91,7 +91,7 @@ const errors = reactive<Record<string, string>>({})
 const surgeryOptions = ref<string[]>([])
 onMounted(async () => {
   try {
-    surgeryOptions.value = (await procedureService.getProcedures()).map(p => p.name)
+    surgeryOptions.value = (await publicProcedureService.getProcedures()).map(p => p.name)
   } catch {
     // Las sugerencias son opcionales: el campo sigue siendo de texto libre.
   }

@@ -3,7 +3,7 @@ import { useRoute } from 'vue-router'
 import { quotationService } from '~/services/QuotationService'
 import type { QuotationResult } from '~/providers/MockQuotationProvider'
 import { trackingService } from '~/services/TrackingService'
-import { procedureService } from '~/services/ProcedureService'
+import { publicProcedureService } from '~/services/PublicProcedureService'
 import type { Procedure } from '~/types/procedure'
 import { useAsyncData } from '#imports'
 
@@ -24,7 +24,7 @@ export function useSimulator() {
   const isLoading = ref(false)
   let abortController: AbortController | null = null
 
-  const { data: availableProcedures } = useAsyncData('procedures', () => procedureService.getProcedures(), {
+  const { data: availableProcedures } = useAsyncData('procedures', () => publicProcedureService.getProcedures(), {
     default: () => [] as Procedure[]
   })
   

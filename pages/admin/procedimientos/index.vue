@@ -4,7 +4,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
       <div>
         <h2 class="text-3xl font-serif text-[#0C2619] mb-2 uppercase">Procedimientos</h2>
-        <p class="text-gray-500 font-light">Gestiona el catálogo de procedimientos médicos.</p>
+        <p class="text-gray-500 font-light">Gestiona el catálogo de procedimientos médicos. Los datos se guardan en Wellezy Hub.</p>
       </div>
       <NuxtLink to="/admin/procedimientos/nuevo" class="bg-[#D3A76A] hover:bg-[#c29659] text-white px-6 py-3 rounded-lg font-bold text-xs tracking-widest uppercase transition-colors inline-flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
@@ -41,6 +41,7 @@
             <tr class="bg-gray-50 border-b border-gray-200 text-[10px] font-bold tracking-widest text-gray-500 uppercase">
               <th class="p-4 font-medium">Procedimiento</th>
               <th class="p-4 font-medium">Categoría</th>
+              <th class="p-4 font-medium">Estado</th>
               <th class="p-4 font-medium text-center">Destacado</th>
               <th class="p-4 font-medium text-right">Acciones</th>
             </tr>
@@ -62,6 +63,12 @@
               <td class="p-4">
                 <span class="inline-flex px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium">{{ proc.category }}</span>
               </td>
+              <td class="p-4">
+                <div class="flex flex-col items-start gap-1">
+                  <span class="inline-flex px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider" :class="proc.activo ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'">{{ proc.activo ? 'Visible en la web' : 'Inactivo' }}</span>
+                  <span class="inline-flex px-2 py-1 rounded-md text-[10px] font-medium" :class="proc.isMaster ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'" :title="proc.isMaster ? 'Catálogo global del Hub: solo se habilita o deshabilita en tu línea' : 'Procedimiento propio de tu línea'">{{ proc.isMaster ? 'Maestro' : 'Propio' }}</span>
+                </div>
+              </td>
               <td class="p-4 text-center">
                 <button 
                   @click="toggleDestacado(proc)"
@@ -74,35 +81,18 @@
               </td>
               <td class="p-4 text-right">
                 <div class="flex items-center justify-end gap-2">
-                  <NuxtLink :to="`/admin/procedimientos/${proc.slug}`" class="p-2 text-gray-400 hover:text-[#0C2619] transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg" title="Editar">
+                  <NuxtLink :to="`/admin/procedimientos/${proc.slug}`" class="p-2 text-gray-400 hover:text-[#0C2619] transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg" :title="proc.isMaster ? 'Ver (contenido global)' : 'Editar'">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                   </NuxtLink>
-                  <button @click="confirmDelete(proc)" class="p-2 text-gray-400 hover:text-red-600 transition-colors bg-gray-50 hover:bg-red-50 rounded-lg" title="Eliminar">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  <button @click="toggleActivo(proc)" :class="proc.activo ? 'hover:text-red-600 hover:bg-red-50' : 'hover:text-green-700 hover:bg-green-50'" class="p-2 text-gray-400 transition-colors bg-gray-50 rounded-lg" :title="proc.activo ? (proc.isMaster ? 'Deshabilitar en Planmed' : 'Desactivar') : (proc.isMaster ? 'Habilitar en Planmed' : 'Activar')">
+                    <svg v-if="proc.activo" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                   </button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
-      </div>
-    </div>
-
-    <!-- Delete Modal -->
-    <div v-if="deletingProc" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
-        <h3 class="text-xl font-bold text-gray-900 mb-2">¿Eliminar procedimiento?</h3>
-        <p class="text-gray-500 text-sm mb-6">
-          Estás a punto de eliminar <strong>{{ deletingProc.name }}</strong>. Esta acción no se puede deshacer.
-        </p>
-        <div class="flex justify-end gap-3">
-          <button @click="deletingProc = null" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-            Cancelar
-          </button>
-          <button @click="executeDelete" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-            Eliminar
-          </button>
-        </div>
       </div>
     </div>
 
@@ -124,9 +114,9 @@ definePageMeta({
 })
 
 const searchQuery = ref('')
-const deletingProc = ref<Procedure | null>(null)
 
 const { data: procedures, pending } = await useAsyncData('admin-procedures-list', () => procedureService.getProcedures(), { default: () => [] })
+onMounted(async () => { procedures.value = await procedureService.getProcedures() })
 
 const filteredProcedures = computed(() => {
   if (!procedures.value) return []
@@ -142,27 +132,18 @@ async function toggleDestacado(proc: Procedure) {
       procedures.value![index] = updated
     }
   } catch (e) {
-    console.error('Error toggling destacado', e)
-    notify.error('No se pudo actualizar el estado destacado.')
+    notify.error((e as Error).message || 'No se pudo actualizar el estado destacado.')
   }
 }
 
-function confirmDelete(proc: Procedure) {
-  deletingProc.value = proc
-}
-
-async function executeDelete() {
-  if (!deletingProc.value) return
+// Activar/desactivar: en Hub el procedimiento propio se conserva (activo = false) y un maestro solo se deshabilita en esta línea.
+async function toggleActivo(proc: Procedure) {
   try {
-    const success = await procedureService.deleteProcedure(deletingProc.value.slug)
-    if (success) {
-      procedures.value = procedures.value!.filter(p => p.slug !== deletingProc.value!.slug)
-    }
+    const updated = await procedureService.updateProcedure(proc.slug, { activo: !proc.activo })
+    const index = procedures.value!.findIndex(p => p.slug === proc.slug)
+    if (index !== -1) procedures.value![index] = updated
   } catch (e) {
-    console.error('Error deleting procedure', e)
-    notify.error('No se pudo eliminar el procedimiento.')
-  } finally {
-    deletingProc.value = null
+    notify.error((e as Error).message || 'No se pudo actualizar el estado del procedimiento.')
   }
 }
 </script>

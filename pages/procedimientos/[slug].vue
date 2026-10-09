@@ -22,7 +22,12 @@
           
           <div class="space-y-6 text-[#4c4546] font-light leading-relaxed text-lg md:text-xl">
             <p>{{ procedure.shortDescription }}</p>
-            <p v-if="procedure.whatIsIt" class="text-base text-gray-500">{{ procedure.whatIsIt }}</p>
+            <CommonRichContent v-if="procedure.whatIsIt" :html="procedure.whatIsIt" class="text-base text-gray-500" />
+          </div>
+
+          <div v-if="procedure.perfil_paciente?.condiciones_medicas_compatibles" class="mt-10 w-full">
+            <h2 class="text-[11px] font-bold tracking-[0.15em] text-[#0C2619] uppercase mb-3">Condiciones médicas compatibles</h2>
+            <CommonRichContent :html="procedure.perfil_paciente.condiciones_medicas_compatibles" class="text-base text-gray-500" />
           </div>
           
           <!-- Separador -->
@@ -69,12 +74,12 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSeoMeta, createError } from '#imports'
 import { useAsyncData } from '#imports'
-import { procedureService } from '~/services/ProcedureService'
+import { publicProcedureService } from '~/services/PublicProcedureService'
 
 const route = useRoute()
 const router = useRouter()
 
-const { data: procedure } = await useAsyncData('procedure-' + route.params.slug, () => procedureService.getProcedureBySlug(route.params.slug))
+const { data: procedure } = await useAsyncData('procedure-' + route.params.slug, () => publicProcedureService.getProcedureBySlug(route.params.slug))
 
 if (!procedure.value) {
   throw createError({
@@ -86,7 +91,7 @@ if (!procedure.value) {
 
 // SEO
 useSeoMeta({
-  title: `${procedure.value.name} | Planmed`,
-  description: procedure.value.description
+  title: procedure.value.seo?.meta_title || `${procedure.value.name} | Planmed`,
+  description: procedure.value.seo?.meta_description || procedure.value.shortDescription
 })
 </script>

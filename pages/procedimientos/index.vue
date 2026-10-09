@@ -84,9 +84,9 @@
 import { computed } from 'vue'
 import { useSeoMeta, useHead } from '#imports'
 import { useAsyncData } from '#imports'
-import { procedureService } from '~/services/ProcedureService'
+import { publicProcedureService } from '~/services/PublicProcedureService'
 
-const { data: cirugias } = await useAsyncData('procedures', () => procedureService.getProcedures(), {
+const { data: cirugias } = await useAsyncData('procedures', () => publicProcedureService.getProcedures(), {
   default: () => []
 })
 

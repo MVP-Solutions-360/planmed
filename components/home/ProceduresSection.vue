@@ -44,9 +44,9 @@
 
 <script setup>
 import { useAsyncData } from '#imports'
-import { procedureService } from '~/services/ProcedureService'
+import { publicProcedureService } from '~/services/PublicProcedureService'
 
-const { data: procedures } = await useAsyncData('home-procedures', () => procedureService.getProcedures(), {
+const { data: procedures } = await useAsyncData('home-procedures', () => publicProcedureService.getProcedures(), {
   default: () => []
 })
 
