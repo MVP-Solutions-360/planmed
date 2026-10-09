@@ -17,8 +17,11 @@
         </p>
       </div>
 
+      <!-- Hub caído: aviso con reintento (no un catálogo vacío). Lista vacía válida => cuadrícula vacía. -->
+      <CommonHubUnavailable v-if="error" :retrying="status === 'pending'" @retry="refresh()" />
+
       <!-- CATÁLOGO GRID -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 mb-24">
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 mb-24">
         
         <NuxtLink 
           v-for="proc in cirugias" 
@@ -86,9 +89,10 @@ import { useSeoMeta, useHead } from '#imports'
 import { useAsyncData } from '#imports'
 import { publicProcedureService } from '~/services/PublicProcedureService'
 
-const { data: cirugias } = await useAsyncData('procedures', () => publicProcedureService.getProcedures(), {
+const { data: cirugias, error, refresh, status } = await useAsyncData('procedures', () => publicProcedureService.getProcedures(), {
   default: () => []
 })
+useServiceUnavailable(error)
 
 useSeoMeta({
   title: 'Procedimientos | Planmed',

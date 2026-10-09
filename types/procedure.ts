@@ -43,6 +43,11 @@ export interface Procedure {
   perfil_paciente?: ProcedurePerfilPaciente;
   recomendaciones_post?: string;
   recomendaciones_revision?: string;
+  /** Solo lista pública: el detalle tiene texto de cuidados / de revisión (sin pedir cada detalle). */
+  tiene_recomendaciones_post?: boolean;
+  tiene_recomendaciones_revision?: boolean;
+  /** Fuente efectiva por tipo (contrato Hub): pagina | pagina_oculta | historico | ninguna. Ver utils/recommendationSource.ts. */
+  recomendaciones?: Partial<Record<'cuidados' | 'revision', { fuente: 'pagina' | 'pagina_oculta' | 'historico' | 'ninguna', paginaSlug: string | null }>>;
   galeria_antes_despues?: ProcedureAntesDespues[];
   seo?: ProcedureSEO;
   // Solo administración (Wellezy Hub es la fuente de verdad; el público solo ve los activos).

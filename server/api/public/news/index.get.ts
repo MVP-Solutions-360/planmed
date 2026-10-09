@@ -6,12 +6,7 @@ export default defineEventHandler(async (event) => {
 
   const res = await wellezyPublicGet<any>(event, '/v1/web/posts?per_page=50')
 
-  if (res.status === 404 && String(res.data?.message ?? '').includes('Tenant')) {
-    console.error('[news] Hub no resolvió el tenant (revisa NUXT_WELLEZY_LINE_SLUG).')
-  }
-  if (res.status !== 200 || !Array.isArray(res.data?.data)) {
-    throw createError({ statusCode: 503, message: 'No fue posible cargar las noticias. Intenta nuevamente.' })
-  }
+  assertHubOk('news', res, Array.isArray(res.data?.data), 'No fue posible cargar las noticias. Intenta nuevamente.')
 
   return res.data.data.map(fromPublicPost)
 })

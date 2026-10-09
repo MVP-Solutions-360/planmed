@@ -12,15 +12,9 @@ export default defineEventHandler(async (event) => {
 
   const res = await wellezyPublicGet<any>(event, `/v1/web/posts/${slug}`)
 
-  if (res.status === 404) {
-    if (String(res.data?.message ?? '').includes('Tenant')) {
-      console.error('[news] Hub no resolvió el tenant (revisa NUXT_WELLEZY_LINE_SLUG).')
-    }
-    throw createError({ statusCode: 404, message: 'No encontrado' })
-  }
-  if (res.status !== 200 || !res.data?.data?.slug) {
-    throw createError({ statusCode: 503, message: 'No fue posible cargar esta noticia. Intenta nuevamente.' })
-  }
+  // Tenant sin resolver = configuración rota (no "la noticia no existe"): 503, igual que procedimientos y recomendaciones.
+  if (res.status === 404 && !isTenantNotResolved(res)) throw createError({ statusCode: 404, message: 'No encontrado' })
+  assertHubOk('news', res, !!res.data?.data?.slug, 'No fue posible cargar esta noticia. Intenta nuevamente.')
 
   return fromPublicPost(res.data.data)
 })

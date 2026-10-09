@@ -41,10 +41,6 @@ export class HubProcedureProvider implements ProcedureProvider {
   }
 
   async updateProcedure(slug: string, data: Partial<Procedure>): Promise<Procedure> {
-    // Las recomendaciones por procedimiento aún no se almacenan en Hub (Entregable 8): no se simula un guardado.
-    if (data.recomendaciones_post !== undefined || data.recomendaciones_revision !== undefined) {
-      throw new Error('Las recomendaciones por procedimiento todavía no se guardan en Wellezy Hub.')
-    }
     const current = await this.getProcedureBySlug(slug)
     if (!current) throw new Error('Procedimiento no encontrado')
     const request = useRequestFetch()

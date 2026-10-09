@@ -59,7 +59,16 @@ const route = useRoute()
 const slug = route.params.slug as string
 
 // Wellezy Hub decide qué es público (publicada, vigente, de esta línea). Si no existe → 404 real también en SSR.
-const { data: article } = await useAsyncData('news-' + slug, () => publicNewsService.getNewsBySlug(slug))
+const { data: article, error } = await useAsyncData('news-' + slug, () => publicNewsService.getNewsBySlug(slug))
+
+// Hub caído, timeout o error de servicio NO es "no existe": 503 reintentable. Solo un 404 de Hub (null) es 404.
+if (error.value) {
+  throw createError({
+    statusCode: 503,
+    statusMessage: 'No fue posible cargar la página. Intenta nuevamente.',
+    fatal: true
+  })
+}
 
 if (!article.value) {
   throw createError({

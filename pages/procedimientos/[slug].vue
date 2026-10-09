@@ -79,7 +79,16 @@ import { publicProcedureService } from '~/services/PublicProcedureService'
 const route = useRoute()
 const router = useRouter()
 
-const { data: procedure } = await useAsyncData('procedure-' + route.params.slug, () => publicProcedureService.getProcedureBySlug(route.params.slug))
+const { data: procedure, error } = await useAsyncData('procedure-' + route.params.slug, () => publicProcedureService.getProcedureBySlug(route.params.slug))
+
+// Hub caído, timeout o error de servicio NO es "no existe": 503 reintentable. Solo un 404 de Hub (null) es 404.
+if (error.value) {
+  throw createError({
+    statusCode: 503,
+    statusMessage: 'No fue posible cargar la página. Intenta nuevamente.',
+    fatal: true
+  })
+}
 
 if (!procedure.value) {
   throw createError({

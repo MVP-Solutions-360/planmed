@@ -17,8 +17,11 @@
         </p>
       </div>
 
+      <!-- Hub caído: aviso con reintento (no «sin noticias»). Lista vacía válida => cuadrícula vacía. -->
+      <CommonHubUnavailable v-if="error" :retrying="status === 'pending'" @retry="refresh()" />
+
       <!-- GRID DE NOTICIAS -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 mb-24">
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 mb-24">
         
         <NuxtLink 
           v-for="article in news" 
@@ -66,9 +69,10 @@ import { publicNewsService } from '~/services/PublicNewsService'
 import { richHtmlToText } from '~/utils/richText'
 
 // Fuente de verdad: Wellezy Hub (vía Nitro). Mismo resultado en SSR, navegación interna, recarga e incógnito.
-const { data: news } = await useAsyncData('news-list', () => publicNewsService.getNews(), {
+const { data: news, error, refresh, status } = await useAsyncData('news-list', () => publicNewsService.getNews(), {
   default: () => []
 })
+useServiceUnavailable(error)
 
 useSeoMeta({
   title: 'Noticias | Planmed',

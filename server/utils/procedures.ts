@@ -23,6 +23,12 @@ export interface ProcedureDto {
   editable?: boolean
   galeriaAssets?: Array<{ id: number, url: string }>
   recomendaciones_post?: string
+  recomendaciones_revision?: string
+  /** Solo en la lista pública: indican si el detalle tiene ese texto (sin pedir el detalle de cada procedimiento). */
+  tiene_recomendaciones_post?: boolean
+  tiene_recomendaciones_revision?: boolean
+  /** Fuente efectiva por tipo (la decide el Hub): pagina | pagina_oculta | historico | ninguna. Ausente en un Hub anterior. */
+  recomendaciones?: Partial<Record<'cuidados' | 'revision', { fuente: 'pagina' | 'pagina_oculta' | 'historico' | 'ninguna', paginaSlug: string | null }>>
   ficha_tecnica: { tipo_anestesia?: string, tiempo_quirurgico?: string, tiempo_recuperacion?: string, cicatrizacion_minima?: boolean }
   perfil_paciente: { edad_minima?: number | null, edad_maxima?: number | null, imc_maximo?: number | null, condiciones_medicas_compatibles?: string }
   seo: { meta_title?: string, meta_description?: string }
@@ -32,6 +38,19 @@ const str = (v: unknown) => (typeof v === 'string' ? v : '')
 const orUndef = (v: unknown) => (typeof v === 'string' && v !== '' ? v : undefined)
 const numOrNull = (v: unknown) => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? null : Number(v))
 const orNull = (v: unknown) => (typeof v === 'string' && v.trim() !== '' ? v.trim() : null)
+
+const SOURCES = ['pagina', 'pagina_oculta', 'historico', 'ninguna']
+
+/** `recomendaciones` del Hub → modelo de Planmed. Un valor desconocido o ausente se omite (Planmed cae al comportamiento previo). */
+export function fromRecommendationSources(raw: any): ProcedureDto['recomendaciones'] {
+  if (!raw || typeof raw !== 'object') return undefined
+  const out: NonNullable<ProcedureDto['recomendaciones']> = {}
+  for (const kind of ['cuidados', 'revision'] as const) {
+    const s = raw[kind]
+    if (s && SOURCES.includes(s.fuente)) out[kind] = { fuente: s.fuente, paginaSlug: s.fuente === 'pagina' ? orNull(s.pagina_slug) : null }
+  }
+  return Object.keys(out).length ? out : undefined
+}
 
 /** Elemento de /v1/web/cirugias (lista pública): solo lo necesario para tarjetas, menús y selectores. */
 export function fromPublicListItem(item: any): ProcedureDto {
@@ -45,6 +64,9 @@ export function fromPublicListItem(item: any): ProcedureDto {
     image: str(item.imagen_destacada),
     galeria: [],
     destacado: item.destacado === true,
+    tiene_recomendaciones_post: item.tiene_recomendaciones_post === true,
+    tiene_recomendaciones_revision: item.tiene_recomendaciones_revision === true,
+    recomendaciones: fromRecommendationSources(item.recomendaciones),
     ficha_tecnica: {},
     perfil_paciente: {},
     seo: {}
@@ -64,7 +86,10 @@ export function fromPublicDetail(d: any): ProcedureDto {
     image: str(d.imagen_destacada),
     galeria: Array.isArray(d.galeria) ? d.galeria.filter((u: unknown) => typeof u === 'string') : [],
     destacado: d.destacado === true,
-    recomendaciones_post: typeof d.recomendaciones_post === 'string' ? d.recomendaciones_post : undefined,
+    // Hub devuelve HTML (string) o, en datos históricos, una lista: se muestra como lista sin modificar el dato almacenado.
+    recomendaciones_post: recommendationHtml(d.recomendaciones_post),
+    recomendaciones_revision: recommendationHtml(d.recomendaciones_revision),
+    recomendaciones: fromRecommendationSources(d.recomendaciones),
     ficha_tecnica: {
       tipo_anestesia: orUndef(d.ficha_tecnica?.tipo_anestesia),
       tiempo_quirurgico: orUndef(d.ficha_tecnica?.tiempo_quirurgico),
@@ -98,6 +123,8 @@ export function fromCms(d: any): ProcedureDto {
     galeriaAssets: gallery,
     destacado: d.destacado === true,
     activo: d.activo === true,
+    recomendaciones_post: recommendationHtml(d.recomendaciones_post),
+    recomendaciones_revision: recommendationHtml(d.recomendaciones_revision),
     isMaster: d.es_maestro === true,
     editable: d.editable !== false,
     ficha_tecnica: {
@@ -145,6 +172,9 @@ export function pickProcedureBody(body: any): Record<string, unknown> {
     out.meta_title = orNull(body.seo.meta_title)
     out.meta_description = orNull(body.seo.meta_description)
   }
+  // Texto de cuidados / cita de revisión (HTML). Hub solo lo guarda en procedimientos propios (maestro => 403).
+  if ('recomendaciones_post' in body) out.recomendaciones_post = body.recomendaciones_post ?? ''
+  if ('recomendaciones_revision' in body) out.recomendaciones_revision = body.recomendaciones_revision ?? ''
   if ('activo' in body) out.activo = body.activo === true
   if ('destacado' in body) out.destacado = body.destacado === true
   return out
