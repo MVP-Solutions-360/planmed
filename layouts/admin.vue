@@ -24,17 +24,22 @@
           <NuxtLink to="/admin/noticias" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Noticias
           </NuxtLink>
+          <NuxtLink to="/admin/testimonios" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
+            Nuestros Pacientes
+          </NuxtLink>
+          <NuxtLink to="/admin/recomendaciones" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
+            Recomendaciones
+          </NuxtLink>
           <NuxtLink to="/admin/micrositios" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Micrositios
           </NuxtLink>
         </div>
 
-        <div>
-          <p class="px-4 text-[10px] tracking-[0.15em] text-white/50 uppercase font-bold mb-2">Configuración</p>
-          <!-- Placeholder, sin href real funcional aún pero visualmente presente -->
-          <div class="block px-4 py-2 rounded-lg text-sm font-medium text-white/40 cursor-not-allowed">
-            Usuarios (Próximamente)
-          </div>
+        <div v-if="user?.isAreaLeader">
+          <p class="px-4 text-[10px] tracking-[0.15em] text-white/50 uppercase font-bold mb-2">Administración</p>
+          <NuxtLink to="/admin/configuracion" class="block px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
+            Configuración
+          </NuxtLink>
         </div>
 
       </nav>

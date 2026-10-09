@@ -22,6 +22,7 @@ const toast = Swal.mixin({
 export function useNotify() {
   return {
     success: (title: string) => toast.fire({ icon: 'success', title }),
+    warning: (title: string) => toast.fire({ icon: 'warning', title, timer: 6000 }),
     error: (text: string, title = 'Ocurrió un error') => base.fire({ icon: 'error', title, text }),
     confirm: async (title: string, text = '', confirmText = 'Sí, continuar') => {
       const res = await base.fire({

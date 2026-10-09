@@ -5,7 +5,7 @@
       <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-[#0C2619] text-[#D3A76A] flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
       </div>
-      <h3 class="font-serif text-2xl md:text-3xl font-medium text-black uppercase tracking-tight mb-3">¡Gracias, {{ firstName }}!</h3>
+      <h3 class="font-serif text-2xl md:text-3xl font-medium text-black uppercase tracking-tight mb-3">¡Gracias<template v-if="submittedName">, <span class="normal-case">{{ submittedName }}</span></template>!</h3>
       <p class="text-gray-600 font-light leading-relaxed max-w-sm mx-auto mb-8">
         Recibimos tus datos. Una asesora de Planmed se pondrá en contacto contigo muy pronto para agendar tu valoración.
       </p>
@@ -56,7 +56,7 @@
           <input v-model="form.accepted" type="checkbox" class="mt-0.5 w-5 h-5 shrink-0 accent-[#0C2619] border-gray-300 cursor-pointer" :aria-invalid="!!errors.accepted" />
           <span class="text-xs text-gray-600 leading-relaxed select-none">
             Acepto la
-            <NuxtLink to="/recursos" target="_blank" class="text-[#0C2619] font-bold underline underline-offset-2" @click.stop>política de tratamiento de datos personales</NuxtLink>
+            <a :href="PRIVACY_POLICY_URL" target="_blank" rel="noopener noreferrer" class="text-[#0C2619] font-bold underline underline-offset-2" @click.stop>política de tratamiento de datos personales</a>
             y autorizo ser contactado para recibir información. *
           </span>
         </label>
@@ -73,13 +73,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { prpLeadService } from '~/services/PrpLeadService'
 import { publicProcedureService } from '~/services/PublicProcedureService'
 import { PrpLeadError } from '~/types/prpPublic'
 
 // `codePrp` es el código externo del PRP recuperado desde Hub; la persona nunca lo ve ni lo escribe.
 const props = defineProps<{ codePrp: string }>()
+
+// Política de tratamiento de datos personales (PDF del CRM), que se abre en una pestaña nueva.
+const PRIVACY_POLICY_URL = 'https://pdtclientsolutions.com/crm-public/Politica_Tratamiento_Personal.pdf'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error'
 const status = ref<Status>('idle')
@@ -97,7 +100,8 @@ onMounted(async () => {
   }
 })
 
-const firstName = computed(() => form.fullName.trim().split(/\s+/)[0] || '')
+// Nombre completo tal como lo escribió el paciente, capturado al enviar (sin nuevas peticiones al CRM).
+const submittedName = ref('')
 
 function inputClass(error?: string) {
   return [
@@ -137,6 +141,7 @@ async function onSubmit() {
       surgery: form.surgery,
       codePrp: props.codePrp
     })
+    submittedName.value = form.fullName.trim()
     status.value = 'success'
   } catch (e) {
     errorMessage.value = e instanceof PrpLeadError && e.kind === 'validation'
