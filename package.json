@@ -12,13 +12,18 @@
   },
   "dependencies": {
     "@nuxtjs/sitemap": "^8.0.15",
+    "@tiptap/pm": "^3.31.4",
+    "@tiptap/starter-kit": "^3.31.4",
+    "@tiptap/vue-3": "^3.31.4",
     "nuxt": "latest",
+    "sanitize-html": "^2.18.0",
     "sweetalert2": "^11.26.25",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
     "@tailwindcss/vite": "latest",
+    "@types/sanitize-html": "^2.16.2",
     "tailwindcss": "latest",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.3.12"

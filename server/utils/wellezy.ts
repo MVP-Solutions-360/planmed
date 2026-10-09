@@ -89,6 +89,25 @@ export function wellezyRequest<T>(
   return call<T>(event, path, { method, token, ...options })
 }
 
+// Subida multipart (p. ej. portada de una noticia) con el Bearer de la sesión del servidor.
+export async function wellezyUpload<T>(event: H3Event, token: string, path: string, form: FormData): Promise<WellezyResult<T>> {
+  const base = baseUrl(event)
+  if (!base) return { status: 0 }
+  try {
+    const res = await $fetch.raw<T>(`${base}${path}`, {
+      method: 'POST',
+      body: form,
+      headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+      timeout: 30_000,
+      retry: 0,
+      ignoreResponseError: true
+    })
+    return { status: res.status, data: res._data as T }
+  } catch {
+    return { status: 0 }
+  }
+}
+
 // Lectura pública (sin Bearer) de la API web de Hub. El tenant lo resuelve Hub con el header
 // X-Tenant-Linea, cuyo valor sale de la configuración de Planmed (wellezyLineSlug), nunca del navegador.
 export function wellezyPublicGet<T>(event: H3Event, path: string): Promise<WellezyResult<T>> {
