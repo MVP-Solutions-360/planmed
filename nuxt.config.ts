@@ -11,6 +11,9 @@ export default defineNuxtConfig({
     // IDs de rol (users.role.id de Wellezy) autorizados para el CMS, separados por coma.
     planmedAdminRoleIds: '19',
     sessionPassword: '',
+    // Directorio persistente del contenido administrado localmente en la web (página «Nosotros»). NUXT_PLANMED_CONTENT_DIR.
+    // Vacío => `<directorio de trabajo>/.data/planmed-content`. Debe quedar FUERA de `.output/` para sobrevivir a los despliegues.
+    planmedContentDir: '',
     public: {
       appName: 'Planmed',
       localDomain: 'planmed.com',
@@ -50,10 +53,13 @@ export default defineNuxtConfig({
     ]
   },
   routeRules: {
-    '/': { prerender: true },
-    '/nosotros': { prerender: true },
-    '/simulador': { ssr: false },
-    '/recursos': { prerender: true },
+    // Estas páginas se renderizan en cada petición (SSR), NO en el build: el menú compartido (Navbar) trae datos del Hub
+    // (recomendaciones, procedimientos, visibilidad de pacientes) y un prerenderizado los congelaría con lo que hubiera al compilar.
+    '/': { ssr: true },
+    '/nosotros': { ssr: true },
+    // El simulador vive ahora dentro de /financiacion (sección #calculadora): la ruta anterior redirige.
+    '/simulador': { redirect: { to: '/financiacion', statusCode: 301 } },
+    '/recursos': { ssr: true },
     '/blog/**': { isr: 3600 },
     '/procedimientos/**': { ssr: true },
     '/prp/**': { ssr: true },

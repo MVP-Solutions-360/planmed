@@ -55,7 +55,7 @@
         </div>
         
         <div class="mt-16">
-          <NuxtLink :to="'/simulador'" class="inline-flex items-center gap-4 text-[11px] font-bold tracking-[0.15em] text-[#0C2619] uppercase hover:text-black transition-colors group">
+          <NuxtLink :to="'/financiacion#calculadora'" class="inline-flex items-center gap-4 text-[11px] font-bold tracking-[0.15em] text-[#0C2619] uppercase hover:text-black transition-colors group">
             INICIAR TU PLAN
             <span class="w-8 h-8 rounded-full border border-[#0C2619] group-hover:border-black flex items-center justify-center transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>

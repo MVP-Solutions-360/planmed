@@ -58,7 +58,7 @@
 
       <!-- Ajuste 4: CTA al final del proceso -->
       <div class="mt-16 text-center">
-        <NuxtLink :to="'/simulador'" class="inline-block bg-[#111111] text-white px-10 py-4 rounded-full font-bold text-base hover:bg-[#F7F3EE] hover:text-[#111111] border-2 border-transparent hover:border-[#111111] transition-all active:scale-95">
+        <NuxtLink :to="'/financiacion#calculadora'" class="inline-block bg-[#111111] text-white px-10 py-4 rounded-full font-bold text-base hover:bg-[#F7F3EE] hover:text-[#111111] border-2 border-transparent hover:border-[#111111] transition-all active:scale-95">
           Simular financiación
         </NuxtLink>
       </div>

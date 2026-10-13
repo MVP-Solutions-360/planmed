@@ -1,0 +1,19 @@
+<template>
+  <SitePageShell title="Información precontractual y advertencias al consumidor">
+    <article class="space-y-6 text-base md:text-[17px] font-light text-gray-700 leading-relaxed bg-white border border-[#e5e2e1] border-l-[3px] border-l-[#D3A76A] p-6 md:p-10">
+      <p>El presente documento es suministrado por <strong>PLAN MÉDICO Y QUIRÚRGICO S.A.S.</strong>, en adelante <strong>PLANMED S.A.S.</strong>, sociedad identificada con <strong>NIT. 900.794.105-6</strong>, con domicilio principal en la ciudad de Medellín y cuyos canales oficiales para la atención de Peticiones, Quejas y Reclamos se encuentran disponibles en el correo electrónico institucional: <a href="mailto:pqrs.institucional@gmail.com" class="font-semibold text-[#0C2619] underline underline-offset-4 hover:text-[#9a7a45]">pqrs.institucional@gmail.com</a>.</p>
+      <p>Al continuar con este proceso, usted reconoce y acepta que <strong>PLANMED S.A.S.</strong> es una sociedad comercial que otorga créditos exclusivamente con recursos propios y que su actividad no es la de una entidad financiera regulada, ni la de una Institución Prestadora de Servicios de Salud IPS o clínica. En consecuencia, la labor de la compañía se limita al financiamiento y no garantiza resultados médicos o quirúrgicos, los cuales son responsabilidad exclusiva del profesional que usted elija. Asimismo, comprende que el envío de su solicitud no implica una aprobación automática, pues el otorgamiento del crédito está sujeto a un riguroso análisis de riesgo por parte de nuestro departamento de cartera, el cual se reserva el derecho de negar la financiación según sus políticas internas.</p>
+      <p>El consumidor tiene el derecho de realizar el pago total o parcial de su deuda en cualquier momento, abonando únicamente los intereses corrientes o de mora que se hayan causado efectivamente hasta la fecha en que se realice el abono. En ningún caso se impondrán penalidades, multas ni sanciones por concepto de pagos anticipados. Asimismo, mediante la aceptación de estas condiciones, usted declara entender que esta operación de crédito genera obligaciones civiles de pago y la causación de intereses corrientes y de mora a la tasa máxima legal establecida por la Superintendencia Financiera de Colombia, lo que implica que el incumplimiento en el pago de las cuotas podrá derivar en reportes negativos ante centrales de riesgo como Datacrédito o CIFIN, así como en el inicio de gestiones de cobro administrativo o judicial para la recuperación de la obligación.</p>
+      <p>De igual forma, acepta que toda la publicidad visualizada en redes sociales o canales de mensajería tiene un carácter meramente informativo y comercial, por lo que no constituye una promesa de aprobación ni una garantía sobre los resultados del procedimiento a financiar. Al hacer clic en el botón de aceptación o continuar con el formulario, usted confirma que ha recibido información suficiente, veraz y oportuna, y que acepta estas condiciones de manera voluntaria antes de cualquier desembolso, entendiendo que para la formalización final se requerirá su firma física o digital certificada en el documento oficial de advertencias.</p>
+      <p class="font-semibold text-[#0C2619] border-t border-[#e5e2e1] pt-6">Si aceptas continuar, manifiestas que conoces y aceptas los términos, condiciones y advertencias aquí descritas.</p>
+    </article>
+  </SitePageShell>
+</template>
+
+<script setup lang="ts">
+// Página estática (sin administración). Texto entregado por Planmed. OJO: el modal precontractual global
+// (components/common/PrecontractualModal.vue) conserva su texto anterior (incluido otro NIT); no se modificó.
+import { useSeoMeta } from '#imports'
+
+useSeoMeta({ title: 'Información precontractual | Planmed', ogTitle: 'Información precontractual | Planmed', ogType: 'website' })
+</script>

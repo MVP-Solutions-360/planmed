@@ -36,7 +36,7 @@
         <h2 class="relative font-serif text-2xl md:text-3xl mb-4">Tu seguridad es lo más importante en cada etapa</h2>
         <p class="relative text-white/70 font-light max-w-xl mx-auto mb-8">Operarte con confianza es posible. Conoce cómo financiar tu cirugía con el respaldo de la entidad especializada en cirugía plástica.</p>
         <div class="relative flex flex-wrap justify-center gap-3">
-          <NuxtLink to="/simulador" class="px-7 py-3 text-[11px] font-bold tracking-[0.15em] uppercase bg-[#D3A76A] text-[#0C2619] hover:bg-white transition-colors">Simular financiación</NuxtLink>
+          <NuxtLink to="/financiacion#calculadora" class="px-7 py-3 text-[11px] font-bold tracking-[0.15em] uppercase bg-[#D3A76A] text-[#0C2619] hover:bg-white transition-colors">Simular financiación</NuxtLink>
           <NuxtLink to="/procedimientos" class="px-7 py-3 text-[11px] font-bold tracking-[0.15em] uppercase border border-white/40 hover:bg-white/10 transition-colors">Ver procedimientos</NuxtLink>
         </div>
       </aside>

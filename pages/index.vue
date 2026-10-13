@@ -24,7 +24,7 @@
             </p>
           </div>
 
-          <NuxtLink :to="'/simulador'" class="bg-white text-[#0C2619] px-8 py-4 font-bold text-[12px] tracking-[0.1em] uppercase hover:bg-[#D3A76A] transition-colors rounded-[4px] flex items-center gap-3 shadow-md">
+          <NuxtLink :to="'/financiacion#calculadora'" class="bg-white text-[#0C2619] px-8 py-4 font-bold text-[12px] tracking-[0.1em] uppercase hover:bg-[#D3A76A] transition-colors rounded-[4px] flex items-center gap-3 shadow-md">
             SIMULAR FINANCIACIÓN
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
           </NuxtLink>
@@ -91,7 +91,7 @@
 *El ejemplo utiliza una tasa referencial que puede variar de acuerdo con la tasa de usura vigente, fijada mensualmente.
 </div>
 <div class="mt-12 flex justify-center">
-          <NuxtLink to="/simulador" class="bg-[#0C2619] text-white px-8 py-4 font-bold text-[12px] tracking-[0.1em] uppercase hover:bg-black transition-colors rounded-[4px] flex items-center justify-center gap-3 shadow-md w-full md:w-auto">
+          <NuxtLink to="/financiacion#calculadora" class="bg-[#0C2619] text-white px-8 py-4 font-bold text-[12px] tracking-[0.1em] uppercase hover:bg-black transition-colors rounded-[4px] flex items-center justify-center gap-3 shadow-md w-full md:w-auto">
             SIMULAR FINANCIACIÓN
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
           </NuxtLink>

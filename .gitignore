@@ -9,3 +9,6 @@ node_modules
 .nuxt/
 .output/
 dist/
+
+# Contenido administrado localmente (pagina Nosotros): datos del entorno, no se versionan
+.data/

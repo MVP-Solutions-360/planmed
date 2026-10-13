@@ -24,8 +24,20 @@
         </div>
         <NuxtLink v-else to="/procedimientos" class="text-[11px] font-bold tracking-[0.1em] text-[#4c4546] hover:text-black transition-colors uppercase">PROCEDIMIENTOS</NuxtLink>
         <NuxtLink to="/noticias" class="text-[11px] font-bold tracking-[0.1em] text-[#4c4546] hover:text-black transition-colors uppercase">NOTICIAS</NuxtLink>
-        <NuxtLink to="/recursos" class="text-[11px] font-bold tracking-[0.1em] text-[#4c4546] hover:text-black transition-colors uppercase">RECURSOS</NuxtLink>
-        <NuxtLink to="/nosotros" class="text-[11px] font-bold tracking-[0.1em] text-[#4c4546] hover:text-black transition-colors uppercase">NOSOTROS</NuxtLink>
+
+        <!-- PLANMED: Nosotros, páginas institucionales y Recursos en un solo desplegable -->
+        <div class="relative group" data-testid="planmed-menu" @focusin="openMenu = 'PLANMED'" @focusout="openMenu = null">
+          <button type="button" aria-haspopup="true" :aria-expanded="openMenu === 'PLANMED' ? 'true' : 'false'" class="text-[11px] font-bold tracking-[0.1em] text-[#4c4546] group-hover:text-black transition-colors uppercase flex items-center gap-1 whitespace-nowrap">
+            PLANMED
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <div class="absolute left-0 top-full pt-4 hidden group-hover:block" :class="{ '!block': openMenu === 'PLANMED' }">
+            <div class="bg-white shadow-lg border border-[#e5e2e1] py-2 w-[280px]" data-testid="planmed-list">
+              <NuxtLink v-for="item in planmedItems" :key="item.to" :to="item.to" class="block px-6 py-3 text-[11px] font-bold tracking-[0.1em] text-[#4c4546] hover:text-black hover:bg-[#fcf9f8] uppercase transition-colors leading-snug">{{ item.label }}</NuxtLink>
+            </div>
+          </div>
+        </div>
+
 
         <div v-for="menu in menus" :key="menu.label" class="relative group" @focusin="openMenu = menu.label" @focusout="openMenu = null">
           <NuxtLink :to="menu.items[0]?.to || menu.to" class="text-[11px] font-bold tracking-[0.1em] text-[#4c4546] group-hover:text-black transition-colors uppercase flex items-center gap-1 whitespace-nowrap">
@@ -52,7 +64,7 @@
           </div>
         </div>
         
-        <NuxtLink to="/simulador" class="bg-[#0C2619] text-white px-4 py-2.5 font-bold text-[10px] tracking-[0.15em] uppercase hover:bg-black transition-colors rounded-[2px] shadow-sm ml-4 border border-[#0C2619]">
+        <NuxtLink to="/financiacion#calculadora" class="bg-[#0C2619] text-white px-4 py-2.5 font-bold text-[10px] tracking-[0.15em] uppercase hover:bg-black transition-colors rounded-[2px] shadow-sm ml-4 border border-[#0C2619]">
           SIMULAR FINANCIACIÓN
         </NuxtLink>
         
@@ -98,6 +110,17 @@
           <NuxtLink v-else :to="link.to" @click="closeMenu" class="py-3.5 text-[#4c4546] font-bold text-sm tracking-widest uppercase break-words">{{ link.label }}</NuxtLink>
         </template>
 
+        <!-- Planmed -->
+        <details class="group border-t border-[#e5e2e1]" data-testid="planmed-menu-mobile">
+          <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer py-3.5 flex items-center justify-center gap-2 text-[#4c4546] font-bold text-sm tracking-widest uppercase select-none">
+            <span>Planmed</span>
+            <svg class="w-3 h-3 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+          </summary>
+          <div class="flex flex-col pb-2">
+            <NuxtLink v-for="item in planmedItems" :key="item.to" :to="item.to" @click="closeMenu" class="py-2.5 text-[#4c4546] font-medium text-xs tracking-widest uppercase break-words">{{ item.label }}</NuxtLink>
+          </div>
+        </details>
+
         <!-- Nuestros pacientes / Recomendaciones -->
         <details v-for="menu in menus" :key="menu.label" class="group border-t border-[#e5e2e1] first-of-type:mt-2">
           <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer py-3.5 flex items-center justify-center gap-2 text-[#4c4546] font-bold text-sm tracking-widest uppercase select-none">
@@ -121,7 +144,7 @@
           </div>
         </details>
 
-        <NuxtLink to="/simulador" @click="closeMenu" class="bg-[#0C2619] text-white px-8 py-3.5 mt-6 font-bold text-xs tracking-widest uppercase shadow-md border border-[#0C2619]">
+        <NuxtLink to="/financiacion#calculadora" @click="closeMenu" class="bg-[#0C2619] text-white px-8 py-3.5 mt-6 font-bold text-xs tracking-widest uppercase shadow-md border border-[#0C2619]">
           SIMULAR FINANCIACIÓN
         </NuxtLink>
         <NuxtLink to="/admin/login" @click="closeMenu" class="mt-4 text-[#0C2619] font-bold text-xs tracking-widest uppercase border border-[#0C2619] px-8 py-3.5 flex items-center justify-center gap-2">
@@ -149,9 +172,19 @@ const menuButton = ref(null)
 const mainLinks = [
   { to: '/', label: 'Inicio' },
   { to: '/procedimientos', label: 'Procedimientos' },
-  { to: '/noticias', label: 'Noticias' },
-  { to: '/recursos', label: 'Recursos' },
-  { to: '/nosotros', label: 'Nosotros' }
+  { to: '/noticias', label: 'Noticias' }
+]
+
+// Desplegable «Planmed» (escritorio y móvil). Las páginas informativas viven en pages/*.vue; Recursos se movió aquí desde el menú principal.
+const planmedItems = [
+  { to: '/nosotros', label: 'Nosotros' },
+  { to: '/quienes-somos', label: '¿Quiénes somos?' },
+  { to: '/servicios', label: 'Servicios' },
+  { to: '/clinicas-aliadas', label: 'Clínicas aliadas' },
+  { to: '/estudio-de-creditos', label: 'Estudio de créditos' },
+  { to: '/informacion-precontractual', label: 'Información precontractual y advertencias al consumidor' },
+  { to: '/politica-datos-personales', label: 'Políticas y protección de datos personales' },
+  { to: '/recursos', label: 'Recursos' }
 ]
 
 // Cierra el menú móvil (al navegar, con Escape o al volver a escritorio) y, con Escape, devuelve el foco al botón.

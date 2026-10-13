@@ -87,7 +87,7 @@ export function useSimulator() {
       
       currentQuote.value = quote;
       
-      trackingService.track('SIMULATOR_CALC', '/simulador', {
+      trackingService.track('SIMULATOR_CALC', '/financiacion', {
         intent: {
           item_name: procedure.value,
           financial_amount: amount.value,

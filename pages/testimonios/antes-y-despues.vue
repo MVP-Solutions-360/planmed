@@ -57,7 +57,7 @@
           <div>
             <h2 class="font-bold text-black text-lg mb-3">Da el primer paso hoy</h2>
             <p class="mb-6">Explora nuestra galería de «Antes y después» y visualiza cómo podría ser tu transformación. Contáctanos para una consulta y descubre cómo nuestra financiación flexible puede ayudarte a alcanzar tus objetivos estéticos.</p>
-            <NuxtLink to="/simulador" class="inline-block px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase bg-[#0C2619] text-white border border-[#0C2619] hover:bg-black transition-colors">
+            <NuxtLink to="/financiacion#calculadora" class="inline-block px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase bg-[#0C2619] text-white border border-[#0C2619] hover:bg-black transition-colors">
               Simular financiación
             </NuxtLink>
           </div>

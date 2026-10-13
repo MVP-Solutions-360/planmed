@@ -74,7 +74,7 @@
             ¿Ya sabes qué procedimiento deseas? Utiliza nuestro simulador para estructurar cuotas que se adapten a tu capacidad financiera.
           </p>
         </div>
-        <NuxtLink to="/simulador" class="flex-shrink-0 bg-white text-[#0C2619] px-10 py-5 font-bold text-xs tracking-widest uppercase hover:bg-gray-100 transition-colors active:scale-95 text-center w-full md:w-auto">
+        <NuxtLink to="/financiacion#calculadora" class="flex-shrink-0 bg-white text-[#0C2619] px-10 py-5 font-bold text-xs tracking-widest uppercase hover:bg-gray-100 transition-colors active:scale-95 text-center w-full md:w-auto">
           Ir al Simulador
         </NuxtLink>
       </div>

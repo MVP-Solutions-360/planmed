@@ -40,7 +40,7 @@
               La viabilidad de esta intervención médica será determinada por un profesional certificado. Nuestro rol es brindarte la tranquilidad financiera para que puedas enfocarte en tu bienestar.
             </p>
             <NuxtLink 
-              :to="{ path: '/simulador', query: { procedureId: procedure.id } }" 
+              :to="{ path: '/financiacion', query: { procedureId: procedure.id }, hash: '#calculadora' }" 
               class="w-full sm:w-auto inline-flex justify-center bg-[#0C2619] text-white px-8 py-4 font-bold text-[11px] tracking-[0.15em] uppercase hover:bg-black transition-colors"
             >
               SIMULAR FINANCIACIÓN

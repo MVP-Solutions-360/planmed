@@ -55,7 +55,7 @@
         <p class="text-gray-700 font-light leading-relaxed mb-6">Lo que nos diferencia es que no somos una clínica ni un banco: somos la entidad especializada en préstamos para cirugía plástica en Colombia. Financiamos más del 50% del valor total y ofrecemos planes de pago de hasta 72 meses.</p>
         <ul class="space-y-2 text-gray-700 font-light">
           <li>📌 <NuxtLink to="/recursos" class="underline hover:text-[#0C2619]">Conoce cómo funciona nuestro crédito quirúrgico</NuxtLink></li>
-          <li>📌 <NuxtLink to="/simulador" class="underline hover:text-[#0C2619]">Agenda tu valoración inicial gratuita</NuxtLink></li>
+          <li>📌 <NuxtLink to="/financiacion#calculadora" class="underline hover:text-[#0C2619]">Agenda tu valoración inicial gratuita</NuxtLink></li>
         </ul>
       </section>
 
@@ -81,7 +81,7 @@
             class="px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase border border-[#0C2619] text-[#0C2619] hover:bg-[#0C2619] hover:text-white transition-colors">
             {{ s.label }}
           </a>
-          <NuxtLink to="/simulador" class="px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase bg-[#0C2619] text-white border border-[#0C2619] hover:bg-black transition-colors">
+          <NuxtLink to="/financiacion#calculadora" class="px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase bg-[#0C2619] text-white border border-[#0C2619] hover:bg-black transition-colors">
             Simular financiación
           </NuxtLink>
         </div>

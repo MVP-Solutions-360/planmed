@@ -70,7 +70,7 @@ defineProps({
           </div>
           
           <div class="pt-6 flex flex-col sm:flex-row flex-wrap gap-4">
-            <NuxtLink :to="'/simulador'" class="w-full sm:w-auto bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-[#fdd798] transition-all shadow-md active:scale-95 text-center">
+            <NuxtLink :to="'/financiacion#calculadora'" class="w-full sm:w-auto bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-[#fdd798] transition-all shadow-md active:scale-95 text-center">
               {{ 'Simular financiación' }}
             </NuxtLink>
             <NuxtLink :to="'/#aliados'" class="w-full sm:w-auto border-2 border-white/30 text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:text-black transition-all active:scale-95 text-center">

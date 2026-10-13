@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex font-sans text-gray-900">
+  <div class="h-screen overflow-hidden bg-gray-50 flex font-sans text-gray-900">
     
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-[#0C2619] text-white flex flex-col hidden md:flex shrink-0 shadow-xl z-20 relative">
+    <aside class="w-64 bg-[#0C2619] text-white flex-col hidden md:flex shrink-0 shadow-xl z-20 relative h-full overflow-y-auto">
       <div class="p-8 border-b border-white/10">
         <h1 class="font-serif text-3xl font-medium tracking-tight text-white uppercase">Planmed</h1>
         <p class="text-[10px] text-[#D3A76A] tracking-[0.2em] font-bold uppercase mt-2">Panel Administrativo</p>
@@ -30,6 +30,14 @@
           <NuxtLink to="/admin/recomendaciones" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Recomendaciones
           </NuxtLink>
+          <!-- Submenú «Nosotros»: solo las páginas administrables -->
+          <button type="button" class="w-full flex items-center justify-between px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" :class="isPagesRoute ? 'text-[#D3A76A]' : ''" :aria-expanded="pagesOpen ? 'true' : 'false'" aria-controls="admin-pages-submenu" @click="pagesOpen = !pagesOpen">
+            <span>Nosotros</span>
+            <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': pagesOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <div v-show="pagesOpen" id="admin-pages-submenu" class="ml-3 pl-3 border-l border-white/10 space-y-1 mt-1">
+            <NuxtLink v-for="l in pageLinks" :key="l.to" :to="l.to" class="block px-4 py-2 rounded-lg text-sm transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">{{ l.label }}</NuxtLink>
+          </div>
           <NuxtLink to="/admin/micrositios" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Micrositios
           </NuxtLink>
@@ -48,7 +56,7 @@
     <!-- MOBILE OVERLAY (Solo estructural para futuro) -->
     <!-- En esta fase priorizamos Desktop pero dejamos estructura base -->
 
-    <div class="flex-grow flex flex-col min-w-0">
+    <div class="flex-grow flex flex-col min-w-0 min-h-0">
       
       <!-- TOPBAR -->
       <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0 z-10 shadow-sm">
@@ -78,7 +86,7 @@
       </header>
 
       <!-- MAIN CONTENT -->
-      <main class="flex-grow p-8 overflow-y-auto">
+      <main class="flex-grow min-h-0 p-8 overflow-y-auto">
         <div class="max-w-6xl mx-auto">
           <slot />
         </div>
@@ -89,11 +97,21 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from '#imports'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from '#imports'
 import { authService } from '~/services/AuthService'
 
 const router = useRouter()
 const user = authService.getUser()
+const route = useRoute()
+
+// Submenú «Nosotros»: solo páginas con pantalla de edición en este panel.
+const pageLinks = [
+  { label: 'Nosotros', to: '/admin/nosotros' },
+  { label: 'Clínicas aliadas', to: '/admin/paginas/clinicas-aliadas' }
+]
+const isPagesRoute = computed(() => route.path.startsWith('/admin/nosotros') || route.path.startsWith('/admin/paginas'))
+const pagesOpen = ref(isPagesRoute.value)
 
 async function handleLogout() {
   await authService.logout()

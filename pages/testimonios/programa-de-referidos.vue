@@ -8,9 +8,11 @@
 
       <CommonHubUnavailable v-if="error" :retrying="status === 'pending'" @retry="refresh()" />
       <CommonRichContent v-else-if="referral.content" :html="referral.content" class="text-gray-700 font-light leading-relaxed" />
-      <p v-else-if="loaded" class="text-center text-gray-500 font-light py-16 border border-dashed border-gray-300">
-        Pronto publicaremos aquí la información del programa de referidos.
-      </p>
+      <!-- Sin texto administrado en Hub: se muestra el contenido del programa entregado por Planmed (estático). -->
+      <ReferralProgramContent v-else-if="loaded" />
+
+      <!-- Formulario (maqueta, aún no funcional; destino futuro: CRM médico). Se muestra con el texto de Hub o con el estático, no en error. -->
+      <ReferralForm v-if="loaded && !error" />
     </div>
   </div>
 </template>

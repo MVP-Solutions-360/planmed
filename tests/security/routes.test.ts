@@ -36,10 +36,14 @@ before(async () => {
   g.wellezyRequest = async (...args) => { hubCalls.push(args); return { status: 0 } }
   g.wellezyUpload = async (...args) => { hubCalls.push(args); return { status: 0 } }
   g.wellezyPublicGet = async (...args) => { hubCalls.push(args); return { status: 0 } }
+  g.wellezyMe = async (...args) => { hubCalls.push(args); return { status: 0 } }
   g.wellezyLogin = async (...args) => { hubCalls.push(args); return { status: 0 } }
+  g.isAuthorizedUser = () => false
+  g.MSG_FORBIDDEN = 'forbidden'
+  g.MSG_UNAVAILABLE = 'unavailable'
   g.wellezyLogout = async (...args) => { hubCalls.push(args); return 0 }
 
-  for (const rel of ['server/utils/origin.ts', 'server/utils/news.ts', 'server/utils/procedures.ts', 'server/utils/prp.ts', 'server/utils/patients.ts', 'server/utils/recommendations.ts']) {
+  for (const rel of ['server/utils/origin.ts', 'server/utils/news.ts', 'server/utils/procedures.ts', 'server/utils/prp.ts', 'server/utils/patients.ts', 'server/utils/recommendations.ts', 'shared/utils/aboutContent.ts', 'server/utils/aboutStore.ts', 'shared/utils/sitePages.ts', 'server/utils/sitePages.ts', 'shared/utils/clinics.ts', 'server/utils/clinics.ts']) {
     Object.assign(g, await imp(rel))
   }
 
@@ -59,9 +63,9 @@ const loggedIn = { token: 'hub-secret-token', user: { id: 1, name: 'U', email: '
 
 describe('inventario', () => {
   test('se auditan todas las rutas admin (no hay ninguna sin cubrir)', () => {
-    assert.equal(handlers.length, 23, `rutas auditadas: ${handlers.length} (si se agrega una ruta admin, esta matriz debe cubrirla)`)
+    assert.equal(handlers.length, 30, `rutas auditadas: ${handlers.length} (si se agrega una ruta admin, esta matriz debe cubrirla)`)
     const names = handlers.map(h => h.rel)
-    for (const must of ['server/api/admin/recommendations/[slug].put.ts', 'server/api/admin/patient-section.put.ts', 'server/api/admin/procedures/index.post.ts', 'server/api/admin/news/index.post.ts', 'server/api/admin/prp/index.post.ts', 'server/api/auth/login.post.ts']) {
+    for (const must of ['server/api/admin/recommendations/[slug].put.ts', 'server/api/admin/about.put.ts', 'server/api/admin/pages/[slug].put.ts', 'server/api/admin/clinics.put.ts', 'server/api/admin/clinics/upload.post.ts', 'server/api/admin/patient-section.put.ts', 'server/api/admin/procedures/index.post.ts', 'server/api/admin/news/index.post.ts', 'server/api/admin/prp/index.post.ts', 'server/api/auth/login.post.ts']) {
       assert.ok(names.includes(must), must)
     }
   })
