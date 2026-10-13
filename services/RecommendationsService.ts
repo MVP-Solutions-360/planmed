@@ -23,6 +23,10 @@ export class RecommendationsService {
     return this.provider.savePage(page)
   }
 
+  setPublished(slug: string, published: boolean): Promise<RecommendationPage> {
+    return this.provider.setPublished(slug, published)
+  }
+
   createPage(data: { title: string; group: RecommendationGroup }): Promise<RecommendationPage> {
     return this.provider.createPage(data)
   }

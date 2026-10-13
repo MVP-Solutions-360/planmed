@@ -14,8 +14,11 @@ const GENERIC_ERROR = 'No fue posible conectar con Wellezy Hub. Intenta nuevamen
 
 export function toError(e: any): Error {
   const message = e?.data?.data?.message || e?.data?.message
-  const error = new Error(typeof message === 'string' && message ? message : GENERIC_ERROR) as Error & { statusCode?: number }
+  const error = new Error(typeof message === 'string' && message ? message : GENERIC_ERROR) as Error & { statusCode?: number, fieldErrors?: Record<string, unknown> }
   error.statusCode = e?.statusCode ?? e?.response?.status
+  // Errores de validación por campo que devuelve el Hub (422); la pantalla los muestra junto a la acción que falló.
+  const fieldErrors = e?.data?.data?.errors ?? e?.data?.errors
+  if (fieldErrors && typeof fieldErrors === 'object') error.fieldErrors = fieldErrors
   return error
 }
 
@@ -54,6 +57,15 @@ export class HubRecommendationsProvider implements RecommendationsProvider {
     if (page.image === '' || page.image.startsWith('data:')) body.image = page.image
     try {
       return await this.request<RecommendationPage>(`/api/admin/recommendations/${encodeURIComponent(page.slug)}`, { method: 'PUT', body })
+    } catch (e) {
+      throw toError(e)
+    }
+  }
+
+  /** Publica u oculta: PUT parcial con SOLO `published` (el contenido guardado no se reenvía ni se modifica). */
+  async setPublished(slug: string, published: boolean): Promise<RecommendationPage> {
+    try {
+      return await this.request<RecommendationPage>(`/api/admin/recommendations/${encodeURIComponent(slug)}`, { method: 'PUT', body: { published } })
     } catch (e) {
       throw toError(e)
     }

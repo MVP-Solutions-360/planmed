@@ -1,265 +1,302 @@
 <template>
   <div class="pb-24">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-      <div>
-        <h2 class="text-3xl font-serif text-[#0C2619] mb-1 uppercase">Recomendaciones</h2>
-        <p class="text-gray-500 font-light">Edita, agrega o elimina las páginas de recomendaciones del sitio.</p>
-      </div>
+    <div class="mb-8">
+      <h2 class="text-3xl font-serif text-[#0C2619] mb-1 uppercase">Recomendaciones</h2>
+      <p class="text-gray-500 font-light">Administra las recomendaciones generales y el contenido de cada procedimiento. Cada elemento se guarda por separado.</p>
+    </div>
+
+    <!-- Selector de sección (mismo estilo que «Nuestros Pacientes») -->
+    <div class="flex flex-wrap gap-2 mb-8 border-b border-gray-200" role="tablist">
       <button
-        @click="save"
-        :disabled="isSaving || !loaded || !selection || !canSave"
-        class="bg-[#0C2619] hover:bg-[#153a28] text-white px-8 py-3 rounded-lg font-bold text-xs tracking-widest uppercase transition-colors disabled:opacity-50 shadow-lg"
+        v-for="t in tabs" :key="t.key" type="button" role="tab" :aria-selected="state.tab === t.key" @click="ctl.selectTab(t.key)"
+        class="px-5 py-3 text-xs font-bold tracking-widest uppercase border-b-2 -mb-px transition-colors"
+        :class="state.tab === t.key ? 'border-[#0C2619] text-[#0C2619]' : 'border-transparent text-gray-400 hover:text-gray-700'"
       >
-        {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
+        {{ t.label }}
       </button>
     </div>
 
-    <div v-if="!loaded" class="text-gray-400 text-sm">Cargando...</div>
+    <div v-if="!state.loaded" class="text-gray-400 text-sm">Cargando...</div>
 
-    <div v-else class="grid lg:grid-cols-[300px_1fr] gap-6 items-start">
-
-      <!-- Navegación por grupos -->
-      <aside class="bg-white border border-gray-200 rounded-xl shadow-sm p-3 lg:sticky lg:top-4 space-y-5">
-        <section v-for="g in groups" :key="g.key">
-          <div class="flex items-center justify-between px-3 pt-2 pb-2">
-            <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">{{ g.label }}</p>
-            <button type="button" @click="addPage(g.key)" class="text-[10px] font-bold tracking-widest uppercase text-[#0C2619] hover:text-[#D3A76A]" :title="`Agregar a ${g.label}`">+ Agregar</button>
-          </div>
-
-          <!-- Procedimientos (solo cuidados y revisión): el texto vive en cada procedimiento -->
-          <template v-if="g.key !== 'general'">
-            <button
-              v-for="p in procedures" :key="`proc-${g.key}-${p.slug}`" type="button" @click="select({ type: 'procedure', group: g.key, slug: p.slug })"
-              class="item" :class="isSelected('procedure', g.key, p.slug) ? 'item-active' : 'item-idle'"
-            >
-              <span>{{ RECOMMENDATION_KINDS[g.key].itemLabel(p.name) }}</span>
-              <span class="w-2 h-2 rounded-full shrink-0" :class="hasText(p, g.key) ? 'bg-emerald-400' : 'bg-gray-300'" :title="hasText(p, g.key) ? 'Con texto (aparece en el menú)' : 'Sin texto (no aparece en el menú)'"></span>
-            </button>
-          </template>
-
-          <button
-            v-for="p in pagesOf(g.key)" :key="p.slug" type="button" @click="select({ type: 'page', group: g.key, slug: p.slug })"
-            class="item" :class="isSelected('page', g.key, p.slug) ? 'item-active' : 'item-idle'"
-          >
-            <span>{{ p.menuLabel }}</span>
-            <span class="w-2 h-2 rounded-full shrink-0" :class="p.published ? 'bg-emerald-400' : 'bg-gray-300'" :title="p.published ? 'Publicada' : 'Oculta'"></span>
-          </button>
-        </section>
-        <p class="px-3 pb-1 text-[10px] text-gray-400 leading-relaxed">● verde: visible en el menú. Gris: oculta o sin texto.</p>
-      </aside>
-
-      <!-- Editor de página (fija o creada desde el panel) -->
-      <div v-if="currentPage" class="space-y-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <label class="flex items-center gap-3 cursor-pointer w-fit">
-              <input type="checkbox" v-model="currentPage.published" class="sr-only peer" />
-              <span class="w-11 h-6 rounded-full bg-gray-300 peer-checked:bg-[#0C2619] relative transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5 after:bg-white after:rounded-full after:transition-transform peer-checked:after:translate-x-5"></span>
-              <span class="text-sm font-bold text-gray-700">{{ currentPage.published ? 'Publicada' : 'Oculta al público' }}</span>
-            </label>
-            <p class="text-xs text-gray-400 mt-1">Al ocultarla, la página deja de mostrarse en el sitio y desaparece del menú. El contenido se conserva. Recuerda guardar los cambios.</p>
-          </div>
-          <button v-if="currentPage.custom" type="button" @click="removePage(currentPage)" class="text-xs font-bold text-gray-400 hover:text-red-600 uppercase tracking-wider">Eliminar página</button>
+    <template v-else>
+      <!-- ───────────── Pestaña A: Recomendaciones generales ───────────── -->
+      <section v-if="state.tab === 'general'">
+        <div v-if="state.pagesError" class="mb-6 text-sm rounded-lg border px-4 py-3" :class="state.pagesError.forbidden ? 'text-amber-800 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200'" role="alert">
+          <p class="font-semibold">{{ state.pagesError.forbidden ? 'No tienes acceso a las recomendaciones generales.' : 'No se pudieron cargar las recomendaciones generales.' }}</p>
+          <p class="mt-1">{{ state.pagesError.message }}</p>
+          <p class="mt-1 text-xs opacity-80">Esto no significa que no existan: no se pudo consultar la lista.</p>
+          <button type="button" @click="ctl.reload()" class="mt-3 text-xs font-bold tracking-widest uppercase underline">Reintentar</button>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-8 space-y-6">
-          <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Título de la página *</label>
-            <input v-model="currentPage.title" type="text" class="field" />
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Video de YouTube (opcional)</label>
-            <input v-model="currentPage.videoUrl" type="url" class="field" placeholder="https://www.youtube.com/watch?v=..." />
-            <p class="text-[10px] text-gray-500 mt-2">Se muestra debajo del título. Admite youtube.com, youtu.be y Shorts.</p>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Imagen (opcional)</label>
-            <div class="flex items-start gap-4">
-              <label class="block w-40 aspect-[4/3] border-2 border-dashed border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-[#0C2619] bg-gray-50 relative">
-                <img v-if="currentPage.image" :src="currentPage.image" alt="Imagen" class="w-full h-full object-cover" />
-                <span v-else class="absolute inset-0 flex items-center justify-center text-xs text-gray-400 text-center px-3">Haz clic para subir</span>
-                <input type="file" accept="image/*" class="hidden" @change="onImage" />
-              </label>
-              <button v-if="currentPage.image" type="button" @click="currentPage.image = ''" class="text-xs font-bold text-gray-400 hover:text-red-600 uppercase tracking-wider">Quitar imagen</button>
+        <div v-else class="grid lg:grid-cols-[320px_1fr] gap-6 items-start">
+          <aside class="bg-white border border-gray-200 rounded-xl shadow-sm p-3 lg:sticky lg:top-4 space-y-3">
+            <div class="flex items-center justify-between px-3 pt-2">
+              <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">Páginas generales</p>
+              <button type="button" @click="ctl.createGeneralPage()" class="text-[10px] font-bold tracking-widest uppercase text-[#0C2619] hover:text-[#D3A76A]">+ Agregar</button>
             </div>
-            <p class="text-[10px] text-gray-500 mt-2">Se muestra a un costado del texto en pantallas grandes.</p>
-          </div>
+            <div v-if="state.errors['create']" class="mx-3"><AdminRecommendationsErrorNotice :error="state.errors['create']" @dismiss="ctl.clearError('create')" /></div>
+            <ul class="space-y-1">
+              <li v-for="p in classification.general" :key="p.slug">
+                <button
+                  type="button" @click="ctl.selectGeneralPage(p.slug)" class="w-full text-left px-3 py-3 rounded-lg transition-colors"
+                  :class="state.generalSlug === p.slug ? 'bg-[#D3A76A] text-[#0C2619]' : 'hover:bg-gray-50 text-gray-700'"
+                >
+                  <span class="block text-sm font-semibold break-words">{{ p.menuLabel || p.title }}</span>
+                  <span class="mt-1.5 flex flex-wrap gap-1.5">
+                    <AdminRecommendationsStatusBadge :label="p.published ? 'Publicada' : 'Oculta'" :tone="p.published ? 'green' : 'gray'" />
+                    <AdminRecommendationsStatusBadge v-if="ctl.isDirty(`page:${p.slug}`)" label="Sin guardar" tone="amber" />
+                  </span>
+                </button>
+              </li>
+              <li v-if="!classification.general.length" class="px-3 py-6 text-sm text-gray-400 text-center">Aún no hay recomendaciones generales. Usa «+ Agregar».</li>
+            </ul>
+            <p class="px-3 pb-1 text-[10px] text-gray-400 leading-relaxed">Aquí solo están las páginas que no dependen de un procedimiento. Las de cada cirugía están en «Contenido por procedimiento».</p>
+          </aside>
 
           <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Contenido</label>
-            <AdminRichTextEditor :key="currentPage.slug" v-model="currentPage.content" min-height="22rem" />
-            <p class="text-[10px] text-gray-500 mt-2">Usa listas para que se vean con los ✓ del diseño. También puedes usar títulos, negrita, cursiva y enlaces.</p>
+            <AdminRecommendationsPageEditor
+              v-if="generalElement && generalElement.type === 'page' && draftOf(generalElement.key)"
+              :key="generalElement.key"
+              :page="generalElement.page" :draft="(draftOf(generalElement.key) as PageDraft)" :dirty="ctl.isDirty(generalElement.key)"
+              :saving="!!state.saving[generalElement.key]" :publishing="!!state.publishing[generalElement.key]"
+              :error="state.errors[generalElement.key]" :saved-at="state.savedAt[generalElement.key]"
+              :view-url="pagePublicUrl(generalElement.page)" :can-delete="generalElement.page.custom" eyebrow="Recomendación general"
+              @save="ctl.save(generalElement.key)" @dismiss-error="ctl.clearError(generalElement.key)" @publish="ctl.setPublished(generalElement.page.slug, true)"
+              @unpublish="ctl.setPublished(generalElement.page.slug, false)" @delete="ctl.deletePage(generalElement.page.slug)"
+            />
+            <p v-else class="text-gray-400 text-sm">Selecciona una recomendación de la lista.</p>
           </div>
         </div>
-      </div>
-
-      <!-- Editor de texto de un procedimiento -->
-      <section v-else-if="currentProcedure" class="bg-white border border-gray-200 rounded-xl shadow-sm p-8 space-y-4">
-        <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
-          <h3 class="text-xs font-bold tracking-widest text-[#0C2619] uppercase">{{ RECOMMENDATION_KINDS[selection!.group as RecommendationKind].title(currentProcedure.name) }}</h3>
-          <NuxtLink :to="`/admin/procedimientos/${currentProcedure.slug}`" class="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-[#0C2619]">Editar procedimiento →</NuxtLink>
-        </div>
-        <p v-if="currentProcedure.editable === false" class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
-          Este es un procedimiento maestro del Hub: su contenido es global y no se edita desde Planmed.
-        </p>
-        <AdminRichTextEditor :key="`${selection!.group}-${currentProcedure.slug}`" v-model="currentProcedure[procedureField]" min-height="22rem" :readonly="currentProcedure.editable === false" />
-        <p class="text-[10px] text-gray-500">Si lo dejas vacío, este procedimiento no aparece en el submenú ni tiene página pública. Usa listas para que se vean con los ✓ del diseño.</p>
       </section>
 
-      <p v-else class="text-gray-400 text-sm">Selecciona una página de la lista.</p>
-    </div>
+      <!-- ───────────── Pestaña B: Contenido por procedimiento ───────────── -->
+      <section v-else>
+        <div v-if="state.proceduresError" class="mb-6 text-sm rounded-lg border px-4 py-3" :class="state.proceduresError.forbidden ? 'text-amber-800 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200'" role="alert">
+          <p class="font-semibold">No se pudieron cargar los procedimientos.</p>
+          <p class="mt-1">{{ state.proceduresError.message }}</p>
+          <button type="button" @click="ctl.reload()" class="mt-3 text-xs font-bold tracking-widest uppercase underline">Reintentar</button>
+        </div>
+        <div v-if="state.pagesError" class="mb-6 text-sm rounded-lg border px-4 py-3 text-amber-800 bg-amber-50 border-amber-200" role="alert">
+          <p class="font-semibold">No se pudieron cargar las páginas del CMS.</p>
+          <p class="mt-1">{{ state.pagesError.message }}</p>
+          <p class="mt-1 text-xs">Sin ellas no se puede saber qué contenido se publica de cada procedimiento, por eso la edición está bloqueada.</p>
+          <button type="button" @click="ctl.reload()" class="mt-3 text-xs font-bold tracking-widest uppercase underline">Reintentar</button>
+        </div>
+
+        <div class="grid lg:grid-cols-[340px_1fr] gap-6 items-start">
+          <div class="space-y-6">
+            <AdminRecommendationsProcedurePicker :rows="pickerRows" :selected="state.unassociatedSlug ? null : state.procedureSlug" @select="ctl.selectProcedure" />
+
+            <!-- Solo existe si realmente hay páginas sin procedimiento asociado -->
+            <aside v-if="hasUnassociated(classification)" class="bg-white border border-gray-200 rounded-xl shadow-sm p-3 space-y-2">
+              <p class="px-2 pt-1 text-[10px] font-bold tracking-widest text-gray-400 uppercase">Sin asociación ({{ classification.unassociated.length }})</p>
+              <p class="px-2 text-[10px] text-gray-400 leading-relaxed">Páginas de cuidados o revisión que no están vinculadas a ningún procedimiento visible. No sustituyen el texto de ninguna cirugía.</p>
+              <ul class="space-y-1">
+                <li v-for="p in classification.unassociated" :key="p.slug">
+                  <button
+                    type="button" @click="ctl.selectUnassociated(p.slug)" class="w-full text-left px-3 py-3 rounded-lg transition-colors"
+                    :class="state.unassociatedSlug === p.slug ? 'bg-[#D3A76A] text-[#0C2619]' : 'hover:bg-gray-50 text-gray-700'"
+                  >
+                    <span class="block text-sm font-semibold break-words">{{ p.title }}</span>
+                    <span class="mt-1.5 flex flex-wrap gap-1.5">
+                      <AdminRecommendationsStatusBadge :label="KIND_LABEL[p.group as RecommendationKindKey] ?? 'General'" tone="gray" />
+                      <AdminRecommendationsStatusBadge :label="p.published ? 'Publicada' : 'Oculta'" :tone="p.published ? 'green' : 'gray'" />
+                      <AdminRecommendationsStatusBadge v-if="ctl.isDirty(`page:${p.slug}`)" label="Sin guardar" tone="amber" />
+                    </span>
+                  </button>
+                </li>
+              </ul>
+            </aside>
+          </div>
+
+          <div class="space-y-6">
+            <!-- Página sin asociación seleccionada -->
+            <template v-if="state.unassociatedSlug && procElement && procElement.type === 'page'">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-sm text-gray-500">Página sin procedimiento asociado.</p>
+                <button type="button" @click="ctl.clearUnassociated()" class="text-[11px] font-bold tracking-widest uppercase text-[#0C2619] hover:text-[#D3A76A]">← Volver a procedimientos</button>
+              </div>
+              <AdminRecommendationsPageEditor
+                v-if="draftOf(procElement.key)" :key="procElement.key"
+                :page="procElement.page" :draft="(draftOf(procElement.key) as PageDraft)" :dirty="ctl.isDirty(procElement.key)"
+                :saving="!!state.saving[procElement.key]" :publishing="!!state.publishing[procElement.key]"
+                :error="state.errors[procElement.key]" :saved-at="state.savedAt[procElement.key]"
+                :view-url="pagePublicUrl(procElement.page)" :can-delete="procElement.page.custom" eyebrow="Sin asociación"
+                @save="ctl.save(procElement.key)" @dismiss-error="ctl.clearError(procElement.key)" @publish="ctl.setPublished(procElement.page.slug, true)"
+                @unpublish="ctl.setPublished(procElement.page.slug, false)" @delete="ctl.deletePage(procElement.page.slug)"
+              />
+            </template>
+
+            <!-- Procedimiento seleccionado -->
+            <template v-else-if="procedure">
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Procedimiento</p>
+                <h3 class="text-2xl font-serif text-[#0C2619] break-words">{{ procedure.name }}</h3>
+                <div class="mt-5 flex flex-wrap gap-2 border-b border-gray-200" role="tablist">
+                  <button
+                    v-for="k in kinds" :key="k" type="button" role="tab" :aria-selected="state.kind === k" @click="ctl.selectKind(k)"
+                    class="px-4 py-2.5 text-xs font-bold tracking-widest uppercase border-b-2 -mb-px transition-colors"
+                    :class="state.kind === k ? 'border-[#0C2619] text-[#0C2619]' : 'border-transparent text-gray-400 hover:text-gray-700'"
+                  >
+                    {{ KIND_LABEL[k] }}
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="procElement && procElement.type === 'blocked'" class="text-sm rounded-lg border px-4 py-3 text-amber-800 bg-amber-50 border-amber-200" role="alert">{{ procElement.reason }}</div>
+
+              <template v-else-if="procSource">
+                <div class="rounded-xl border px-5 py-4 text-sm" :class="sourceBox[procSource.fuente]">
+                  <p class="font-bold tracking-wide uppercase text-[11px]">Fuente publicada hoy: {{ SOURCE_LABEL[procSource.fuente] }}</p>
+                  <p class="mt-1 leading-relaxed">{{ SOURCE_HELP[procSource.fuente] }}</p>
+                </div>
+
+                <!-- La página del CMS es la fuente (publicada u oculta): se edita la página -->
+                <template v-if="procElement && procElement.type === 'page'">
+                  <AdminRecommendationsPageEditor
+                    v-if="draftOf(procElement.key)" :key="procElement.key"
+                    :page="procElement.page" :draft="(draftOf(procElement.key) as PageDraft)" :dirty="ctl.isDirty(procElement.key)"
+                    :saving="!!state.saving[procElement.key]" :publishing="!!state.publishing[procElement.key]"
+                    :error="state.errors[procElement.key]" :saved-at="state.savedAt[procElement.key]"
+                    :view-url="procedureUrl" :can-delete="procElement.page.custom" :eyebrow="`${KIND_LABEL[state.kind]} · Página vinculada`"
+                    @save="ctl.save(procElement.key)" @dismiss-error="ctl.clearError(procElement.key)" @publish="ctl.setPublished(procElement.page.slug, true)"
+                    @unpublish="ctl.setPublished(procElement.page.slug, false)" @delete="ctl.deletePage(procElement.page.slug)"
+                  >
+                    <template #notice>
+                      <details v-if="procSource.historicText" class="bg-gray-50 border border-gray-200 rounded-xl px-5 py-4">
+                        <summary class="cursor-pointer text-xs font-bold tracking-widest uppercase text-gray-500">Texto histórico del procedimiento (solo lectura)</summary>
+                        <p class="text-xs text-gray-500 mt-2 mb-3">No se publica mientras exista la página vinculada y no se puede editar desde esta vista. Se conserva sin cambios.</p>
+                        <AdminRichTextEditor :key="`hist-${procElement.key}`" :model-value="procSource.historicText" min-height="6rem" readonly />
+                      </details>
+                    </template>
+                  </AdminRecommendationsPageEditor>
+                </template>
+
+                <!-- Sin página vinculada: la fuente es el texto histórico del procedimiento -->
+                <AdminRecommendationsLegacyTextEditor
+                  v-else-if="procElement && procElement.type === 'legacy' && draftOf(procElement.key)" :key="procElement.key"
+                  :label="procElement.label" :kind-label="KIND_LABEL[state.kind]" :draft="(draftOf(procElement.key) as LegacyDraft)" :editor-key="procElement.key"
+                  :readonly="procElement.readonly" :dirty="ctl.isDirty(procElement.key)" :saving="!!state.saving[procElement.key]"
+                  :error="state.errors[procElement.key]" :saved-at="state.savedAt[procElement.key]" :view-url="procedureUrl"
+                  @save="ctl.save(procElement.key)" @dismiss-error="ctl.clearError(procElement.key)"
+                />
+              </template>
+            </template>
+
+            <p v-else class="text-gray-400 text-sm">Elige un procedimiento de la lista para ver y editar sus recomendaciones de cuidados y de citas de revisión.</p>
+          </div>
+        </div>
+      </section>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, watchEffect } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 import Swal from 'sweetalert2'
 import { useHead } from '#imports'
 import { recommendationsService } from '~/services/RecommendationsService'
 import { procedureService } from '~/services/ProcedureService'
-import { fileToOptimizedDataUrl } from '~/utils/imageFile'
 import { isRichHtmlEmpty } from '~/utils/richText'
-import { RECOMMENDATION_KINDS, type RecommendationKind } from '~/utils/recommendationKinds'
-import type { RecommendationGroup, RecommendationPage } from '~/types/recommendations'
-import type { Procedure } from '~/types/procedure'
+import { resolveRecommendation } from '~/utils/recommendationSource'
+import {
+  KIND_KEYS, KIND_LABEL, SOURCE_HELP, SOURCE_LABEL, createAdminController, createAdminState, deriveSource, hasUnassociated, pagePublicUrl, procedurePublicUrl,
+  type LegacyDraft, type PageDraft, type RecommendationKindKey, type SourceKind
+} from '~/utils/recommendationsAdmin'
+import type { BadgeTone } from '~/components/admin/recommendations/StatusBadge.vue'
 
 useHead({ title: 'Recomendaciones | Admin Planmed' })
 definePageMeta({ layout: 'admin' })
 
 const notify = useNotify()
 
-const groups: { key: RecommendationGroup; label: string }[] = [
+const tabs = [
   { key: 'general', label: 'Recomendaciones generales' },
-  { key: 'cuidados', label: 'Cuidados de cirugías' },
-  { key: 'revision', label: 'Cita de revisión' }
-]
+  { key: 'procedure', label: 'Contenido por procedimiento' }
+] as const
+const kinds = KIND_KEYS
 
-type Selection = { type: 'page' | 'procedure'; group: RecommendationGroup; slug: string }
-
-const pages = ref<RecommendationPage[]>([])
-const procedures = ref<Procedure[]>([])
-const selection = ref<Selection | null>(null)
-const loaded = ref(false)
-const isSaving = ref(false)
-
-const pagesOf = (group: RecommendationGroup) => pages.value.filter(p => p.group === group)
-const hasText = (p: Procedure, group: RecommendationGroup) => group !== 'general' && !isRichHtmlEmpty(p[RECOMMENDATION_KINDS[group].field])
-const isSelected = (type: Selection['type'], group: RecommendationGroup, slug: string) =>
-  selection.value?.type === type && selection.value.group === group && selection.value.slug === slug
-
-const currentPage = computed(() => (selection.value?.type === 'page' ? pages.value.find(p => p.slug === selection.value!.slug) ?? null : null))
-const currentProcedure = computed(() => (selection.value?.type === 'procedure' ? procedures.value.find(p => p.slug === selection.value!.slug) ?? null : null))
-// Los procedimientos maestros del Hub no se editan desde una línea (Hub responde 403): se bloquea el guardado.
-const canSave = computed(() => !currentProcedure.value || currentProcedure.value.editable !== false)
-const procedureField = computed(() => RECOMMENDATION_KINDS[(selection.value?.group === 'revision' ? 'revision' : 'cuidados')].field)
-
-onMounted(async () => {
-  ;[pages.value, procedures.value] = await Promise.all([recommendationsService.getPages(), procedureService.getProcedures()])
-  const first = pages.value[0]
-  if (first) selection.value = { type: 'page', group: first.group, slug: first.slug }
-  loaded.value = true
+const state = reactive(createAdminState())
+const ctl = createAdminController(state, {
+  pages: recommendationsService as any,
+  procedures: procedureService as any,
+  resolve: resolveRecommendation as any,
+  isEmpty: isRichHtmlEmpty,
+  confirm: ({ title, text, confirmText }) => notify.confirm(title, text, confirmText),
+  askTitle: async () => {
+    const { value } = await Swal.fire({
+      title: 'Nueva recomendación general',
+      text: 'Nace oculta hasta que la publiques. No está asociada a ningún procedimiento.',
+      input: 'text',
+      inputPlaceholder: 'Título de la página',
+      showCancelButton: true,
+      confirmButtonText: 'Crear',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#0C2619',
+      inputValidator: v => (v.trim() ? null : 'Escribe un título')
+    })
+    return typeof value === 'string' && value.trim() ? value.trim() : null
+  },
+  notify: { success: m => void notify.success(m), warning: m => void notify.warning(m) }
 })
 
-function select(next: Selection) {
-  selection.value = next
+const classification = computed(() => ctl.classification())
+const element = computed(() => ctl.current())
+const generalElement = computed(() => (state.tab === 'general' ? element.value : null))
+const procElement = computed(() => (state.tab === 'procedure' ? element.value : null))
+const procedure = computed(() => ctl.findProcedure(state.procedureSlug))
+const draftOf = (key: string) => state.drafts[key] ?? null
+
+// El borrador se crea fuera del render, al seleccionar el elemento.
+watchEffect(() => {
+  const el = element.value
+  if (el?.key) ctl.draft(el.key)
+})
+
+// Fuente efectiva del procedimiento y tipo elegidos (la regla vive en resolveRecommendation; ver utils/recommendationsAdmin.ts).
+const sourceDeps = { resolve: resolveRecommendation as any, isEmpty: isRichHtmlEmpty }
+const procSource = computed(() => (procedure.value && !state.pagesError ? deriveSource(procedure.value, state.kind, classification.value.linked, sourceDeps) : null))
+const procedureUrl = computed(() => (procedure.value && procSource.value ? procedurePublicUrl(procedure.value, state.kind, procSource.value) : null))
+
+const SHORT: Record<SourceKind, { label: string, tone: BadgeTone }> = {
+  pagina: { label: 'Página publicada', tone: 'green' },
+  pagina_oculta: { label: 'Página oculta', tone: 'amber' },
+  historico: { label: 'Texto', tone: 'blue' },
+  ninguna: { label: 'Sin contenido', tone: 'gray' }
+}
+const sourceBox: Record<SourceKind, string> = {
+  pagina: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+  pagina_oculta: 'bg-amber-50 border-amber-200 text-amber-900',
+  historico: 'bg-sky-50 border-sky-200 text-sky-900',
+  ninguna: 'bg-gray-50 border-gray-200 text-gray-600'
 }
 
-async function addPage(group: RecommendationGroup) {
-  const label = groups.find(g => g.key === group)!.label
-  const { value } = await Swal.fire({
-    title: 'Nueva página',
-    text: `Se agregará a "${label}". Nace oculta hasta que la publiques.`,
-    input: 'text',
-    inputPlaceholder: 'Título de la página',
-    showCancelButton: true,
-    confirmButtonText: 'Crear',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#0C2619',
-    inputValidator: v => (v.trim() ? null : 'Escribe un título')
-  })
-  if (!value) return
-  try {
-    const page = await recommendationsService.createPage({ title: value, group })
-    pages.value = [...pages.value, page]
-    select({ type: 'page', group, slug: page.slug })
-    notify.success('Página creada. Redacta su contenido y publícala.')
-  } catch (err: any) {
-    notify.error(err.message || 'No se pudo crear la página.')
-  }
+const pickerRows = computed(() => state.procedures.map(p => ({
+  slug: p.slug,
+  name: p.name,
+  // Sin las páginas del CMS no se puede afirmar qué se publica: no se muestran indicadores en lugar de mostrar unos falsos.
+  badges: state.pagesError
+    ? []
+    : kinds.map((k: RecommendationKindKey) => {
+        const s = SHORT[deriveSource(p, k, classification.value.linked, sourceDeps).fuente]
+        return { kind: k, kindLabel: KIND_LABEL[k], label: s.label, tone: s.tone }
+      })
+})))
+
+// Protección contra pérdida de cambios al salir de la pantalla o cerrar la pestaña del navegador.
+onBeforeRouteLeave(async () => {
+  if (!ctl.anyDirty()) return true
+  return notify.confirm('Hay cambios sin guardar', 'Si sales de esta pantalla se perderán los cambios no guardados.', 'Salir sin guardar')
+})
+const beforeUnload = (e: BeforeUnloadEvent) => {
+  if (!ctl.anyDirty()) return
+  e.preventDefault()
+  e.returnValue = ''
 }
-
-async function removePage(page: RecommendationPage) {
-  if (!(await notify.confirm(`¿Eliminar "${page.title}"?`, 'Esta acción no se puede deshacer.', 'Sí, eliminar'))) return
-  try {
-    await recommendationsService.deletePage(page.slug)
-    pages.value = pages.value.filter(p => p.slug !== page.slug)
-    const first = pages.value[0]
-    selection.value = first ? { type: 'page', group: first.group, slug: first.slug } : null
-    notify.success('Página eliminada')
-  } catch (err: any) {
-    notify.error(err.message || 'No se pudo eliminar la página.')
-  }
-}
-
-async function onImage(e: Event) {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-  if (!file || !currentPage.value) return
-  if (file.size > 10 * 1024 * 1024) return notify.error('La imagen no puede superar los 10 MB.')
-  try {
-    currentPage.value.image = await fileToOptimizedDataUrl(file)
-  } catch (err: any) {
-    notify.error(err.message)
-  }
-}
-
-const YOUTUBE_RE = /^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//i
-
-async function save() {
-  isSaving.value = true
-  try {
-    if (currentPage.value) await saveFixedPage(currentPage.value)
-    else if (currentProcedure.value) await saveProcedureText(currentProcedure.value)
-  } catch (err: any) {
-    notify.error(err.message || 'Ocurrió un error al guardar.')
-  } finally {
-    isSaving.value = false
-  }
-}
-
-async function saveFixedPage(page: RecommendationPage) {
-  if (!page.title.trim()) return notify.error('Escribe el título de la página.', 'Falta información')
-  if (page.videoUrl.trim() && !YOUTUBE_RE.test(page.videoUrl.trim())) return notify.error('Solo se admiten enlaces de YouTube.', 'Enlace no válido')
-  if (page.published && isRichHtmlEmpty(page.content)) return notify.error('Para publicar la página, redacta primero su contenido.', 'Falta información')
-
-  page.title = page.title.trim()
-  page.videoUrl = page.videoUrl.trim()
-  // Las páginas creadas desde el panel usan su título como etiqueta del menú.
-  if (page.custom) page.menuLabel = page.title
-  const saved = await recommendationsService.savePage(page)
-  pages.value = pages.value.map(p => (p.slug === saved.slug ? saved : p))
-  if (saved.published) notify.success('Cambios guardados correctamente')
-  else notify.warning('Guardado, pero la página sigue oculta: actívala para que aparezca en el menú.')
-}
-
-async function saveProcedureText(procedure: Procedure) {
-  const field = procedureField.value
-  // Un editor vacío ("<p></p>") se guarda como vacío: el procedimiento deja de aparecer en el menú.
-  const value = isRichHtmlEmpty(procedure[field]) ? '' : procedure[field]
-  const saved = await procedureService.updateProcedure(procedure.slug, { [field]: value })
-  procedures.value = procedures.value.map(p => (p.slug === procedure.slug ? { ...p, [field]: saved[field] } : p))
-  notify.success(`Guardado: ${procedure.name}`)
-}
+onMounted(() => {
+  window.addEventListener('beforeunload', beforeUnload)
+  ctl.load()
+})
+onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
 </script>
-
-<style scoped>
-.field { width: 100%; padding: .65rem .9rem; border: 1px solid #e5e7eb; border-radius: .5rem; background: #f9fafb; font-size: .875rem; }
-.field:focus { outline: none; box-shadow: 0 0 0 2px #0C2619; border-color: transparent; }
-.item { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .6rem .75rem; border-radius: .5rem; font-size: .875rem; text-align: left; transition: background .15s; }
-.item-idle { color: #374151; }
-.item-idle:hover { background: #f9fafb; }
-.item-active { background: #0C2619; color: #fff; }
-</style>
