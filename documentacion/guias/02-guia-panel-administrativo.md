@@ -51,6 +51,7 @@
 
 ## 3. Módulo Procedimientos
 **Ruta:** `Contenido → Procedimientos` (`/admin/procedimientos`).
+**Acceso directo al Hub:** [Procedimientos](https://wellezyhub.com/procedimientos) · [Crear procedimiento](https://wellezyhub.com/procedimientos/create).
 
 ### 3.1 La lista
 Tabla con **Procedimiento** (nombre y descripción corta), **Categoría**, **Estado** (Visible/Oculto y si es «Maestro» o propio), **Destacado** y **Acciones**.
@@ -75,6 +76,7 @@ Secciones de la ficha:
 
 ## 4. Módulo Noticias
 **Ruta:** `Contenido → Noticias`.
+**Acceso directo al Hub:** [Noticias](https://wellezyhub.com/posts/cms) · [Crear noticia](https://wellezyhub.com/posts/cms/create).
 - **Lista:** filtro *Todos / Publicados / Borradores*; columnas Artículo, Estado, Fecha, Acciones (editar, eliminar). Eliminar pide confirmación y **no se puede deshacer**.
 - **Nueva noticia / Editar:**
   1. **Información principal:** título*, slug* (si lo dejas vacío al crear se genera del título), extracto*, contenido editorial* (con formato).
@@ -136,8 +138,16 @@ Dos bloques, con **dos botones de guardado distintos**:
 - **Dónde se ven:** en `/clinicas-aliadas` (tarjeta completa) y en la sección «Red médica aliada» del **inicio** (imagen + nombre, con enlace a su tarjeta). Mientras no haya ninguna clínica guardada, el inicio muestra los logos históricos.
 - **Ojo:** los archivos se suben al instante; si subes y no guardas, quedan huérfanos en el servidor (no se muestran en la web).
 
+> **Accesos directos al Hub.** El Hub es `https://wellezyhub.com`. Solo *Procedimientos*, *Noticias* y *Usuarios* tienen pantalla propia allí; *Nuestros Pacientes*, *Recomendaciones* y *Micrositios (PRP)* se guardan en el Hub pero **se editan únicamente desde este panel**. La pestaña «Guía del panel» muestra cada acceso en su módulo.
+
 ## 9. Módulo Configuración
-**Ruta:** `Administración → Configuración` (solo líder de la línea). Hoy muestra un aviso: la gestión de usuarios de la línea está pendiente de conectarse con el Hub. Un usuario que no es líder recibe un error 403 al entrar.
+**Ruta:** `Administración → Configuración` (solo líder de la línea). Tiene dos pestañas. **Acceso directo al Hub:** [Usuarios](https://wellezyhub.com/users).
+- **Configuración:** lista de **colaboradores de la línea** (solo lectura, tomada de Wellezy Hub): nombre (con la etiqueta *Líder* si corresponde), correo, rol y estado (Activo/Inactivo). Incluye búsqueda por nombre o correo, filtro por estado y paginación (15 por página). Se listan las personas **con usuario** cuya empresa y línea son las del usuario que inició sesión; en el entorno local son los IDs de la base local y, al pasar a producción, los de la base real, sin tocar la web. Activar/desactivar usuarios aún no está disponible desde el panel.
+- **Guía del panel:** el contenido descrito abajo.
+
+Un usuario que no es líder recibe un error 403 al entrar.
+
+La pestaña **Guía del panel** contiene: (1) *Dónde se guarda cada cosa*, con la tabla de qué módulos se actualizan en **Wellezy Hub** y cuáles viven **solo en la web** (y qué páginas están en el código); (2) *Cómo usar cada opción del panel*, un acordeón por módulo con pasos y advertencias; (3) *Reglas que valen para todo el panel*. Los datos de esa guía están en `utils/adminGuide.ts`: si cambia un módulo, actualízalo ahí y en este documento.
 
 ## 10. Tutorial paso a paso: casos frecuentes
 

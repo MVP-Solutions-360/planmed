@@ -106,6 +106,8 @@ describe('menú y páginas', () => {
     const layout = readFileSync(join(ROOT, 'layouts/admin.vue'), 'utf8')
     assert.match(layout, /h-screen overflow-hidden/)
     assert.match(layout, /<main class="[^"]*overflow-y-auto/)
+    // `relative` contiene los elementos sr-only (absolutos); sin él alargan el documento y aparece un segundo scroll en la ventana
+    assert.match(layout, /<main class="[^"]*relative[^"]*overflow-y-auto/)
   })
 
   test('Servicios está dentro del desplegable Planmed (no suelto) y usa los videos entregados', () => {

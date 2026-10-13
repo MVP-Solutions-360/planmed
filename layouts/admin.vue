@@ -86,7 +86,8 @@
       </header>
 
       <!-- MAIN CONTENT -->
-      <main class="flex-grow min-h-0 p-8 overflow-y-auto">
+      <!-- relative: los elementos sr-only (position:absolute) quedan contenidos y recortados por este contenedor; sin esto alargan el documento y aparece un segundo scroll -->
+      <main class="relative flex-grow min-h-0 p-8 overflow-y-auto">
         <div class="max-w-6xl mx-auto">
           <slot />
         </div>
