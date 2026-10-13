@@ -48,6 +48,7 @@ Otras sesiones de trabajo activas en la misma máquina (según el panel de sesio
 6. [`06-auditoria-preaprobado-y-pagos.md`](06-auditoria-preaprobado-y-pagos.md) — auditoría separada; **no implementar** aún.
 7. [`07-reutilizacion-crediestetica.md`](07-reutilizacion-crediestetica.md) — común / configurable / específico de marca.
 8. [`08-registro-de-pruebas-y-cambios.md`](08-registro-de-pruebas-y-cambios.md) — pruebas ejecutadas y cambios hechos en esta fase.
+9. [`09-traspaso-admin-permisos-navegacion-crediestetica.md`](09-traspaso-admin-permisos-navegacion-crediestetica.md) — traspaso (10 oct 2026): permisos asignados en el Hub al usuario 20, incidencia de «Nuestros Pacientes», entornos conocidos, inconsistencia del header y plan para replicar en Crediestética.
 
 ## Límites de esta documentación (leer antes de usarla)
 
@@ -70,3 +71,8 @@ Otras sesiones de trabajo activas en la misma máquina (según el panel de sesio
 - **Implementado con limitaciones:** índices con Hub caído siguen mostrando lista vacía con HTTP 200 (PM-ERR-02); revisión visual parcial contra un Hub simulado (ver `08` §6).
 - **Pendiente de decisión funcional / otra fase (Hub):** sustitución de campo histórico por página independiente (R4, PM-RECO-08) requiere vínculo `cirugia_id`+`kind` y distinguir «no publicada» de «inexistente».
 - **Pendiente del backoffice del CRM:** sin cambios.
+
+## Guías de uso (2026-10-13)
+
+- [`../guias/01-guia-pagina-publica.md`](../guias/01-guia-pagina-publica.md) — todas las vistas públicas: contenido, origen de los datos y estado de cada formulario.
+- [`../guias/02-guia-panel-administrativo.md`](../guias/02-guia-panel-administrativo.md) — tutorial del panel administrativo, módulo por módulo.
