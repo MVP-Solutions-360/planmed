@@ -61,8 +61,8 @@ describe('guía del panel', () => {
     assert.equal(G.HUB_BASE_URL, 'https://wellezyhub.com')
     const links = G.GUIDE_MODULES.flatMap(m => m.hubLinks ?? [])
     assert.deepEqual(links.map(l => G.hubUrl(l.path)).sort(), [
+      'https://wellezyhub.com/cirugias', 'https://wellezyhub.com/cirugias/create',
       'https://wellezyhub.com/posts/cms', 'https://wellezyhub.com/posts/cms/create',
-      'https://wellezyhub.com/procedimientos', 'https://wellezyhub.com/procedimientos/create',
       'https://wellezyhub.com/users'
     ])
     for (const l of links) assert.ok(l.path.startsWith('/') && !l.path.includes('//'), l.path)

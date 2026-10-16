@@ -62,13 +62,20 @@ export const GUIDE_MODULES: GuideModule[] = [
     storage: 'hub',
     publicEffect: 'Menú y página «Procedimientos», fichas de cada procedimiento y «Procedimientos destacados» del inicio.',
     steps: [
-      'En la lista usa la estrella para destacar un procedimiento en el inicio y el ojo para mostrarlo u ocultarlo en la web de Planmed.',
-      'Los procedimientos «Maestro» vienen del catálogo global: solo puedes habilitarlos, deshabilitarlos o destacarlos; su contenido no se edita aquí.',
-      '«Nuevo Procedimiento» crea uno propio: nombre, slug (URL), categoría, descripción corta, «¿Qué es?», ficha técnica, perfil del paciente, imagen principal, galería y SEO.',
+      'Los procedimientos se administran centralmente en Wellezy Hub (catálogo «cirugías» y su habilitación por línea). Planmed no guarda una copia: consulta el catálogo de su línea mediante la API del Hub, así que los cambios se hacen en el Hub o desde este panel, que escribe en el Hub.',
+      'Hay dos tipos. «Maestro»: procedimiento global del catálogo, que no pertenece a ninguna empresa ni línea y solo se publica en las líneas donde esté habilitado. «Propio»: procedimiento específico de una empresa y una línea; el Hub lo asigna a la empresa y la línea de tu sesión.',
+      'Crear no es lo mismo que publicar. Un maestro nuevo (creado en el Hub) no queda visible en ninguna web hasta que se habilite para la línea: en la lista, usa el botón de habilitar de su fila. Un procedimiento propio que crees desde este panel queda habilitado en tu línea.',
+      'En la lista, la estrella marca o desmarca un procedimiento como destacado (aparece primero y en «Procedimientos destacados» del inicio). El botón de activar actúa así: en un maestro lo habilita o deshabilita solo en Planmed; en un propio lo activa o desactiva. Desactivar no elimina: el procedimiento se conserva y puede reactivarse.',
+      'Un maestro solo se puede habilitar, deshabilitar o destacar; su contenido global no se edita aquí. Un propio se edita completo con «Nuevo Procedimiento» o con el lápiz: nombre, slug (URL), categoría, descripción corta, «¿Qué es?», ficha técnica, perfil del paciente, imagen principal, galería y SEO.',
       'Pulsa Guardar. Las imágenes nuevas se suben en ese momento.'
     ],
-    notes: ['Cambiar el slug de un procedimiento cambia su URL pública.'],
-    hubLinks: [{ label: 'Procedimientos en el Hub', path: '/procedimientos' }, { label: 'Crear procedimiento en el Hub', path: '/procedimientos/create' }]
+    notes: [
+      'Cambiar el slug de un procedimiento cambia su URL pública.',
+      'Los cambios se guardan en el Hub, pero no se garantiza que la web pública los muestre al instante: si no ves un cambio, revisa que el procedimiento esté activo y habilitado en tu línea.',
+      'Crear un procedimiento global o elegir otra empresa o línea se hace en el Hub (superadmin). Desde este panel solo se crean procedimientos propios de tu línea.',
+      'Usa «Procedimientos en el Hub» (catálogo vigente). No uses /procedimientos del Hub: es un módulo antiguo que no alimenta la web.'
+    ],
+    hubLinks: [{ label: 'Procedimientos en el Hub', path: '/cirugias' }, { label: 'Crear procedimiento en el Hub', path: '/cirugias/create' }]
   },
   {
     id: 'noticias',

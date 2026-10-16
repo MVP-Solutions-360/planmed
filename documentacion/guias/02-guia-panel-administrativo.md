@@ -51,7 +51,7 @@
 
 ## 3. Módulo Procedimientos
 **Ruta:** `Contenido → Procedimientos` (`/admin/procedimientos`).
-**Acceso directo al Hub:** [Procedimientos](https://wellezyhub.com/procedimientos) · [Crear procedimiento](https://wellezyhub.com/procedimientos/create).
+**Acceso directo al Hub:** [Procedimientos](https://wellezyhub.com/cirugias) · [Crear procedimiento](https://wellezyhub.com/cirugias/create) (catálogo vigente del Hub; no uses `/procedimientos` del Hub, que es un módulo antiguo).
 
 ### 3.1 La lista
 Tabla con **Procedimiento** (nombre y descripción corta), **Categoría**, **Estado** (Visible/Oculto y si es «Maestro» o propio), **Destacado** y **Acciones**.
@@ -61,8 +61,10 @@ Tabla con **Procedimiento** (nombre y descripción corta), **Categoría**, **Est
 - **Nuevo Procedimiento:** crea uno propio de Planmed.
 
 ### 3.2 Procedimientos «maestros» y propios
-- **Maestro:** viene del catálogo global del Hub. Su contenido **no se edita** desde Planmed; solo puedes **habilitarlo/deshabilitarlo** y **destacarlo** en tu línea. La pantalla lo avisa («Procedimiento maestro…»).
-- **Propio:** se edita completo.
+- **Maestro (global):** viene del catálogo global del Hub (no pertenece a ninguna empresa ni línea). Su contenido **no se edita** desde Planmed; solo puedes **habilitarlo/deshabilitarlo** y **destacarlo** en tu línea. La pantalla lo avisa («Procedimiento maestro…»). Un maestro nuevo no se publica en ninguna web hasta que se habilita para la línea.
+- **Propio:** pertenece a una empresa y una línea (las de tu sesión) y se edita completo.
+- **Administración y publicación son distintas:** crear no implica que esté visible; debe estar activo y habilitado en la línea. Planmed no guarda una copia del catálogo: lo consulta en el Hub, y no se garantiza que un cambio se vea al instante en la web pública.
+- **Desactivar no elimina:** el procedimiento se conserva y puede reactivarse.
 
 ### 3.3 Crear o editar un procedimiento propio
 Secciones de la ficha:
