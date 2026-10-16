@@ -6,6 +6,10 @@
           <p v-if="eyebrow" class="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">{{ eyebrow }}</p>
           <h3 class="text-xl font-serif text-[#0C2619] break-words">{{ page.title }}</h3>
           <p class="text-xs text-gray-400 mt-1">Dirección fija: <code class="bg-gray-100 rounded px-1.5 py-0.5">/recomendaciones/{{ page.slug }}</code> · el slug no cambia al editar.</p>
+          <p v-if="page.shortUrl" class="text-xs text-gray-500 mt-1 flex flex-wrap items-center gap-2" data-testid="short-url">
+            Enlace corto: <code class="bg-gray-100 rounded px-1.5 py-0.5">{{ page.shortUrl }}</code>
+            <button type="button" class="text-[11px] font-bold tracking-widest uppercase text-[#0C2619] hover:text-[#D3A76A]" @click="copyShortUrl">{{ copied ? 'Copiado' : 'Copiar' }}</button>
+          </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <AdminRecommendationsStatusBadge :label="page.published ? 'Publicada' : 'Oculta'" :tone="page.published ? 'green' : 'gray'" />
@@ -80,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { fileToOptimizedDataUrl } from '~/utils/imageFile'
 import type { RecommendationPage } from '~/types/recommendations'
 import { ACTION_BADGE, type ActionError, type PageDraft } from '~/utils/recommendationsAdmin'
@@ -103,6 +107,17 @@ const notify = useNotify()
 
 // Los errores de guardar se muestran en la barra de guardado; los demás, junto a Publicar / Ocultar / Eliminar.
 const actionError = computed(() => (props.error && props.error.action !== 'save' ? props.error : null))
+
+const copied = ref(false)
+async function copyShortUrl() {
+  try {
+    await navigator.clipboard.writeText(props.page.shortUrl ?? '')
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch {
+    notify.error('No se pudo copiar el enlace. Cópialo manualmente.')
+  }
+}
 
 async function onImage(e: Event) {
   const input = e.target as HTMLInputElement

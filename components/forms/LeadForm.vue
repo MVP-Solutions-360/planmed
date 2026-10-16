@@ -1,6 +1,6 @@
 <template>
   <div v-if="isOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" @click.self="closeModal">
-    <div class="bg-white text-black w-full max-w-xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 relative">
+    <div class="bg-white text-black w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 relative">
       
       <!-- Botón de cerrar -->
       <button @click="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200">
@@ -88,6 +88,108 @@
             <input v-model="form.email" type="email" class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
           </div>
 
+          <!-- Preaprobado: información del tomador del crédito (desplegable) -->
+          <section class="border-t border-gray-100 pt-5">
+            <button type="button" class="w-full flex items-center justify-between text-left" :aria-expanded="open.tomador" aria-controls="lead-tomador" @click="open.tomador = !open.tomador">
+              <h3 class="text-base font-extrabold text-black">Información del tomador del crédito</h3>
+              <span class="text-xs text-gray-500 transition-transform" :class="open.tomador ? 'rotate-180' : ''" aria-hidden="true">▼</span>
+            </button>
+            <div v-show="open.tomador" id="lead-tomador" class="grid grid-cols-1 md:grid-cols-6 gap-x-4 gap-y-4 mt-4">
+              <div class="md:col-span-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-tipodoc">Tipo documento</label>
+                <select id="lf-tipodoc" v-model="form.doc_type" :class="inputCls()"><option v-for="o in TIPOS_DOC" :key="o" :value="o">{{ o }}</option></select>
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-numdoc">Número documento</label>
+                <input id="lf-numdoc" v-model="form.doc_number" type="text" inputmode="numeric" placeholder="Ingresa número de documento" :class="inputCls()" />
+              </div>
+              <div class="md:col-span-4">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-lugarexp">Lugar expedición documento</label>
+                <input id="lf-lugarexp" v-model="form.doc_issue_place" type="text" placeholder="Ingresa la ciudad" :class="inputCls()" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-fechaexp">Fecha expedición</label>
+                <input id="lf-fechaexp" v-model="form.doc_issue_date" type="date" :class="inputCls()" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-fechanac">Fecha nacimiento</label>
+                <input id="lf-fechanac" v-model="form.birth_date" type="date" :class="inputCls()" />
+              </div>
+              <div class="md:col-span-4">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-lugarnac">Lugar nacimiento</label>
+                <input id="lf-lugarnac" v-model="form.birth_place" type="text" placeholder="Ingresa tu ciudad" :class="inputCls()" />
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-profesion">Profesión / Ocupación</label>
+                <input id="lf-profesion" v-model="form.occupation" type="text" placeholder="Ingresa tu ocupación" :class="inputCls()" />
+              </div>
+              <div class="md:col-span-1">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-cargo">Personas a cargo</label>
+                <input id="lf-cargo" v-model.number="form.dependents" type="number" min="0" inputmode="numeric" placeholder="0" :class="inputCls()" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-vivienda">Tipo vivienda</label>
+                <select id="lf-vivienda" v-model="form.housing_type" :class="inputCls()"><option v-for="o in TIPOS_VIVIENDA" :key="o" :value="o">{{ o }}</option></select>
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-ciudadres">Ciudad residencia</label>
+                <input id="lf-ciudadres" v-model="form.residence_city" type="text" placeholder="Ingresa tu ciudad" :class="inputCls()" />
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-ciudadcir">Ciudad cirugía</label>
+                <input id="lf-ciudadcir" v-model="form.surgery_city" type="text" placeholder="Ingresa la ciudad" :class="inputCls()" />
+              </div>
+            </div>
+          </section>
+
+          <!-- Preaprobado: actividad económica (desplegable) -->
+          <section class="border-t border-gray-100 pt-5">
+            <button type="button" class="w-full flex items-center justify-between text-left" :aria-expanded="open.actividad" aria-controls="lead-actividad" @click="open.actividad = !open.actividad">
+              <h3 class="text-base font-extrabold text-black">Actividad económica</h3>
+              <span class="text-xs text-gray-500 transition-transform" :class="open.actividad ? 'rotate-180' : ''" aria-hidden="true">▼</span>
+            </button>
+            <div v-show="open.actividad" id="lead-actividad" class="grid grid-cols-1 md:grid-cols-6 gap-x-4 gap-y-4 mt-4">
+              <div class="md:col-span-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-tipoact">Tipo actividad</label>
+                <select id="lf-tipoact" v-model="form.activity_type" :class="inputCls()"><option v-for="o in TIPOS_ACTIVIDAD" :key="o" :value="o">{{ o }}</option></select>
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-ss">¿Aporta seguridad social?</label>
+                <select id="lf-ss" v-model="form.social_security" :disabled="isEmployee" :class="[inputCls(), isEmployee ? 'opacity-50 cursor-not-allowed' : '']"><option>Si</option><option>No</option></select>
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-ing">Ingresos mensuales</label>
+                <input id="lf-ing" v-model.number="form.monthly_income" type="number" min="0" inputmode="numeric" placeholder="Ingresa tus ingresos" :class="inputCls()" />
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-egr">Egresos mensuales</label>
+                <input id="lf-egr" v-model.number="form.monthly_expenses" type="number" min="0" inputmode="numeric" placeholder="Ingresa tus egresos" :class="inputCls()" />
+              </div>
+              <template v-if="isEmployee">
+                <div class="md:col-span-3">
+                  <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-contrato">Tipo de contrato</label>
+                  <select id="lf-contrato" v-model="form.contract_type" :class="inputCls()"><option v-for="o in TIPOS_CONTRATO" :key="o" :value="o">{{ o }}</option></select>
+                </div>
+                <div class="md:col-span-3">
+                  <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-duracion">Duración del contrato</label>
+                  <select id="lf-duracion" v-model="form.contract_duration" :class="inputCls()"><option v-for="o in DURACIONES_CONTRATO" :key="o" :value="o">{{ o }}</option></select>
+                </div>
+              </template>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-prop">¿Tienes propiedad?</label>
+                <select id="lf-prop" v-model="form.has_property" :class="inputCls()"><option>No</option><option>Si</option></select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-veh">¿Tiene vehículo?</label>
+                <select id="lf-veh" v-model="form.has_vehicle" :class="inputCls()"><option>No</option><option>Si</option></select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-bold text-gray-700 mb-1" for="lf-rep">¿Estás reportado?</label>
+                <select id="lf-rep" v-model="form.is_reported" :class="inputCls()"><option>No</option><option>Si</option></select>
+              </div>
+            </div>
+          </section>
+
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-1" v-html="'Comentarios (Opcional)'"></label>
             <textarea v-model="form.comments" rows="2" class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"></textarea>
@@ -145,7 +247,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useTracking } from '~/composables/useTracking'
 import { leadService } from '~/services/LeadService'
@@ -188,6 +290,13 @@ async function refreshQuote() {
   }
 }
 
+// Opciones PROVISIONALES de las listas del preaprobado (por confirmar con Planmed).
+const TIPOS_DOC = ['Cedula ciudadania', 'Tarjeta identidad', 'Numero identificacion personal', 'Pasaporte', 'Permiso permanencia temporal', 'Cedula extranjeria']
+const TIPOS_VIVIENDA = ['Propia', 'Arrendada', 'Familiar']
+const TIPOS_ACTIVIDAD = ['Empleado', 'Independiente']
+const TIPOS_CONTRATO = ['Fijo', 'Indefinido', 'Prestacion de servicio']
+const DURACIONES_CONTRATO = ['2 años o mas', 'Menos de 1 año', '1 año o mas']
+
 const form = reactive({
   full_name: '',
   phone: '',
@@ -197,8 +306,36 @@ const form = reactive({
   installments: null,
   email: '',
   comments: '',
-  accepted_habeas_data: false
+  accepted_habeas_data: false,
+  // Preaprobado: tomador del crédito
+  doc_type: TIPOS_DOC[0],
+  doc_number: '',
+  doc_issue_place: '',
+  doc_issue_date: '',
+  birth_date: '',
+  birth_place: '',
+  occupation: '',
+  dependents: null,
+  housing_type: TIPOS_VIVIENDA[0],
+  residence_city: '',
+  surgery_city: '',
+  // Preaprobado: actividad económica
+  activity_type: TIPOS_ACTIVIDAD[0],
+  social_security: 'Si',
+  monthly_income: null,
+  monthly_expenses: null,
+  contract_type: TIPOS_CONTRATO[0],
+  contract_duration: DURACIONES_CONTRATO[0],
+  has_property: 'No',
+  has_vehicle: 'No',
+  is_reported: 'No'
 })
+
+const open = reactive({ tomador: false, actividad: false })
+const isEmployee = computed(() => form.activity_type === 'Empleado')
+// Empleado: la seguridad social queda fija en «Si» (campo deshabilitado) y aparecen tipo y duración del contrato.
+watch(isEmployee, (v) => { if (v) form.social_security = 'Si' }, { immediate: true })
+const inputCls = () => 'w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all'
 
 const errors = reactive({})
 
@@ -211,7 +348,8 @@ watch(() => props.isOpen, async (newVal) => {
     form.requested_amount = props.amount || null
     form.installments = props.installments || null
     form.city = props.city || ''
-    
+    if (!form.residence_city) form.residence_city = props.city || ''
+
     // Cotización con la tasa mensual configurada en el panel (QuotationService), sin conocer la fórmula en la UI
     await refreshQuote()
       
@@ -293,7 +431,27 @@ const submitLead = async () => {
       // Condiciones con las que se cotizó: una solicitud conserva su tasa aunque la tasa vigente cambie después.
       quote_rate_percent: currentQuote.value?.ratePercent ?? null,
       quote_rate_version: currentQuote.value?.rateUpdatedAt ?? null,
-      quote_monthly_payment: currentQuote.value ? Math.round(currentQuote.value.monthlyPayment) : null
+      quote_monthly_payment: currentQuote.value ? Math.round(currentQuote.value.monthlyPayment) : null,
+      doc_type: form.doc_type,
+      doc_number: form.doc_number,
+      doc_issue_place: form.doc_issue_place,
+      doc_issue_date: form.doc_issue_date,
+      birth_date: form.birth_date,
+      birth_place: form.birth_place,
+      occupation: form.occupation,
+      dependents: form.dependents,
+      housing_type: form.housing_type,
+      residence_city: form.residence_city,
+      surgery_city: form.surgery_city,
+      activity_type: form.activity_type,
+      social_security: form.social_security,
+      monthly_income: form.monthly_income,
+      monthly_expenses: form.monthly_expenses,
+      contract_type: isEmployee.value ? form.contract_type : null,
+      contract_duration: isEmployee.value ? form.contract_duration : null,
+      has_property: form.has_property,
+      has_vehicle: form.has_vehicle,
+      is_reported: form.is_reported
     }
   }
 

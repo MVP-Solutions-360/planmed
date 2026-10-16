@@ -15,6 +15,8 @@ export interface RecommendationPage {
   // Slug del procedimiento al que sustituye (el Hub lo informa solo si ese procedimiento sigue activo y habilitado en la línea).
   // null = página independiente. No se lista aparte en el menú: la representa la entrada del procedimiento.
   procedureSlug?: string | null;
+  // Enlace corto (solo lectura, lo genera el Hub al publicar). Ausente si aún no existe o el Hub no tiene dominio de enlaces cortos.
+  shortUrl?: string;
 }
 
 // Páginas fijas del menú "Recomendaciones"; el panel solo edita su contenido.

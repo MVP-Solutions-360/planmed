@@ -24,6 +24,8 @@ export interface RecommendationPageDto {
   published: boolean
   /** Slug del procedimiento al que sustituye (null = independiente). */
   procedureSlug: string | null
+  /** Enlace corto de la página (solo lectura, del Hub). Solo se incluye en el admin y cuando el Hub lo informa. */
+  shortUrl?: string
 }
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '')
@@ -60,7 +62,8 @@ export function fromCmsPage(d: any): RecommendationPageDto {
     image: str(d.image_url),
     content: str(d.content),
     published: d.published === true,
-    procedureSlug: orNull(d.cirugia_slug)
+    procedureSlug: orNull(d.cirugia_slug),
+    ...(orNull(d.short_url) ? { shortUrl: orNull(d.short_url)! } : {})
   }
 }
 
