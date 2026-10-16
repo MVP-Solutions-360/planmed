@@ -13,8 +13,8 @@ Este documento define las reglas operativas, comerciales y de comunicación vige
    - "20% con tarjeta de crédito"
    - Distribución interna de fuentes de financiación
    - Mecanismos internos utilizados para estructurar la financiación
-6. La tasa utilizada actualmente por el simulador debe ser: **2% mensual**.
-7. Esta tasa es **REFERENCIAL**.
+6. La tasa de interés que usa el simulador es la **tasa de usura mensual configurada en el panel administrativo** (Configuración → Tasa de usura), y se aplica **tal como se digita**, con hasta **cuatro decimales** y punto decimal (p. ej. `2`, `2.12`, `2.0126`). Pueden modificarla el líder de la línea y la diseñadora. En el primer despliegue arranca en **2.0000 % mensual** y ese valor no se vuelve a sobrescribir. Rango técnico permitido: mayor que 0 y hasta 5 % mensual (no es el tope legal de la usura).
+7. La cuota resultante es **REFERENCIAL**. Es la cuota fija amortizada exacta de la fórmula (sin redondeo a centenas ni incrementos); solo se redondea al peso para mostrarla. Si la tasa no puede consultarse, el simulador muestra "simulación no disponible" y no presenta ninguna cuota.
 8. La interfaz debe informar que la tasa puede variar de acuerdo con la tasa de usura vigente, fijada mensualmente.
 9. No presentar el resultado del simulador como una aprobación, oferta definitiva o condición contractual.
 

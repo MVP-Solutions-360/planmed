@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     throw authError(403, MSG_FORBIDDEN)
   }
 
-  const publicUser = toPublicUser(user)
+  const publicUser = toPublicUser(user, event)
   await session.update({ token, user: publicUser })
   return { user: publicUser }
 })

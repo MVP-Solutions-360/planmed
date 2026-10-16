@@ -2,6 +2,9 @@
   "name": "planmed-web",
   "private": true,
   "type": "module",
+  "imports": {
+    "#shared/*": "./shared/*.ts"
+  },
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",

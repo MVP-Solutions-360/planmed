@@ -1,10 +1,11 @@
 import { MockQuotationProvider, type QuotationResult } from '../providers/MockQuotationProvider';
+import { financingRateService } from './FinancingRateService';
 
 export class QuotationService {
   private provider: MockQuotationProvider;
 
   constructor() {
-    this.provider = new MockQuotationProvider();
+    this.provider = new MockQuotationProvider(financingRateService);
   }
 
   async calculateQuotation(amount: number, months: number, procedure: string, signal?: AbortSignal): Promise<QuotationResult> {

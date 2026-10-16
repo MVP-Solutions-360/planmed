@@ -10,6 +10,9 @@ export default defineNuxtConfig({
     wellezyLineSlug: 'planmed',
     // IDs de rol (users.role.id de Wellezy) autorizados para el CMS, separados por coma.
     planmedAdminRoleIds: '19',
+    // IDs de rol que, además del líder de la línea, pueden ver y modificar la tasa de interés del simulador (rol «Diseñador gráfico» = 19 en
+    // Wellezy Hub según el repositorio; confirmar en el Hub real). Separados por coma. NUXT_PLANMED_RATE_EDITOR_ROLE_IDS. Deben seguir siendo roles del CMS.
+    planmedRateEditorRoleIds: '19',
     sessionPassword: '',
     // Directorio persistente del contenido administrado localmente en la web (página «Nosotros»). NUXT_PLANMED_CONTENT_DIR.
     // Vacío => `<directorio de trabajo>/.data/planmed-content`. Debe quedar FUERA de `.output/` para sobrevivir a los despliegues.

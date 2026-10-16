@@ -6,6 +6,7 @@ import { trackingService } from '~/services/TrackingService'
 import { publicProcedureService } from '~/services/PublicProcedureService'
 import type { Procedure } from '~/types/procedure'
 import { useAsyncData } from '#imports'
+import { FinancingRateUnavailableError } from '~/services/FinancingRateService'
 
 export function useSimulator() {
   const route = useRoute()
@@ -22,6 +23,8 @@ export function useSimulator() {
   
   const currentQuote = ref<QuotationResult | null>(null)
   const isLoading = ref(false)
+  // Mensaje cuando no se pudo cotizar (p. ej. la tasa no está disponible). Mientras exista NO se muestra ninguna cuota.
+  const quoteError = ref<string | null>(null)
   let abortController: AbortController | null = null
 
   const { data: availableProcedures } = useAsyncData('procedures', () => publicProcedureService.getProcedures(), {
@@ -86,6 +89,7 @@ export function useSimulator() {
       if (signal.aborted) return;
       
       currentQuote.value = quote;
+      quoteError.value = null;
       
       trackingService.track('SIMULATOR_CALC', '/financiacion', {
         intent: {
@@ -98,6 +102,9 @@ export function useSimulator() {
     } catch (e: any) {
       if (e.name !== 'AbortError') {
         console.error('Error al simular cotizacion:', e);
+        // Sin tasa vigente no se deja la cuota anterior en pantalla: se muestra un estado controlado.
+        currentQuote.value = null;
+        quoteError.value = e instanceof FinancingRateUnavailableError ? e.message : 'No fue posible calcular la cuota en este momento. Intenta nuevamente.';
       }
     } finally {
       if (!signal.aborted) {
@@ -113,6 +120,7 @@ export function useSimulator() {
     city,
     currentQuote,
     isLoading,
+    quoteError,
     formatCurrency,
     displayAmount,
     handleAmountBlur,

@@ -2,7 +2,7 @@
   <div>
     <div class="mb-8">
       <h2 class="text-3xl font-serif text-[#0C2619] mb-2 uppercase">Configuración</h2>
-      <p class="text-gray-500 font-light">Colaboradores de la línea Planmed y guía de uso del panel. Solo visible para el líder de la línea.</p>
+      <p class="text-gray-500 font-light">Colaboradores de la línea Planmed (solo líder), tasa de usura mensual del simulador y guía de uso del panel.</p>
     </div>
 
     <!-- Pestañas -->
@@ -23,8 +23,12 @@
       >{{ t.label }}</button>
     </div>
 
-    <section v-show="tab === 'config'" id="cfg-panel-config" role="tabpanel" aria-labelledby="cfg-tab-config" tabindex="0" class="focus:outline-none">
+    <section v-if="can.line" v-show="tab === 'config'" id="cfg-panel-config" role="tabpanel" aria-labelledby="cfg-tab-config" tabindex="0" class="focus:outline-none">
       <AdminLineUsersPanel />
+    </section>
+
+    <section v-if="can.rate" v-show="tab === 'tasa'" id="cfg-panel-tasa" role="tabpanel" aria-labelledby="cfg-tab-tasa" tabindex="0" class="focus:outline-none">
+      <AdminFinancingRatePanel />
     </section>
 
     <section v-show="tab === 'guia'" id="cfg-panel-guia" role="tabpanel" aria-labelledby="cfg-tab-guia" tabindex="0" class="focus:outline-none">
@@ -35,36 +39,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useHead, useRoute, useRouter } from '#imports'
+import { computed, ref } from 'vue'
+import { useFetch, useHead, useRoute, useRouter } from '#imports'
 
 useHead({ title: 'Configuración | Admin Planmed' })
 definePageMeta({ layout: 'admin' })
 
-const tabs = [
+// Qué secciones puede usar la persona (el servidor lo decide y vuelve a comprobarlo en cada ruta): colaboradores = solo líder;
+// tasa = líder y rol de diseño configurado. La guía es para todas.
+const { data: access } = await useFetch<{ canManageLine: boolean, canManageRate: boolean }>('/api/admin/config/access')
+const can = computed(() => ({ line: access.value?.canManageLine === true, rate: access.value?.canManageRate === true }))
+
+const ALL_TABS = [
   { key: 'config', label: 'Configuración' },
+  { key: 'tasa', label: 'Tasa de usura' },
   { key: 'guia', label: 'Guía del panel' }
 ] as const
-type TabKey = typeof tabs[number]['key']
+type TabKey = typeof ALL_TABS[number]['key']
+const tabs = computed(() => ALL_TABS.filter(t => t.key === 'guia' || (t.key === 'config' ? can.value.line : can.value.rate)))
 
 const route = useRoute()
 const router = useRouter()
 // Se puede enlazar una pestaña con /admin/configuracion?tab=guia.
-const tab = ref<TabKey>(route.query.tab === 'guia' ? 'guia' : 'config')
+const wanted = route.query.tab === 'guia' || route.query.tab === 'tasa' ? route.query.tab as TabKey : 'config'
+const tab = ref<TabKey>(tabs.value.some(t => t.key === wanted) ? wanted : tabs.value[0]!.key)
 const tabButtons = ref<HTMLButtonElement[]>([])
 
 function select(key: TabKey) {
   tab.value = key
-  router.replace({ query: key === 'config' ? {} : { tab: key } })
+  router.replace({ query: key === tabs.value[0]!.key ? {} : { tab: key } })
 }
 
 // Teclado del patrón WAI-ARIA tabs: flechas, Inicio y Fin.
 function onTabKey(e: KeyboardEvent) {
-  const i = tabs.findIndex(t => t.key === tab.value)
-  const target = ({ ArrowRight: (i + 1) % tabs.length, ArrowLeft: (i - 1 + tabs.length) % tabs.length, Home: 0, End: tabs.length - 1 } as Record<string, number>)[e.key]
+  const list = tabs.value
+  const i = list.findIndex(t => t.key === tab.value)
+  const target = ({ ArrowRight: (i + 1) % list.length, ArrowLeft: (i - 1 + list.length) % list.length, Home: 0, End: list.length - 1 } as Record<string, number>)[e.key]
   if (target === undefined) return
   e.preventDefault()
-  select(tabs[target]!.key)
+  select(list[target]!.key)
   tabButtons.value[target]?.focus()
 }
 </script>

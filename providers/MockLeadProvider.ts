@@ -7,6 +7,8 @@ export interface LeadData {
   installments: number;
   email?: string;
   comments?: string;
+  // Datos del preaprobado (tomador del crédito y actividad económica). El contrato de Hub /v1/leads admite `metadata` (array/objeto libre).
+  metadata?: Record<string, string | number | boolean | null>;
 }
 
 export class MockLeadProvider {

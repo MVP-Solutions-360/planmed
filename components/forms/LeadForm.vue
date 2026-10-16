@@ -76,9 +76,12 @@
           <div v-if="currentQuote" class="bg-gray-100 border border-gray-200 p-4 rounded-xl flex justify-between items-center">
             <span class="text-sm font-bold text-gray-900">Cuota Mensual Estimada:</span>
             <span class="text-xl font-extrabold text-black">
-              ${{ currentQuote.monthlyPayment?.toLocaleString('es-CO') || 0 }}*
+              {{ formatPesos(currentQuote.monthlyPayment) }}*
             </span>
           </div>
+          <p v-else-if="quoteError" role="alert" data-testid="leadform-quote-unavailable" class="bg-amber-50 border border-amber-200 text-amber-800 text-sm p-4 rounded-xl">
+            {{ quoteError }} Puedes enviar tu solicitud igualmente; un asesor te compartirá la cuota.
+          </p>
 
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-1" v-html="'Correo Electrónico (Opcional)'"></label>
@@ -147,6 +150,8 @@ import { useRoute } from 'vue-router'
 import { useTracking } from '~/composables/useTracking'
 import { leadService } from '~/services/LeadService'
 import { quotationService } from '~/services/QuotationService'
+import { FinancingRateUnavailableError } from '~/services/FinancingRateService'
+import { formatPesos } from '#shared/utils/financing'
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
@@ -169,6 +174,19 @@ const { getVisitorUuid, trackFormStart, trackFormSubmit, trackWhatsAppClick, tra
 const isSubmitting = ref(false)
 const isSuccess = ref(false)
 const currentQuote = ref(null)
+// Si no hay tasa vigente no se muestra ninguna cuota (ni una anterior): solo este aviso.
+const quoteError = ref(null)
+
+async function refreshQuote() {
+  if (!(form.requested_amount && form.installments)) return
+  try {
+    currentQuote.value = await quotationService.calculateQuotation(form.requested_amount, form.installments, form.procedure)
+    quoteError.value = null
+  } catch (e) {
+    currentQuote.value = null
+    quoteError.value = e instanceof FinancingRateUnavailableError ? e.message : 'No fue posible calcular la cuota estimada en este momento.'
+  }
+}
 
 const form = reactive({
   full_name: '',
@@ -194,10 +212,8 @@ watch(() => props.isOpen, async (newVal) => {
     form.installments = props.installments || null
     form.city = props.city || ''
     
-    // Obtener cotización real (mock) desde el QuotationService sin conocer la fórmula en UI
-    if (form.requested_amount && form.installments) {
-      currentQuote.value = await quotationService.calculateQuotation(form.requested_amount, form.installments, form.procedure);
-    }
+    // Cotización con la tasa mensual configurada en el panel (QuotationService), sin conocer la fórmula en la UI
+    await refreshQuote()
       
     trackFormStart(route.fullPath, form.procedure, form.requested_amount, form.installments, currentQuote.value?.monthlyPayment || null)
   } else {
@@ -207,11 +223,7 @@ watch(() => props.isOpen, async (newVal) => {
 })
 
 // Actualizar cotización si cambia monto o cuotas dentro del modal
-watch([() => form.requested_amount, () => form.installments], async () => {
-  if (form.requested_amount && form.installments) {
-    currentQuote.value = await quotationService.calculateQuotation(form.requested_amount, form.installments, form.procedure);
-  }
-})
+watch([() => form.requested_amount, () => form.installments], () => refreshQuote())
 
 onUnmounted(() => {
   document.body.style.overflow = ''
@@ -276,7 +288,13 @@ const submitLead = async () => {
     procedure_name: form.procedure,
     requested_amount: form.requested_amount,
     installments: form.installments,
-    comments: form.comments
+    comments: form.comments,
+    metadata: {
+      // Condiciones con las que se cotizó: una solicitud conserva su tasa aunque la tasa vigente cambie después.
+      quote_rate_percent: currentQuote.value?.ratePercent ?? null,
+      quote_rate_version: currentQuote.value?.rateUpdatedAt ?? null,
+      quote_monthly_payment: currentQuote.value ? Math.round(currentQuote.value.monthlyPayment) : null
+    }
   }
 
   try {

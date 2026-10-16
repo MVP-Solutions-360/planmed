@@ -94,7 +94,7 @@ La página alterna fondos blanco/verde para marcar cada sección:
 4. **¿Cómo financiamos?** (blanco): video.
 5. **Simula tu financiación** (verde): título y ventajas (Planes flexibles, Seguro y confiable, Asesor personal).
 6. **Simulador** (blanco): elegir procedimiento, ciudad (Medellín, Cali, Barranquilla, Por definir), monto ($1 M a $100 M, de a $500 mil) y plazo (12, 18, 24, 36, 48, 60 o 72 meses). Muestra la **cuota mensual estimada**, el total a financiar y el plazo, y el botón *Solicitar financiación* que abre la ventana «Inicia tu proceso ahora».
-   - ⚠ **Estado:** la cotización usa una **tasa de ejemplo (2 % mensual)** y la solicitud de la ventana **no se envía a ningún sistema** (solo se registra en la consola del navegador). Las reglas de tasa y financiación no se tocaron. Ver §5.
+   - ⚠ **Estado:** la cotización usa la **tasa de usura mensual configurada en el panel** (Configuración → Tasa de usura; arranca en 2 %) y, si no puede leerse, muestra «Simulación no disponible» en lugar de una cuota. La solicitud de la ventana **no se envía a ningún sistema** (solo se registra en la consola del navegador). La cuota es la fórmula exacta de cuota fija, sin redondeo a centenas. Ver §5.
 7. **Preguntas frecuentes** (verde, acordeón sobre tarjeta blanca) y 8. **Contacto** (claro), los mismos de «Nosotros».
 - Si se llega desde un procedimiento (`/financiacion?procedureId=…#calculadora`) el simulador abre con ese procedimiento elegido.
 

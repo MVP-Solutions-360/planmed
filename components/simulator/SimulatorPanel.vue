@@ -83,7 +83,13 @@
       <div class="bg-[#0C2619] text-white p-8 md:p-10 shadow-xl lg:sticky lg:top-28">
         <h3 class="text-xs font-bold tracking-widest text-[#848484] uppercase mb-8">CUOTA ESTIMADA</h3>
     
-        <div v-if="isLoading && !currentQuote" class="flex flex-col gap-4 animate-pulse">
+        <div v-if="quoteError" role="alert" data-testid="simulator-unavailable" class="text-sm text-white/90 leading-relaxed border border-[#D3A76A]/60 bg-black/30 p-5">
+          <p class="font-bold text-[#D3A76A] uppercase tracking-wider text-xs mb-2">Simulación no disponible</p>
+          <p>{{ quoteError }}</p>
+          <button type="button" class="mt-4 underline text-xs font-bold tracking-widest uppercase" @click="submitSimulation">Reintentar</button>
+        </div>
+
+        <div v-else-if="isLoading && !currentQuote" class="flex flex-col gap-4 animate-pulse">
           <div class="h-12 bg-[#313030] rounded w-3/4 mb-4"></div>
           <div class="h-6 bg-[#313030] rounded w-1/2"></div>
         </div>
@@ -158,6 +164,7 @@ const {
   procedure,
   city,
   currentQuote,
+  quoteError,
   isLoading,
   formatCurrency,
   displayAmount,

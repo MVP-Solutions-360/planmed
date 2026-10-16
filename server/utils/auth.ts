@@ -8,6 +8,8 @@ export interface PublicAdminUser {
   email: string
   role: { id: number, name: string }
   isAreaLeader: boolean
+  /** Puede ver y modificar la tasa de interés del simulador (líder o rol de diseño configurado). Solo informativo para la UI. */
+  canEditRate: boolean
 }
 
 interface AdminSessionData {
@@ -53,13 +55,14 @@ export function isAuthorizedUser(event: H3Event, user: WellezyUser): boolean {
 }
 
 // Solo los datos públicos mínimos: nunca el token ni los permisos.
-export function toPublicUser(user: WellezyUser): PublicAdminUser {
+export function toPublicUser(user: WellezyUser, event?: H3Event): PublicAdminUser {
   return {
     id: Number(user.id),
     name: user.name,
     email: user.email,
     role: { id: Number(user.role!.id), name: user.role!.name },
-    isAreaLeader: user.is_area_leader === true
+    isAreaLeader: user.is_area_leader === true,
+    canEditRate: event ? canManageFinancingRate(event, user) : user.is_area_leader === true
   }
 }
 
@@ -83,6 +86,30 @@ export async function requireAreaLeader(event: H3Event): Promise<WellezyUser> {
   return user
 }
 
+export interface ConfigAccess { ok: true, canManageLine: boolean, canManageRate: boolean }
+
+// Acceso a la pantalla Configuración: líder de la línea (colaboradores + tasa) o rol con permiso sobre la tasa (solo la tasa).
+// Se consulta Hub en cada llamada. 401 sin sesión · 403 sin ninguna de las dos · 503 si Hub no responde.
+export async function resolveConfigAccess(event: H3Event): Promise<ConfigAccess> {
+  const session = await useAdminSession(event)
+  const token = session.data.token
+  if (!token) throw authError(401, 'No autenticado')
+
+  const res = await wellezyMe(event, token)
+  if (res.status === 401) {
+    await session.clear()
+    throw authError(401, 'No autenticado')
+  }
+  if (res.status !== 200) throw authError(503, MSG_UNAVAILABLE)
+
+  const user = res.data!.user
+  const canManageLine = isAuthorizedUser(event, user) && user.is_area_leader === true
+  const canManageRate = canManageFinancingRate(event, user)
+  if (!canManageLine && !canManageRate) throw authError(403, MSG_CONFIG_FORBIDDEN)
+  return { ok: true, canManageLine, canManageRate }
+}
+
+export const MSG_CONFIG_FORBIDDEN = 'No tienes acceso a la configuración.'
 export const MSG_UNAVAILABLE = 'No fue posible conectar con el servicio de autenticación. Intenta nuevamente.'
 export const MSG_LEADER_ONLY = 'Solo el líder de la línea puede acceder a la configuración.'
 export const MSG_FORBIDDEN = 'No tienes acceso al panel administrativo de Planmed.'

@@ -15,11 +15,11 @@
 
 ### 1.2 Permisos (importante)
 - Casi todo el contenido se guarda en **Wellezy Hub**, y es el Hub quien decide qué puedes hacer (ver, crear, editar, eliminar) en cada módulo. Si el Hub te niega una acción, el panel lo avisa con un mensaje; pídele a quien administra el Hub que ajuste tus permisos.
-- **Configuración** y la gestión de usuarios de la línea son solo para el **líder de la línea**.
+- **Configuración**: la gestión de usuarios de la línea es solo para el **líder de la línea**; la **tasa de usura mensual** la pueden ver y cambiar el líder y la **diseñadora**.
 - Los módulos propios de la web (**Nosotros** y **Clínicas aliadas**) solo exigen que sigas autorizado como usuario del panel; la web lo vuelve a comprobar con el Hub cada vez que guardas.
 
 ### 1.3 Recorrido por la pantalla
-- **Menú lateral izquierdo (fijo):** no se mueve al desplazarte por la página. Grupos: *Dashboard* · *Contenido* (Procedimientos, Noticias, Nuestros Pacientes, Recomendaciones, **Nosotros ▾** con Nosotros y Clínicas aliadas, Micrositios) · *Administración* (Configuración, solo líder).
+- **Menú lateral izquierdo (fijo):** no se mueve al desplazarte por la página. Grupos: *Dashboard* · *Contenido* (Procedimientos, Noticias, Nuestros Pacientes, Recomendaciones, **Nosotros ▾** con Nosotros y Clínicas aliadas, Micrositios) · *Administración* (Configuración, líder y diseñadora).
 - **Barra superior:** tu nombre, rol y «Cerrar sesión».
 - **Dashboard (`/admin`):** tarjetas que llevan a cada módulo.
 
@@ -143,11 +143,12 @@ Dos bloques, con **dos botones de guardado distintos**:
 > **Accesos directos al Hub.** El Hub es `https://wellezyhub.com`. Solo *Procedimientos*, *Noticias* y *Usuarios* tienen pantalla propia allí; *Nuestros Pacientes*, *Recomendaciones* y *Micrositios (PRP)* se guardan en el Hub pero **se editan únicamente desde este panel**. La pestaña «Guía del panel» muestra cada acceso en su módulo.
 
 ## 9. Módulo Configuración
-**Ruta:** `Administración → Configuración` (solo líder de la línea). Tiene dos pestañas. **Acceso directo al Hub:** [Usuarios](https://wellezyhub.com/users).
-- **Configuración:** lista de **colaboradores de la línea** (solo lectura, tomada de Wellezy Hub): nombre (con la etiqueta *Líder* si corresponde), correo, rol y estado (Activo/Inactivo). Incluye búsqueda por nombre o correo, filtro por estado y paginación (15 por página). Se listan las personas **con usuario** cuya empresa y línea son las del usuario que inició sesión; en el entorno local son los IDs de la base local y, al pasar a producción, los de la base real, sin tocar la web. Activar/desactivar usuarios aún no está disponible desde el panel.
+**Ruta:** `Administración → Configuración` (líder de la línea y diseñadora). Tiene tres pestañas; la diseñadora solo ve *Tasa de usura* y *Guía del panel*. **Acceso directo al Hub:** [Usuarios](https://wellezyhub.com/users).
+- **Tasa de usura:** muestra la **tasa de interés mensual vigente** del simulador (con la fecha y quién la cambió) y permite escribir una nueva: porcentaje mensual con **punto decimal** y hasta **cuatro decimales** (`2`, `2.12`, `2.0126`; mayor que 0 y hasta 5 %). Pide confirmación, valida en el servidor y guarda un historial. Se aplica tal cual al cálculo de la cuota en el simulador de `/financiacion` y en el formulario «Solicitar financiación». En el primer despliegue arranca en 2.0000 %. Se guarda en el servidor de la web (no en Wellezy Hub). Si dos personas editan a la vez, la segunda recibe un aviso y debe recargar.
+- **Configuración (solo líder):** lista de **colaboradores de la línea** (solo lectura, tomada de Wellezy Hub): nombre (con la etiqueta *Líder* si corresponde), correo, rol y estado (Activo/Inactivo). Incluye búsqueda por nombre o correo, filtro por estado y paginación (15 por página). Se listan las personas **con usuario** cuya empresa y línea son las del usuario que inició sesión; en el entorno local son los IDs de la base local y, al pasar a producción, los de la base real, sin tocar la web. Activar/desactivar usuarios aún no está disponible desde el panel.
 - **Guía del panel:** el contenido descrito abajo.
 
-Un usuario que no es líder recibe un error 403 al entrar.
+Un usuario que no es líder ni tiene el rol de diseño autorizado recibe un error 403 al entrar. La diseñadora no puede abrir la pestaña de colaboradores aunque cambie la URL: el servidor se lo niega.
 
 La pestaña **Guía del panel** contiene: (1) *Dónde se guarda cada cosa*, con la tabla de qué módulos se actualizan en **Wellezy Hub** y cuáles viven **solo en la web** (y qué páginas están en el código); (2) *Cómo usar cada opción del panel*, un acordeón por módulo con pasos y advertencias; (3) *Reglas que valen para todo el panel*. Los datos de esa guía están en `utils/adminGuide.ts`: si cambia un módulo, actualízalo ahí y en este documento.
 

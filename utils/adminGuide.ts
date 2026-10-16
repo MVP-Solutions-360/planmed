@@ -174,12 +174,16 @@ export const GUIDE_MODULES: GuideModule[] = [
     storage: 'hub',
     publicEffect: 'No afecta la web pública.',
     steps: [
-      'Solo el líder de la línea puede entrar.',
-      'Pestaña Configuración: lista los colaboradores (con usuario) de la misma empresa y línea que tu usuario. Busca por nombre o correo, filtra por Activos o Inactivos y pasa de página.',
+      'Pueden entrar el líder de la línea y la diseñadora. El líder ve las pestañas Configuración y Tasa de usura; la diseñadora solo ve Tasa de usura y la guía.',
+      'Pestaña Tasa de usura: muestra la tasa de interés mensual vigente (con quién y cuándo la cambió), permite escribir una nueva con punto decimal y hasta cuatro decimales (por ejemplo 2.0126) y guarda el historial. El simulador de Financiación y el formulario «Solicitar financiación» calculan la cuota con exactamente esa tasa; si no se puede leer, muestran que la simulación no está disponible.',
+      'Pestaña Configuración (solo líder): lista los colaboradores (con usuario) de la misma empresa y línea que tu usuario. Busca por nombre o correo, filtra por Activos o Inactivos y pasa de página.',
       'El listado es de solo lectura: activar o desactivar usuarios todavía no está disponible desde el panel.',
       'Pestaña Guía del panel: esta guía, con cómo usar cada módulo y dónde vive cada contenido.'
     ],
-    notes: ['La empresa y la línea salen del usuario con el que iniciaste sesión, no se configuran en la web.'],
+    notes: [
+      'La empresa y la línea salen del usuario con el que iniciaste sesión, no se configuran en la web.',
+      'La tasa se guarda en el servidor de la web (no en Wellezy Hub). Al desplegar por primera vez arranca en 2.0000 % mensual y no se vuelve a pisar.'
+    ],
     hubLinks: [{ label: 'Usuarios en el Hub', path: '/users' }]
   }
 ]
@@ -189,7 +193,7 @@ export const GUIDE_FIXED_PAGES: { name: string, route: string, note: string }[] 
   { name: 'Inicio (textos)', route: '/', note: 'Solo cambian los procedimientos destacados y las clínicas de «Red médica aliada».' },
   { name: 'Quiénes somos', route: '/quienes-somos', note: 'Texto y videos fijos.' },
   { name: 'Servicios', route: '/servicios', note: 'Fijo; las preguntas frecuentes se editan en Nosotros.' },
-  { name: 'Financiación y simulador', route: '/financiacion', note: 'Fijo; las preguntas frecuentes y el contacto se editan en Nosotros. El simulador usa una tasa de ejemplo.' },
+  { name: 'Financiación y simulador', route: '/financiacion', note: 'Fijo; las preguntas frecuentes y el contacto se editan en Nosotros. El simulador usa la tasa de usura mensual que se configura en Configuración.' },
   { name: 'Estudio de créditos', route: '/estudio-de-creditos', note: 'Formulario maquetado (aún no funcional).' },
   { name: 'Información precontractual', route: '/informacion-precontractual', note: 'Texto legal fijo.' },
   { name: 'Política de datos personales', route: '/politica-datos-personales', note: 'Texto y enlaces a PDF fijos.' },
