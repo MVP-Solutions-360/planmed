@@ -66,6 +66,8 @@
         <p class="mt-10 text-xs text-gray-500 font-light text-center max-w-2xl mx-auto">
           Los resultados varían según cada paciente. Toda cirugía requiere valoración médica previa.
         </p>
+
+        <TestimonialsSocial />
       </template>
     </div>
   </div>

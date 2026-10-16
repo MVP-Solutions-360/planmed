@@ -74,18 +74,7 @@
       </section>
 
       <!-- Redes -->
-      <section class="mt-14 text-center">
-        <p class="text-[11px] font-bold tracking-[0.15em] text-[#848484] uppercase mb-5">Conoce más testimonios en nuestras redes sociales</p>
-        <div class="flex flex-wrap justify-center gap-3">
-          <a v-for="s in socials" :key="s.label" :href="s.href" target="_blank" rel="noopener noreferrer"
-            class="px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase border border-[#0C2619] text-[#0C2619] hover:bg-[#0C2619] hover:text-white transition-colors">
-            {{ s.label }}
-          </a>
-          <NuxtLink to="/financiacion#calculadora" class="px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase bg-[#0C2619] text-white border border-[#0C2619] hover:bg-black transition-colors">
-            Simular financiación
-          </NuxtLink>
-        </div>
-      </section>
+      <TestimonialsSocial />
 
     </div>
   </div>
@@ -106,12 +95,6 @@ const quotes = [
   'Planmed fue mi solución cuando nadie más me daba la oportunidad.',
   'Gracias a la financiación pude hacerme la cirugía sin esperar años.',
   'Después de una mala experiencia, ellos me guiaron con los mejores médicos y el apoyo que necesitaba.'
-]
-// TODO: reemplazar por las URLs oficiales de las redes de Planmed (hoy el Footer también usa "#").
-const socials = [
-  { label: 'Instagram', href: '#' },
-  { label: 'Facebook', href: '#' },
-  { label: 'TikTok', href: '#' }
 ]
 
 const empty: TestimonialsContent = { visibility: { videos: true, beforeAfter: true }, videos: [], beforeAfter: [], instagram: [], referral: { title: '', content: '' } }
