@@ -1,5 +1,5 @@
 <template>
-  <div class="border border-gray-200 rounded-lg bg-gray-50 focus-within:ring-2 focus-within:ring-[#0C2619] focus-within:border-transparent">
+  <div class="relative border border-gray-200 rounded-lg bg-gray-50 focus-within:ring-2 focus-within:ring-[#0C2619] focus-within:border-transparent">
     <div v-if="editor && !readonly" class="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-white rounded-t-lg">
       <button v-for="b in buttons" :key="b.label" type="button" :title="b.title" :aria-label="b.title"
         @click="b.run()"
@@ -9,6 +9,7 @@
       </button>
     </div>
     <EditorContent :editor="editor" class="rich-content px-4 py-3 text-sm" />
+    <p v-if="placeholder && editor && editor.isEmpty && !readonly" class="pointer-events-none absolute left-4 text-sm text-gray-400" :class="editor && !readonly ? 'top-[3.65rem]' : 'top-3'" data-testid="editor-placeholder">{{ placeholder }}</p>
   </div>
 </template>
 
@@ -18,7 +19,7 @@ import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { sanitizeRichHtml } from '~/utils/richText'
 
-const props = withDefaults(defineProps<{ modelValue?: string, minHeight?: string, readonly?: boolean }>(), { modelValue: '', minHeight: '9rem', readonly: false })
+const props = withDefaults(defineProps<{ modelValue?: string, minHeight?: string, readonly?: boolean, placeholder?: string }>(), { modelValue: '', minHeight: '9rem', readonly: false, placeholder: '' })
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 function currentHtml(): string {

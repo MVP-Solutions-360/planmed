@@ -109,16 +109,16 @@ export const GUIDE_MODULES: GuideModule[] = [
   {
     id: 'recomendaciones',
     title: 'Recomendaciones',
-    route: '/admin/recomendaciones',
+    route: '/admin/recomendaciones/temas',
     storage: 'hub',
-    publicEffect: 'Menú «Recomendaciones» y sus páginas (cita de preanestesia, prequirúrgicas, cuidados y cita de revisión).',
+    publicEffect: 'Menú «Recomendaciones» por temas principales y sus subtemas (/recomendaciones/tema/subtema), con sus secciones y recomendaciones.',
     steps: [
-      'Páginas generales: «+ Agregar», luego título, video de YouTube e imagen opcionales, y contenido. Usa las listas para que se vean con los ✓ del diseño.',
-      'Cambia el estado entre Visible y Oculta; guarda antes de publicar u ocultar. «Eliminar página» la borra definitivamente.',
-      'Contenido por procedimiento: busca el procedimiento y edita su texto de Cuidados o de Cita de revisión. Vacío = ese procedimiento no aparece en ese menú.',
-      'Cada elemento se guarda por separado con su propio botón Guardar.'
+      'Crea un tema principal y ábrelo para añadir sus subtemas; cada subtema es una página con su introducción, sus secciones y su enlace corto.',
+      'En el subtema edita la introducción (texto, imagen y vídeo) y añade secciones: descripción, lista de recomendaciones, texto con botón, contacto o personalizada. El botón es opcional.',
+      'En las secciones de lista añade cada recomendación individual; ordénalas con las flechas y publícalas u ocúltalas.',
+      'Un tema solo se elimina sin subtemas, un subtema sin secciones y una sección sin recomendaciones. El Hub decide tus permisos.'
     ],
-    notes: ['Si no se puede consultar la lista del Hub, la edición se bloquea hasta reintentar, para no publicar nada equivocado.']
+    notes: ['Un tema oculto oculta todos sus subtemas en la web. El enlace corto lo genera el Hub al publicar.']
   },
   {
     id: 'micrositios',

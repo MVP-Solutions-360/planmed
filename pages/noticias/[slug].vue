@@ -16,8 +16,6 @@
             <time :datetime="article.publishedAt!">
               {{ new Date(article.publishedAt!).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) }}
             </time>
-            <span v-if="article.author" class="w-1 h-1 rounded-full bg-[#D3A76A]"></span>
-            <span v-if="article.author" class="text-[#848484]">{{ article.author }}</span>
           </div>
           <h1 class="font-serif text-[40px] md:text-[56px] font-medium leading-[1.1] tracking-[-0.02em] text-black uppercase">
             {{ article.title }}

@@ -53,7 +53,7 @@ describe('clasificación de recomendaciones', () => {
   })
 
   test('la vista solo renderiza «Sin asociación» con v-if sobre esa condición (nunca una categoría vacía permanente)', () => {
-    const vue = read('pages/admin/recomendaciones/index.vue')
+    const vue = read('pages/admin/recomendaciones/historico.vue')
     assert.match(vue, /v-if="hasUnassociated\(classification\)"[^>]*>/)
   })
 })
@@ -104,7 +104,7 @@ describe('fuente publicada (misma regla que la web pública)', () => {
   test('la fuente se delega en resolveRecommendation: el panel no define una regla paralela', () => {
     const src = read('utils/recommendationsAdmin.ts')
     assert.match(src, /deps\.resolve\(/)
-    assert.match(read('pages/admin/recomendaciones/index.vue'), /import \{ resolveRecommendation \} from '~\/utils\/recommendationSource'/)
+    assert.match(read('pages/admin/recomendaciones/historico.vue'), /import \{ resolveRecommendation \} from '~\/utils\/recommendationSource'/)
   })
 
   test('«Ver en la web»: solo con destino real (publicada / con contenido / procedimiento activo)', () => {
@@ -258,7 +258,7 @@ describe('prevención de pérdida de cambios sin guardar', () => {
   })
 
   test('la pantalla protege también la salida de la ruta y el cierre de la pestaña', () => {
-    const vue = read('pages/admin/recomendaciones/index.vue')
+    const vue = read('pages/admin/recomendaciones/historico.vue')
     assert.match(vue, /onBeforeRouteLeave/)
     assert.match(vue, /beforeunload/)
   })
@@ -306,7 +306,7 @@ describe('guardado del elemento correcto', () => {
     ctl.draft('page:a').title = 'Otro título'
     await ctl.save('page:a')
     assert.equal(calls.savePage[0].slug, 'a')
-    assert.doesNotMatch(read('pages/admin/recomendaciones/index.vue') + read('components/admin/recommendations/PageEditor.vue'), /v-model="draft\.slug"/)
+    assert.doesNotMatch(read('pages/admin/recomendaciones/historico.vue') + read('components/admin/recommendations/PageEditor.vue'), /v-model="draft\.slug"/)
   })
 
   test('sin solicitudes duplicadas: dos guardados simultáneos hacen una sola llamada', async () => {
@@ -497,7 +497,7 @@ describe('errores de API sin perder el contenido', () => {
 })
 
 describe('diseño de la pantalla', () => {
-  const vue = read('pages/admin/recomendaciones/index.vue')
+  const vue = read('pages/admin/recomendaciones/historico.vue')
 
   test('dos pestañas principales y subpestañas por tipo, sin pestañas principales por tipo', () => {
     assert.match(vue, /Recomendaciones generales/)

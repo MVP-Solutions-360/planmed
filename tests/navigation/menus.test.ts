@@ -9,12 +9,10 @@ import { pathToFileURL } from 'node:url'
 import { ROOT } from '../recommendations/harness.ts'
 
 const { buildMenus } = await import(pathToFileURL(join(ROOT, 'utils/navMenus.ts')).href)
-const { RECOMMENDATION_KINDS } = await import(pathToFileURL(join(ROOT, 'utils/recommendationKinds.ts')).href)
 
 const both = { videos: true, beforeAfter: true }
-const page = (slug, group, menuLabel = slug) => ({ slug, group, menuLabel })
-const proc = (slug, name, over = {}) => ({ slug, name, tiene_recomendaciones_post: false, tiene_recomendaciones_revision: false, ...over })
-const build = (over = {}) => buildMenus({ visibility: both, pages: [], procedures: [], ...over }, RECOMMENDATION_KINDS)
+const topicOf = (slug, label, subs) => ({ slug, menuLabel: label, subtopics: subs.map(([s, l]) => ({ slug: s, menuLabel: l })) })
+const build = (over = {}) => buildMenus({ visibility: both, topics: [], ...over })
 const byLabel = (menus, label) => menus.find(m => m.label === label)
 
 describe('Nuestros Pacientes', () => {
@@ -31,75 +29,43 @@ describe('Nuestros Pacientes', () => {
   })
 })
 
-describe('Recomendaciones', () => {
-  test('sin contenido publicado ni procedimientos con texto: el menú RECOMENDACIONES no se muestra', () => {
-    const menus = build({ procedures: [proc('a', 'A'), proc('b', 'B')] })
+describe('Recomendaciones: una sola fuente (el árbol vigente de Hub)', () => {
+  test('sin temas publicados el menú RECOMENDACIONES no se muestra', () => {
+    const menus = build()
     assert.equal(byLabel(menus, 'RECOMENDACIONES'), undefined)
     assert.equal(menus.length, 1)
   })
 
-  test('páginas generales publicadas aparecen sueltas, en el orden que entrega el Hub', () => {
-    const m = byLabel(build({ pages: [page('cita-preanestesia', 'general', 'Cita de preanestesia'), page('otra', 'general', 'Otra')] }), 'RECOMENDACIONES')
-    assert.deepEqual(m.items.map(i => [i.to, i.label]), [['/recomendaciones/cita-preanestesia', 'Cita de preanestesia'], ['/recomendaciones/otra', 'Otra']])
-    assert.equal(m.flip, true)
+  test('páginas históricas, procedimientos con texto y sus grupos «cuidados»/«revisión» NO construyen el menú (causa de los duplicados)', () => {
+    // Aunque el llamador (o un valor heredado) los pase, buildMenus ignora cualquier fuente que no sea el árbol.
+    const menus = buildMenus({
+      visibility: both,
+      topics: [topicOf('cuidados-de-cirugias', 'Recomendaciones cuidados de cirugías', [['abdomen', 'Cuidado de abdominoplastia']])],
+      pages: [{ slug: 'cuidado-de-abdominoplastia', group: 'cuidados', menuLabel: 'Cuidado de abdominoplastia' }, { slug: 'x', group: 'general', menuLabel: 'X' }],
+      procedures: [{ slug: 'lipo', name: 'Lipo', tiene_recomendaciones_post: true, tiene_recomendaciones_revision: true }]
+    })
+    const m = byLabel(menus, 'RECOMENDACIONES')
+    assert.deepEqual(m.items.map(i => i.label), ['Recomendaciones cuidados de cirugías'])
+    const all = JSON.stringify(m)
+    for (const legacy of ['/recomendaciones/cuidados"', '/recomendaciones/revision"', '/recomendaciones/cuidados/lipo', '/recomendaciones/x']) assert.equal(all.includes(legacy), false, legacy)
   })
 
-  test('cuidados: una entrada por procedimiento con texto; los que no lo tienen no aparecen', () => {
-    const m = byLabel(build({ procedures: [proc('mamoplastia', 'Mamoplastia', { tiene_recomendaciones_post: true }), proc('lipo', 'Lipo')] }), 'RECOMENDACIONES')
-    const group = m.items[0]
-    assert.equal(group.to, '/recomendaciones/cuidados')
-    assert.equal(group.label, RECOMMENDATION_KINDS.cuidados.menuLabel)
-    assert.deepEqual(group.children.map(c => [c.to, c.label]), [['/recomendaciones/cuidados/mamoplastia', 'Cuidado de Mamoplastia']])
-  })
-
-  test('revisión: usa su propio indicador y conserva la ruta de Revisión de mamoplastia', () => {
-    const m = byLabel(build({ procedures: [proc('mamoplastia', 'Mamoplastia', { tiene_recomendaciones_revision: true }), proc('lipo', 'Lipo', { tiene_recomendaciones_post: true })] }), 'RECOMENDACIONES')
-    const revision = m.items.find(i => i.to === '/recomendaciones/revision')
-    assert.deepEqual(revision.children.map(c => [c.to, c.label]), [['/recomendaciones/revision/mamoplastia', 'Revisión Mamoplastia']])
-    assert.deepEqual(m.items.find(i => i.to === '/recomendaciones/cuidados').children.map(c => c.to), ['/recomendaciones/cuidados/lipo'])
-  })
-
-  test('páginas independientes de los grupos cuidados y revisión van dentro de su submenú, tras los procedimientos', () => {
-    const m = byLabel(build({
-      pages: [page('prequirurgicas', 'revision', 'Prequirúrgicas'), page('dieta', 'cuidados', 'Dieta')],
-      procedures: [proc('mamoplastia', 'Mamoplastia', { tiene_recomendaciones_revision: true })]
-    }), 'RECOMENDACIONES')
-    assert.deepEqual(m.items.find(i => i.to === '/recomendaciones/revision').children.map(c => c.to), ['/recomendaciones/revision/mamoplastia', '/recomendaciones/prequirurgicas'])
-    assert.deepEqual(m.items.find(i => i.to === '/recomendaciones/cuidados').children.map(c => c.to), ['/recomendaciones/dieta'])
-  })
-
-  test('un grupo solo con páginas (sin procedimientos) igual muestra su submenú', () => {
-    const m = byLabel(build({ pages: [page('prequirurgicas', 'revision', 'Prequirúrgicas')] }), 'RECOMENDACIONES')
-    assert.equal(m.items.length, 1)
-    assert.equal(m.items[0].to, '/recomendaciones/revision')
-  })
-
-  test('contenido despublicado: el Hub no lo entrega, así que no hay forma de que aparezca (la lista pública es la única fuente)', () => {
-    // Antes de publicar: ni la página ni el indicador existen en la respuesta pública.
-    const before = build({ pages: [], procedures: [proc('mamoplastia', 'Mamoplastia', { tiene_recomendaciones_post: false })] })
-    assert.equal(byLabel(before, 'RECOMENDACIONES'), undefined)
-    const after = build({ pages: [page('dieta', 'general', 'Dieta')] })
-    assert.equal(byLabel(after, 'RECOMENDACIONES').items.length, 1)
-  })
-
-  test('solo se usan procedimientos de la lista pública (activos y habilitados para la línea): un indicador ausente o distinto de true no cuenta', () => {
-    const m = build({ procedures: [proc('a', 'A', { tiene_recomendaciones_post: 'true' }), proc('b', 'B', { tiene_recomendaciones_post: 1 }), { slug: 'c', name: 'C' }] })
-    assert.equal(byLabel(m, 'RECOMENDACIONES'), undefined)
+  test('cada texto del menú sale una sola vez aunque el tema y su subtema se llamen igual (no se filtra por nombre)', () => {
+    const m = byLabel(build({ topics: [topicOf('t', 'Mismo nombre', [['s', 'Mismo nombre']])] }), 'RECOMENDACIONES')
+    assert.deepEqual(m.items.map(i => i.to), ['/recomendaciones/t'])
+    assert.deepEqual(m.items[0].children.map(c => c.to), ['/recomendaciones/t/s'])
   })
 })
 
 describe('errores del Hub (listas vacías por defecto)', () => {
   test('si Hub no responde, Pacientes sale completo y Recomendaciones no se muestra (nunca un menú roto)', () => {
-    const menus = buildMenus({ visibility: { videos: true, beforeAfter: true }, pages: [], procedures: [] }, RECOMMENDATION_KINDS)
+    const menus = buildMenus({ visibility: { videos: true, beforeAfter: true }, topics: [] })
     assert.deepEqual(menus.map(m => m.label), ['NUESTROS PACIENTES'])
     assert.equal(menus[0].items.length, 3)
   })
 
   test('todos los enlaces generados son rutas internas válidas', () => {
-    const menus = build({
-      pages: [page('cita', 'general'), page('x', 'cuidados'), page('y', 'revision')],
-      procedures: [proc('a', 'A', { tiene_recomendaciones_post: true, tiene_recomendaciones_revision: true })]
-    })
+    const menus = build({ topics: [topicOf('uno', 'Uno', [['a', 'A'], ['b', 'B']]), topicOf('dos', 'Dos', [['c', 'C']])] })
     const links = menus.flatMap(m => [m.to, ...m.items.flatMap(i => [i.to, ...(i.children ?? []).map(c => c.to)])])
     for (const to of links) assert.match(to, /^\/[a-z0-9/-]*$/, to)
   })
@@ -112,7 +78,8 @@ describe('Navbar.vue', () => {
     assert.match(navbar, /useAsyncData\('patient-section'/)
     assert.match(navbar, /useAsyncData\('nav-recommendations'/)
     assert.match(navbar, /publicTestimonialsService\.getContent\(\)/)
-    assert.match(navbar, /publicRecommendationsService\.getPages\(\)/)
+    assert.match(navbar, /publicRecommendationsService\.getTopics\(\)/)
+    assert.equal(/getPages\(\)/.test(navbar), false, 'el menú ya no consulta el contrato histórico')
     assert.match(navbar, /publicProcedureService\.getProcedures\(\)/)
     assert.equal(/onMounted\([^)]*(Service|load)/.test(navbar), false)
     assert.equal(/localStorage|MockTestimonials|MockRecommendations|[^c]testimonialsService|[^c]recommendationsService/.test(navbar), false)
@@ -128,5 +95,70 @@ describe('Navbar.vue', () => {
   test('el submenú de segundo nivel de recomendaciones tiene altura máxima con scroll interno (escritorio) y el menú móvil scrollea', () => {
     assert.match(navbar, /max-h-\[70vh\] overflow-y-auto/)
     assert.match(navbar, /max-h-\[calc\(100dvh-88px\)\] overflow-y-auto/)
+  })
+})
+
+// ── Árbol de recomendaciones (temas principales → subtemas) ───────────────────────────────────────────────────────────────────
+
+describe('Recomendaciones: temas principales con sus subtemas', () => {
+  test('varios temas con varios subtemas: cada tema es una entrada y sus subtemas cuelgan de él, en el orden del Hub', () => {
+    const m = byLabel(build({ topics: [
+      topicOf('preanestesia', 'Cita de preanestesia', [['importancia', 'La importancia']]),
+      topicOf('cuidados', 'Cuidados de cirugías', [['abdomen', 'Abdominoplastia'], ['mama', 'Mamoplastia']])
+    ] }), 'RECOMENDACIONES')
+    assert.deepEqual(m.items.map(i => [i.to, i.label]), [['/recomendaciones/preanestesia', 'Cita de preanestesia'], ['/recomendaciones/cuidados', 'Cuidados de cirugías']])
+    assert.deepEqual(m.items[1].children.map(c => [c.to, c.label]), [['/recomendaciones/cuidados/abdomen', 'Abdominoplastia'], ['/recomendaciones/cuidados/mama', 'Mamoplastia']])
+  })
+
+  test('un subtema nunca aparece como entrada principal independiente', () => {
+    const m = byLabel(build({ topics: [topicOf('cuidados', 'Cuidados', [['abdomen', 'Abdominoplastia']])] }), 'RECOMENDACIONES')
+    assert.equal(m.items.some(i => i.to === '/recomendaciones/abdomen'), false)
+    assert.equal(m.items.every(i => i.children?.length), true)
+  })
+
+  test('temas sin subtemas utilizables no generan entrada; sin ningún tema el menú no aparece', () => {
+    const m = byLabel(build({ topics: [topicOf('vacio', 'Vacío', []), topicOf('bien', 'Bien', [['a', 'A']])] }), 'RECOMENDACIONES')
+    assert.deepEqual(m.items.map(i => i.to), ['/recomendaciones/bien'])
+    assert.equal(byLabel(build({ topics: [topicOf('vacio', 'Vacío', [])] }), 'RECOMENDACIONES'), undefined)
+  })
+
+  test('sin enlaces vacíos ni duplicados', () => {
+    const m = byLabel(build({ topics: [
+      topicOf('uno', 'Uno', [['a', 'A'], ['a', 'A otra vez'], ['', 'Sin slug'], ['b', '  ']]),
+      topicOf('', 'Sin slug', [['c', 'C']]),
+      topicOf('dos', 'Dos', [['a', 'A en otro tema']])
+    ] }), 'RECOMENDACIONES')
+    assert.deepEqual(m.items.map(i => i.to), ['/recomendaciones/uno'])
+    assert.deepEqual(m.items[0].children.map(c => c.to), ['/recomendaciones/uno/a'])
+    const links = JSON.stringify(m)
+    assert.equal(links.includes('"to":""'), false)
+  })
+
+  test('el enlace del menú principal lleva al primer tema; sin árbol cae en el índice de recomendaciones', () => {
+    assert.equal(byLabel(build({ topics: [topicOf('uno', 'Uno', [['a', 'A']])] }), 'RECOMENDACIONES').to, '/recomendaciones/uno')
+  })
+
+  test('el menú de Nuestros Pacientes no cambia con el árbol', () => {
+    const base = byLabel(build(), 'NUESTROS PACIENTES')
+    const withTree = byLabel(build({ topics: [topicOf('uno', 'Uno', [['a', 'A']])] }), 'NUESTROS PACIENTES')
+    assert.deepEqual(withTree, base)
+  })
+})
+
+describe('Navbar.vue alimenta el menú con el árbol y es responsive', () => {
+  const nav = readFileSync(join(ROOT, 'components/layout/Navbar.vue'), 'utf8')
+
+  test('pide el árbol al servicio público y lo pasa a buildMenus sin romper el resto si falla', () => {
+    assert.match(nav, /publicRecommendationsService\.getTopics\(\)/)
+    assert.match(nav, /Promise\.allSettled\(\[publicProcedureService\.getProcedures\(\), publicRecommendationsService\.getTopics\(\)\]\)/)
+    assert.match(nav, /topics: hubMenu\.value\?\.topics \?\? \[\]/)
+  })
+
+  test('escritorio: desplegable con submenú; móvil: <details> anidados con «Ver todo» y salto de línea en etiquetas largas', () => {
+    assert.match(nav, /group\/sub/)
+    assert.match(nav, /<details v-if="item\.children" class="group\/sub">/)
+    assert.match(nav, /Ver todo/)
+    assert.equal((nav.match(/break-words/g) ?? []).length >= 4, true)
+    assert.match(nav, /min-\[1360px\]:hidden/)
   })
 })

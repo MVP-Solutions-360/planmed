@@ -165,7 +165,7 @@ describe('los flujos específicos existentes no cambian', () => {
   })
 
   test('la pantalla de Recomendaciones del panel conserva sus errores por acción (no usa error.vue para validaciones)', () => {
-    assert.match(read('pages/admin/recomendaciones/index.vue'), /AdminRecommendationsErrorNotice/)
+    assert.match(read('pages/admin/recomendaciones/historico.vue'), /AdminRecommendationsErrorNotice/)
     assert.equal(/showError|createError/.test(read('utils/recommendationsAdmin.ts')), false)
   })
 })

@@ -1,20 +1,21 @@
 // Menús desplegables de la barra de navegación (NUESTROS PACIENTES y RECOMENDACIONES), como función pura para poder probarla.
 // Las entradas salen SOLO de lo que Wellezy Hub entrega públicamente para la línea de Planmed:
-//  - páginas de recomendaciones publicadas (el Hub no entrega las ocultas),
-//  - procedimientos activos y habilitados en la línea (la lista pública) con el indicador de que tienen ese texto,
+//  - RECOMENDACIONES: ÚNICAMENTE el árbol vigente (temas principales publicados con sus subtemas publicados, en el orden del Hub): cada
+//    tema es una entrada y sus subtemas cuelgan de él; un subtema NUNCA aparece como entrada suelta ni repetido. Las páginas del
+//    contrato histórico y los grupos por procedimiento («cuidados»/«revisión») YA NO construyen este menú: con el árbol convivían con
+//    los temas y los duplicaban (mismos textos, otra fuente). Siguen existiendo como rutas (/recomendaciones/cuidados/…) y en los
+//    listados por procedimiento, pero no en el menú,
 //  - visibilidad de videos y de antes/después de «Nuestros Pacientes».
-// Un grupo sin entradas no genera submenú, y un menú sin entradas no se muestra.
+// Un tema sin subtemas utilizables no genera entrada y un menú sin entradas no se muestra.
 
 export interface MenuItem { to: string, label: string, children?: MenuItem[] }
 export interface Menu { label: string, to: string, items: MenuItem[], flip?: boolean }
 
 export interface MenuInput {
   visibility: { videos: boolean, beforeAfter: boolean }
-  pages: Array<{ slug: string, group: string, menuLabel: string, procedureSlug?: string | null }>
-  procedures: Array<{ slug: string, name: string, [flag: string]: unknown }>
+  /** Árbol de recomendaciones de la API pública (`recommendation-topics`). */
+  topics?: Array<{ slug: string, menuLabel: string, subtopics: Array<{ slug: string, menuLabel: string }> }>
 }
-
-export interface MenuKind { menuLabel: string, flag: string, itemLabel: (name: string) => string }
 
 const PATIENTS_ITEMS = [
   { to: '/testimonios', label: 'Videos', key: 'videos' },
@@ -22,19 +23,19 @@ const PATIENTS_ITEMS = [
   { to: '/testimonios/programa-de-referidos', label: 'Programa de referidos', key: null }
 ] as const
 
-export function buildMenus(input: MenuInput, kinds: Record<'cuidados' | 'revision', MenuKind>): Menu[] {
-  const pageLink = (p: { slug: string, menuLabel: string }): MenuItem => ({ to: `/recomendaciones/${p.slug}`, label: p.menuLabel })
-
-  // Cuidados y revisión: una entrada por procedimiento con ese texto + las páginas independientes de ese grupo.
-  const procedureGroup = (kind: 'cuidados' | 'revision'): MenuItem[] => {
-    const meta = kinds[kind]
-    const children: MenuItem[] = [
-      ...input.procedures.filter(p => p[meta.flag] === true).map(p => ({ to: `/recomendaciones/${kind}/${p.slug}`, label: meta.itemLabel(p.name) })),
-      // Una página vinculada a un procedimiento ya está representada por la entrada de ese procedimiento (que apunta a su contenido).
-      ...input.pages.filter(p => p.group === kind && !p.procedureSlug).map(pageLink)
-    ]
-    return children.length ? [{ to: `/recomendaciones/${kind}`, label: meta.menuLabel, children }] : []
-  }
+export function buildMenus(input: MenuInput): Menu[] {
+  // Una entrada sin texto o sin slug no genera enlace (sin enlaces vacíos).
+  const usable = (x: { slug?: string, menuLabel?: string }) => typeof x.slug === 'string' && x.slug !== '' && typeof x.menuLabel === 'string' && x.menuLabel.trim() !== ''
+  const seen = new Set<string>()
+  const topicItems: MenuItem[] = (input.topics ?? []).filter(usable).flatMap((t) => {
+    const children: MenuItem[] = []
+    for (const s of t.subtopics.filter(usable)) {
+      if (seen.has(s.slug)) continue // el mismo subtema no se incorpora dos veces
+      seen.add(s.slug)
+      children.push({ to: `/recomendaciones/${t.slug}/${s.slug}`, label: s.menuLabel.trim() })
+    }
+    return children.length ? [{ to: `/recomendaciones/${t.slug}`, label: t.menuLabel.trim(), children }] : []
+  })
 
   const menus: Menu[] = [
     {
@@ -44,13 +45,9 @@ export function buildMenus(input: MenuInput, kinds: Record<'cuidados' | 'revisio
     },
     {
       label: 'RECOMENDACIONES',
-      to: '/recomendaciones/cita-preanestesia',
+      to: topicItems[0]?.to ?? '/recomendaciones',
       flip: true,
-      items: [
-        ...input.pages.filter(p => p.group === 'general' && !p.procedureSlug).map(pageLink),
-        ...procedureGroup('cuidados'),
-        ...procedureGroup('revision')
-      ]
+      items: topicItems
     }
   ]
   return menus.filter(m => m.items.length)

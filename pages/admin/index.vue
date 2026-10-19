@@ -41,7 +41,7 @@
       </NuxtLink>
 
       <!-- Card Recomendaciones -->
-      <NuxtLink to="/admin/recomendaciones" class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
+      <NuxtLink to="/admin/recomendaciones/temas" class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
         <div class="w-12 h-12 bg-[#0C2619]/5 rounded-lg flex items-center justify-center mb-6 text-[#0C2619] group-hover:scale-110 transition-transform">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </div>

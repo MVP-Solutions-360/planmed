@@ -170,14 +170,16 @@ describe('fuente de las recomendaciones de un procedimiento', () => {
     assert.equal(api.proc.fromPublicDetail({ slug: 'a', nombre: 'A', recomendaciones: raw, recomendaciones_post: null }).recomendaciones.revision.fuente, 'historico')
     assert.equal(api.proc.fromPublicDetail({ slug: 'a', nombre: 'A' }).recomendaciones, undefined)
   })
-  test('menú: una página vinculada no se repite aparte; el procedimiento con página oculta (indicador falso) no aparece', () => {
+  test('menú: las páginas vinculadas y los procedimientos con texto no entran al menú (solo el árbol vigente)', () => {
     const menus = buildMenus({
       visibility: { videos: true, beforeAfter: true },
-      pages: [{ slug: 'cuidado-x', group: 'cuidados', menuLabel: 'Cuidado X', procedureSlug: 'lipo' }, { slug: 'dieta', group: 'cuidados', menuLabel: 'Dieta', procedureSlug: null }],
-      procedures: [{ slug: 'lipo', name: 'Lipo', tiene_recomendaciones_post: true }, { slug: 'rino', name: 'Rino', tiene_recomendaciones_post: false }]
-    }, RECOMMENDATION_KINDS)
-    const cuidados = menus.find(m => m.label === 'RECOMENDACIONES').items[0]
-    assert.deepEqual(cuidados.children.map(c => c.to), ['/recomendaciones/cuidados/lipo', '/recomendaciones/dieta'])
+      topics: [{ slug: 'cuidados', menuLabel: 'Cuidados', subtopics: [{ slug: 'dieta', menuLabel: 'Dieta' }] }],
+      pages: [{ slug: 'cuidado-x', group: 'cuidados', menuLabel: 'Cuidado X', procedureSlug: 'lipo' }],
+      procedures: [{ slug: 'lipo', name: 'Lipo', tiene_recomendaciones_post: true }]
+    })
+    const items = menus.find(m => m.label === 'RECOMENDACIONES').items
+    assert.deepEqual(items.map(i => i.to), ['/recomendaciones/cuidados'])
+    assert.deepEqual(items[0].children.map(c => c.to), ['/recomendaciones/cuidados/dieta'])
   })
   test('la página de recomendación por procedimiento aplica la regla y no escribe', () => {
     const s = code('components/recommendations/ProcedureRecommendation.vue')

@@ -27,7 +27,7 @@
           <NuxtLink to="/admin/testimonios" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Nuestros Pacientes
           </NuxtLink>
-          <NuxtLink to="/admin/recomendaciones" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
+          <NuxtLink to="/admin/recomendaciones/temas" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]" data-testid="nav-recommendation-topics">
             Recomendaciones
           </NuxtLink>
           <!-- Submenú «Nosotros»: solo las páginas administrables -->

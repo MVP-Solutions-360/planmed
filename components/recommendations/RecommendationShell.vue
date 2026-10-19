@@ -19,7 +19,8 @@
 
     <!-- CONTENIDO -->
     <main class="relative max-w-[900px] mx-auto px-4 md:px-6 -mt-16 md:-mt-20 pb-24">
-      <article class="bg-white border border-[#e5e2e1] shadow-xl shadow-black/5 rounded-2xl p-6 md:p-12">
+      <!-- Con secciones (slot) la tarjeta de introducción solo aparece si tiene algo que mostrar; las páginas antiguas, sin slot, la conservan siempre. -->
+      <article v-if="hasArticle" class="bg-white border border-[#e5e2e1] shadow-xl shadow-black/5 rounded-2xl p-6 md:p-12">
         <div v-if="videoUrl" class="-mt-2 mb-10 rounded-xl overflow-hidden [&>div]:my-0">
           <NewsYouTubeEmbed :url="videoUrl" />
         </div>
@@ -28,6 +29,11 @@
         <CommonRichContent :html="html" class="reco-body" />
         <div class="clear-both"></div>
       </article>
+
+      <!-- SECCIONES (subtemas del árbol de recomendaciones) -->
+      <div v-if="$slots.default" class="space-y-8" :class="hasArticle ? 'mt-10' : ''">
+        <slot />
+      </div>
 
       <!-- LLAMADO A LA ACCIÓN -->
       <aside class="mt-10 relative overflow-hidden rounded-2xl bg-[#0C2619] text-white p-8 md:p-12 text-center">
@@ -45,7 +51,9 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { computed, useSlots } from 'vue'
+
+const props = defineProps<{
   eyebrow: string
   title: string
   subtitle?: string
@@ -53,6 +61,9 @@ defineProps<{
   videoUrl?: string
   image?: string
 }>()
+
+const slots = useSlots()
+const hasArticle = computed(() => !slots.default || !!(props.html && props.html.replace(/<[^>]*>/g, '').trim()) || !!props.videoUrl || !!props.image)
 </script>
 
 <style>

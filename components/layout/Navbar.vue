@@ -162,7 +162,6 @@ import { useRoute, useAsyncData } from '#imports'
 import { publicTestimonialsService } from '~/services/PublicTestimonialsService'
 import { publicRecommendationsService } from '~/services/PublicRecommendationsService'
 import { publicProcedureService } from '~/services/PublicProcedureService'
-import { RECOMMENDATION_KINDS } from '~/utils/recommendationKinds'
 import { buildMenus, buildProcedureMenu } from '~/utils/navMenus'
 
 const isMobileMenuOpen = ref(false)
@@ -197,20 +196,23 @@ function closeMenu(restoreFocus = false) {
 // navegación y el menú ya sale correcto en el servidor. Si Hub falla, se muestran todas las entradas (comportamiento por defecto).
 const { data: patientSection, refresh: refreshPatientSection } = useAsyncData('patient-section', () => publicTestimonialsService.getContent())
 
-// Menú de recomendaciones desde Wellezy Hub (SSR): páginas publicadas + indicadores de recomendaciones por procedimiento
-// (la lista pública ya los trae: no se pide el detalle de cada procedimiento). Si Hub no responde, el menú queda sin esa sección.
+// Menú de recomendaciones desde Wellezy Hub (SSR): SOLO el árbol vigente de temas con sus subtemas publicados (API pública
+// `recommendation-topics`). La lista de procedimientos se pide aparte únicamente para el desplegable de Procedimientos. Si Hub no
+// responde, el menú queda sin esa sección (nunca se rellena con una fuente heredada).
 const { data: hubMenu, refresh: refreshHubMenu } = useAsyncData('nav-recommendations', async () => {
-  // Independientes: si falla la lista de páginas no se pierde el menú de procedimientos, y viceversa.
-  const [pages, procedures] = await Promise.allSettled([publicRecommendationsService.getPages(), publicProcedureService.getProcedures()])
-  return { pages: pages.status === 'fulfilled' ? pages.value : [], procedures: procedures.status === 'fulfilled' ? procedures.value : [] }
-}, { default: () => ({ pages: [], procedures: [] }) })
+  // Independientes: si falla una de las listas no se pierde la otra.
+  const [procedures, topics] = await Promise.allSettled([publicProcedureService.getProcedures(), publicRecommendationsService.getTopics()])
+  return {
+    procedures: procedures.status === 'fulfilled' ? procedures.value : [],
+    topics: topics.status === 'fulfilled' ? topics.value : []
+  }
+}, { default: () => ({ procedures: [], topics: [] }) })
 
 // La construcción de los menús vive en utils/navMenus.ts (función pura, con pruebas).
 const menus = computed(() => buildMenus({
   visibility: patientSection.value?.visibility ?? { videos: true, beforeAfter: true },
-  pages: hubMenu.value?.pages ?? [],
-  procedures: hubMenu.value?.procedures ?? []
-}, RECOMMENDATION_KINDS))
+  topics: hubMenu.value?.topics ?? []
+}))
 
 // Desplegable de Procedimientos: misma lista pública (activos y habilitados para la línea), sin pedir el detalle de cada uno.
 const procedureItems = computed(() => buildProcedureMenu(hubMenu.value?.procedures ?? []))

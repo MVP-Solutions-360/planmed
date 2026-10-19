@@ -98,3 +98,62 @@ describe('Hub real (solo lectura): aislamiento y autorización', () => {
     for (const row of res.data.data) assert.equal(Object.keys(row).some(k => /company_id|linea_id/.test(k)), false)
   })
 })
+
+describe('Hub real (solo lectura): árbol de recomendaciones (tema → subtemas → secciones → recomendaciones)', () => {
+  const topicsHandler = () => api.handler('server/api/public/recommendation-topics/index.get.ts')
+  const subtopicHandler = () => api.handler('server/api/public/recommendation-topics/[topic]/[subtopic].get.ts')
+
+  test('el menú responde 200, los temas traen subtemas y ningún tema queda vacío ni repetido', async (t) => {
+    if (skipReason()) return t.skip(skipReason())
+    const { value, error } = await run(await topicsHandler(), makeEvent())
+    assert.equal(error, undefined, error?.message)
+    assert.equal(Array.isArray(value), true)
+    const seen = new Set<string>()
+    for (const topic of value) {
+      assert.equal(typeof topic.slug, 'string')
+      assert.ok(topic.subtopics.length > 0, `${topic.slug}: un tema sin subtemas publicados no debe llegar`)
+      for (const sub of topic.subtopics) {
+        assert.equal(seen.has(sub.slug), false, `${sub.slug}: subtema repetido`)
+        seen.add(sub.slug)
+      }
+    }
+    assert.equal(JSON.stringify(value).includes('company_id') || JSON.stringify(value).includes('linea_id'), false)
+  })
+
+  test('el detalle de cada subtema del menú cumple el contrato y pertenece a su tema', async (t) => {
+    if (skipReason()) return t.skip(skipReason())
+    const { value: topics } = await run(await topicsHandler(), makeEvent())
+    for (const topic of topics) for (const sub of topic.subtopics) {
+      const { value, error } = await run(await subtopicHandler(), makeEvent({ params: { topic: topic.slug, subtopic: sub.slug } }))
+      assert.equal(error, undefined, `${topic.slug}/${sub.slug}: ${error?.message}`)
+      assert.equal(value.slug, sub.slug)
+      assert.equal(value.topic.slug, topic.slug)
+      assert.equal(typeof value.intro.content, 'string')
+      assert.equal(Array.isArray(value.sections), true)
+      for (const s of value.sections) {
+        assert.ok(['description', 'recommendations', 'callout', 'contact', 'custom'].includes(s.type), `tipo inesperado: ${s.type}`)
+        assert.equal(Array.isArray(s.items), true)
+        if (s.cta) assert.equal(typeof s.cta.url === 'string' && /^(https:|mailto:|tel:|\/)/.test(s.cta.url), true, 'destino de botón fuera de contrato')
+      }
+    }
+  })
+
+  test('un subtema inexistente, o pedido bajo otro tema, es un 404 real', async (t) => {
+    if (skipReason()) return t.skip(skipReason())
+    const { value: topics } = await run(await topicsHandler(), makeEvent())
+    const res = await hubGet('/v1/web/recommendation-topics/tema-que-no-existe-xyz/subtema-xyz', { 'X-Tenant-Linea': LINE })
+    assert.equal(res.status, 404)
+    const { error } = await run(await subtopicHandler(), makeEvent({ params: { topic: 'tema-que-no-existe-xyz', subtopic: 'subtema-xyz' } }))
+    assert.equal(error?.statusCode, 404)
+    if (topics.length >= 2) {
+      const { error: cross } = await run(await subtopicHandler(), makeEvent({ params: { topic: topics[0].slug, subtopic: topics[1].subtopics[0].slug } }))
+      assert.equal(cross?.statusCode, 404, 'un subtema no se resuelve bajo un tema ajeno')
+    }
+  })
+
+  test('sin tenant, el árbol responde 404 (no entrega contenido de otra línea)', async (t) => {
+    if (skipReason()) return t.skip(skipReason())
+    assert.equal((await hubGet('/v1/web/recommendation-topics')).status, 404)
+    assert.equal((await hubGet('/v1/web/recommendation-topics', { 'X-Tenant-Linea': 'linea-que-no-existe-xyz' })).status, 404)
+  })
+})

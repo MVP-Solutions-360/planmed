@@ -47,7 +47,8 @@ describe('Navbar.vue — desplegable de Procedimientos', () => {
   test('sin procedimientos queda el enlace simple a /procedimientos', () => {
     assert.match(navbar, /<NuxtLink v-else to="\/procedimientos"/)
   })
-  test('un fallo de la lista de páginas no borra el menú de procedimientos (y viceversa)', () => {
-    assert.match(navbar, /Promise\.allSettled\(\[publicRecommendationsService\.getPages\(\), publicProcedureService\.getProcedures\(\)\]\)/)
+  test('un fallo de la lista de páginas o del árbol no borra el menú de procedimientos (y viceversa)', () => {
+    // Las dos listas (procedimientos y árbol de temas) se piden de forma independiente; el menú ya no usa el contrato histórico.
+    assert.match(navbar, /Promise\.allSettled\(\[publicProcedureService\.getProcedures\(\), publicRecommendationsService\.getTopics\(\)\]\)/)
   })
 })

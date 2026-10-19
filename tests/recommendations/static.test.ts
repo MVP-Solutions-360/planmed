@@ -24,7 +24,7 @@ const recommendationFiles = [
   'providers/HubRecommendationsProvider.ts', 'providers/HubPublicRecommendationsProvider.ts', 'providers/RecommendationsProvider.ts',
   'providers/PublicRecommendationsProvider.ts', 'services/RecommendationsService.ts', 'services/PublicRecommendationsService.ts',
   'pages/recomendaciones/[slug].vue', 'pages/recomendaciones/cuidados/index.vue', 'pages/recomendaciones/cuidados/[slug].vue',
-  'pages/recomendaciones/revision/index.vue', 'pages/recomendaciones/revision/[slug].vue', 'pages/admin/recomendaciones/index.vue',
+  'pages/recomendaciones/revision/index.vue', 'pages/recomendaciones/revision/[slug].vue', 'pages/admin/recomendaciones/historico.vue',
   'components/recommendations/ProcedureRecommendation.vue', 'components/recommendations/ProcedureRecommendationIndex.vue',
   'components/recommendations/RecommendationShell.vue', 'utils/recommendationKinds.ts', 'types/recommendations.ts'
 ]
@@ -75,12 +75,14 @@ describe('SSR de las páginas públicas', () => {
     }
   })
 
-  test('el menú se construye con páginas publicadas e indicadores de la lista pública (sin pedir cada detalle)', () => {
+  test('el menú se construye SOLO con el árbol público de temas (sin páginas históricas ni indicadores por procedimiento) y sin pedir cada detalle', () => {
     const nav = read('components/layout/Navbar.vue')
-    assert.match(nav, /publicRecommendationsService\.getPages\(\)/)
-    assert.match(read('utils/navMenus.ts'), /p\[meta\.flag\] === true/)
+    assert.match(nav, /publicRecommendationsService\.getTopics\(\)/)
+    assert.equal(/getPages\(\)/.test(nav), false)
+    assert.equal(/p\[meta\.flag\]/.test(read('utils/navMenus.ts')), false)
     assert.match(nav, /useAsyncData\('nav-recommendations'/)
     assert.equal(/getProcedureBySlug/.test(nav), false)
+    // el listado por procedimiento (rutas /recomendaciones/cuidados|revision) conserva su lógica
     assert.match(read('components/recommendations/ProcedureRecommendationIndex.vue'), /p\[meta\.flag\] === true/)
   })
 })

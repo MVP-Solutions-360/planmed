@@ -57,6 +57,7 @@ import { publicRecommendationsService } from '~/services/PublicRecommendationsSe
 import { RECOMMENDATION_KINDS, type RecommendationKind } from '~/utils/recommendationKinds'
 import type { Procedure } from '~/types/procedure'
 import type { RecommendationPage } from '~/types/recommendations'
+import { treeSubtopicSlugs } from '#shared/utils/recommendationTree'
 
 const props = defineProps<{ kind: RecommendationKind }>()
 const meta = RECOMMENDATION_KINDS[props.kind]
@@ -64,11 +65,17 @@ const meta = RECOMMENDATION_KINDS[props.kind]
 // Wellezy Hub, resuelto en el servidor (SSR): procedimientos con este texto (indicador de la lista pública, sin pedir cada
 // detalle) y páginas publicadas de este grupo.
 const { data, error, refresh, status } = await useAsyncData(`recommendation-index-${props.kind}`, async () => {
-  const [all, pages] = await Promise.all([publicProcedureService.getProcedures(), publicRecommendationsService.getPages()])
+  const [all, pages, topics] = await Promise.all([
+    publicProcedureService.getProcedures(),
+    publicRecommendationsService.getPages(),
+    // El árbol solo sirve para no repetir aquí lo que ya vive dentro de su tema: si falla no se pierde este listado.
+    publicRecommendationsService.getTopics().catch(() => [])
+  ])
+  const inTree = treeSubtopicSlugs(topics)
   return {
     items: all.filter(p => p[meta.flag] === true),
-    // Las páginas vinculadas a un procedimiento ya salen como la tarjeta de ese procedimiento.
-    extras: pages.filter(p => p.group === props.kind && !p.procedureSlug)
+    // Las páginas vinculadas a un procedimiento ya salen como la tarjeta de ese procedimiento; los subtemas del árbol, dentro de su tema.
+    extras: pages.filter(p => p.group === props.kind && !p.procedureSlug && !inTree.has(p.slug))
   }
 }, { default: () => ({ items: [] as Procedure[], extras: [] as RecommendationPage[] }) })
 
