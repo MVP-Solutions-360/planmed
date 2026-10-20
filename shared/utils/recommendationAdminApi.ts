@@ -18,6 +18,8 @@ export interface AdminRoute {
   query: readonly string[]
   /** Subida de imagen: el cuerpo trae `image` como data URL y se envía a Hub como multipart. */
   upload: boolean
+  /** true = la ruta lleva el id de un registro; false = es un recurso de colección (listar/crear/ordenar), que nunca puede «no existir». */
+  hasId: boolean
 }
 
 interface Def { method: AdminHttpMethod, pattern: string, hub: string, body?: readonly string[], query?: readonly string[], upload?: boolean }
@@ -95,7 +97,7 @@ export function resolveAdminRoute(method: string, segments: string[]): AdminRout
     if (!ok) continue
 
     let n = 0
-    return { method: def.method, hubPath: def.hub.replace(':id', () => ids[n++]!), body: def.body ?? [], query: def.query ?? [], upload: def.upload === true }
+    return { method: def.method, hubPath: def.hub.replace(':id', () => ids[n++]!), body: def.body ?? [], query: def.query ?? [], upload: def.upload === true, hasId: ids.length > 0 }
   }
   return null
 }
@@ -150,6 +152,7 @@ export function describeTreeError(error: any): TreeErrorInfo {
   switch (status) {
     case 401: return { status, kind: 'auth', message: 'Tu sesión expiró. Inicia sesión de nuevo; lo que escribiste sigue en pantalla.', fields, transient: false }
     case 403: return { status, kind: 'forbidden', message: raw || 'Tu usuario no tiene permiso para esta acción en Wellezy Hub.', fields, transient: false }
+    case 501: return { status, kind: 'other', message: raw || 'Wellezy Hub no tiene habilitada la administración de recomendaciones.', fields, transient: false }
     case 404: return { status, kind: 'notfound', message: raw || 'El elemento ya no existe.', fields, transient: false }
     case 409: return { status, kind: 'conflict', message: raw || 'La acción no se puede completar por la integridad del contenido.', fields, transient: false }
     case 422: return { status, kind: 'validation', message: raw || 'Revisa los datos ingresados.', fields, transient: false }

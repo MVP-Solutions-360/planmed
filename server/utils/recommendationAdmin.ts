@@ -6,6 +6,7 @@ import { pickAllowed, pickQuery, resolveAdminRoute } from '#shared/utils/recomme
 // y marca como transitorios (503) los fallos de red/servidor. Ningún error se interpreta como guardado exitoso.
 
 const MSG_FORBIDDEN_WRITE = 'Tu usuario no tiene permiso para esta acción en Wellezy Hub.'
+const MSG_HUB_INCOMPATIBLE = 'Wellezy Hub no tiene habilitada la administración de recomendaciones (versión incompatible). Avisa al administrador; no es un problema de tu línea.'
 const MSG_UNAVAILABLE_TREE = 'No fue posible conectar con Wellezy Hub. Intenta nuevamente; no se sabe si el cambio llegó a guardarse, revisa antes de repetirlo.'
 
 /** Mensaje de Hub solo si es texto corto y en español (los de autorización por defecto de Laravel están en inglés). */
@@ -16,7 +17,9 @@ function hubMessage(data: any): string | null {
   return message
 }
 
-export function translateTree(status: number, data: any, session: { clear: () => Promise<unknown> }): never | void {
+// `hasId`: la ruta lleva el id de un registro. Un 404 en una ruta de colección (listar, crear, ordenar, catálogo) no puede significar «el elemento no
+// existe»: Hub no tiene esa ruta (versión anterior sin la API de recomendaciones). Se informa como incompatibilidad (501), no como falta de pertenencia.
+export function translateTree(status: number, data: any, session: { clear: () => Promise<unknown> }, hasId = true): never | void {
   if (status >= 200 && status < 300) return
   switch (status) {
     case 401:
@@ -24,6 +27,7 @@ export function translateTree(status: number, data: any, session: { clear: () =>
     case 403:
       throw authError(403, hubMessage(data) ?? MSG_FORBIDDEN_WRITE)
     case 404:
+      if (!hasId) throw createError({ statusCode: 501, message: MSG_HUB_INCOMPATIBLE, data: { message: MSG_HUB_INCOMPATIBLE } })
       throw authError(404, 'El elemento no existe o no pertenece a tu línea.')
     case 409:
       throw createError({ statusCode: 409, message: hubMessage(data) ?? 'La acción no se puede completar por la integridad del contenido.', data: { message: hubMessage(data) ?? '' } })
@@ -70,7 +74,7 @@ export async function handleTreeRequest(event: H3Event) {
   }
 
   if (res.status === 401) await session.clear()
-  translateTree(res.status, res.data, session)
+  translateTree(res.status, res.data, session, route.hasId)
 
   // Una respuesta 2xx que no es un objeto JSON no es un guardado verificable.
   if (!res.data || typeof res.data !== 'object') throw createError({ statusCode: 503, message: 'Wellezy Hub respondió con un formato inesperado.', data: { transient: true } })
