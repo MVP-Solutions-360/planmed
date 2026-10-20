@@ -41,7 +41,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'Planmed',
+      title: 'FINANCIACIÓN DE CIRUGÍAS PLÁSTICAS',
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/images/branding/logo-ico.ico' }
       ]
