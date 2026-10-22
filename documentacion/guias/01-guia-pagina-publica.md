@@ -38,7 +38,7 @@ Descripción de Planmed («Financiamos directamente… desde el 50% hasta el 100
 
 ### 2.3 Botones flotantes
 - **Chat (abajo a la derecha, círculo negro):** abre dos botones, WhatsApp (`573157857783`) y Messenger. Solo íconos; se cierra con clic fuera o Esc.
-- **«Pide tu cita» (encima del chat):** abre la ventana «Pide tu cita de valoración» (formulario **maquetado, no funcional**; ver §5). No aparece en los micrositios `/prp/**`.
+- **«Pide tu cita» (encima del chat):** abre la ventana «Pide tu cita de valoración» (formulario conectado al CRM médico mediante la ruta de servidor `POST /api/forms/valuation`; ver §5). No aparece en los micrositios `/prp/**`.
 
 ### 2.4 Aviso precontractual
 Al entrar por primera vez se muestra una ventana «Información precontractual» que bloquea la página hasta aceptar (se recuerda en el navegador). Rechazar saca al visitante del sitio. No se muestra en `/prp/**`. Su texto es independiente del de la página `/informacion-precontractual` (ver §6, pendiente de unificar).
@@ -115,6 +115,7 @@ La página alterna fondos blanco/verde para marcar cada sección:
 - **Videos — `/testimonios`:** «Pacientes felices»: texto introductorio fijo y la lista de videos de YouTube cargados.
 - **Antes y después — `/testimonios/antes-y-despues`:** casos publicados con foto del antes y del después, título y descripción; texto fijo sobre financiación flexible. Solo se muestran los casos con ambas imágenes. Debajo de la galería aparecen los videos de Instagram cargados.
 - **Programa de referidos — `/testimonios/programa-de-referidos`:** si el panel tiene texto guardado se muestra ese; si no, se muestra el contenido del programa entregado por Planmed (¿En qué consiste?, ¿Cómo participar?, ¿Cuándo recibes tu bono?, nota «Importante»). Debajo, el **formulario de registro** (⚠ maquetado, no funcional; destino futuro: CRM médico) y las tres notas legales. Los dos números de atención abren WhatsApp (`wa.me/573157857783`).
+  - **Límite de envíos (inscripción PRP):** 6 por 10 minutos por IP. La IP sale del socket; `X-Forwarded-For` solo se usa si `NUXT_TRUSTED_PROXY_HOPS` ≥ 1 (número de proxies de confianza; toma la entrada añadida por el último proxy). Valor por defecto `0`. **Pendiente de confirmar en la infraestructura** (el traspaso menciona Nginx Proxy Manager en Docker): hasta entonces, tras un proxy todos los visitantes comparten un solo cupo.
 
 ### 3.14 Recomendaciones
 **Fuente:** Wellezy Hub. Cada página muestra título, video de YouTube (opcional), imagen (opcional), contenido con formato y un bloque final «En Planmed te acompañamos» con botones *Simular financiación* y *Ver procedimientos*.
@@ -157,9 +158,9 @@ La página alterna fondos blanco/verde para marcar cada sección:
 | Lead del micrositio PRP | `/prp/[slug]` | **Funcional** | CRM del referidor (envío directo) |
 | Solicitud de financiación (ventana «Inicia tu proceso ahora») | Simulador | **No envía**: solo `console.log` | Por definir |
 | Cotización del simulador | `/financiacion` | **Tasa de ejemplo** (2 % mensual), no es la real | Por definir (regla de negocio, no modificar sin decisión) |
-| Pide tu cita de valoración | Botón flotante | **Maqueta**, con aviso en pantalla | Por definir |
+| Pide tu cita de valoración | Botón flotante | Envía al CRM médico (`/crm-public/api/clients/forms`) desde el servidor; éxito solo si el CRM confirma. Procedimientos desde Hub. | Registro en el CRM (validado con prueba real pendiente de autorización) |
 | Formulario de crédito paciente | `/estudio-de-creditos` | **Maqueta**, con aviso en pantalla | CRM médico |
-| Registro del Programa de referidos | `/testimonios/programa-de-referidos` | **Maqueta**, con aviso en pantalla | CRM médico |
+| Registro del Programa de referidos | `/testimonios/programa-de-referidos` | Envía la inscripción a Wellezy Hub (empresa y línea Planmed). Con efectivo no pide datos bancarios. El envío al CRM médico está **pendiente de contrato**: hasta entonces la web confirma «Recibimos tu inscripción» (no definitiva). | Hub (CRM médico pendiente) |
 
 Pendientes comunes a los formularios no funcionales: definir el destino (CRM médico, no Wellezy Hub), validaciones, consentimiento de datos personales, protección de datos sensibles (cédula, cuenta bancaria, ingresos) y confirmar las opciones de las listas desplegables (hoy son provisionales).
 

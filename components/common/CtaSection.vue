@@ -26,6 +26,6 @@ defineProps({
   primaryText: { type: String, default: null },
   primaryLink: { type: String, default: '/financiacion#calculadora' },
   secondaryText: { type: String, default: null },
-  secondaryLink: { type: String, default: 'https://wa.me/573014746735' }
+  secondaryLink: { type: String, default: 'https://wa.me/573188043382' }
 })
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <SitePageShell title="Financiación" subtitle="Explora opciones de financiación flexibles y encuentra el plan que se adapta a ti." wide bare>
+    <SitePageShell :title="FINANCING_TITLE" :subtitle="FINANCING_SUBTITLE" wide bare>
       <!-- Botón directo al simulador (ancla de esta misma página) -->
       <template #actions>
         <a href="#calculadora" data-testid="go-to-simulator" class="inline-flex items-center gap-3 bg-[#D3A76A] hover:bg-[#e0b97f] text-[#0C2619] px-8 py-4 text-xs font-bold tracking-[0.15em] uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
@@ -99,8 +99,9 @@
 <script setup lang="ts">
 // Página «Financiación»: texto y video entregados por Planmed (estático) + el simulador de cuota (antes /simulador). Preguntas frecuentes y contacto se comparten con /nosotros.
 import { computed } from 'vue'
-import { useFetch, useSeoMeta, useHead } from '#imports'
+import { useFetch, useSeoMeta, useHead, useSiteConfig } from '#imports'
 import { aboutDefaultContent, aboutPublicView, aboutYoutubeEmbedUrl, type AboutContent } from '#shared/utils/aboutContent'
+import { FINANCING_DESCRIPTION, FINANCING_PATH, FINANCING_SEO_TITLE, FINANCING_SUBTITLE, FINANCING_TITLE, financingStructuredData } from '#shared/utils/financingSeo'
 
 const steps = [
   { title: 'Asesoría', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', text: 'Una vez diligencies nuestro formulario, uno de nuestros asesores se comunicará contigo a la mayor brevedad y te brindará toda la información y la documentación que se requiere para iniciar el proceso de valoración con especialista y estudio de crédito.' },
@@ -125,9 +126,15 @@ const { data } = await useFetch<AboutContent>('/api/public/about', { key: 'about
 const content = computed<AboutContent>(() => data.value ?? aboutPublicView(aboutDefaultContent()))
 const faqs = computed(() => content.value.faqs)
 
-const description = 'Cómo funciona la financiación de tu cirugía con Planmed: asesoría, estudio, pre aprobación y desembolso, los documentos que necesitas y un simulador para estimar tu cuota.'
-useSeoMeta({ title: 'Financiación | Planmed', ogTitle: 'Financiación | Planmed', description, ogDescription: description, ogType: 'website' })
-useHead({ link: [{ rel: 'canonical', href: 'https://planmed.com/financiacion' }] })
+// SEO: frase objetivo «Financiación de cirugías plásticas» en título, H1 y descripción; canonical/og:url con el origen del sitio configurado
+// (mismo criterio que el resto de páginas) y datos estructurados solo con lo que la página muestra (ver shared/utils/financingSeo.ts).
+const origin = String(useSiteConfig().url ?? '').replace(/\/+$/, '')
+const canonical = `${origin}${FINANCING_PATH}`
+useSeoMeta({ title: FINANCING_SEO_TITLE, ogTitle: FINANCING_SEO_TITLE, description: FINANCING_DESCRIPTION, ogDescription: FINANCING_DESCRIPTION, ogType: 'website', ogUrl: canonical, ogLocale: 'es_CO' })
+useHead({
+  link: [{ rel: 'canonical', href: canonical }],
+  script: [{ type: 'application/ld+json', innerHTML: computed(() => financingStructuredData(origin, faqs.value)) }]
+})
 </script>
 
 <style scoped>

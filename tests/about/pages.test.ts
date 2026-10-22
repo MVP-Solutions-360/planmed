@@ -144,14 +144,14 @@ describe('menú y páginas', () => {
     assert.deepEqual(bad, [])
   })
 
-  test('Programa de referidos: contenido entregado, formulario maquetado con aviso y sin envío', () => {
+  test('Programa de referidos: contenido entregado y formulario conectado a Hub por el servicio de Planmed (sin aviso de maqueta)', () => {
     const page = readFileSync(join(ROOT, 'pages/testimonios/programa-de-referidos.vue'), 'utf8')
     assert.ok(page.includes('<ReferralProgramContent') && page.includes('<ReferralForm'))
     const content = readFileSync(join(ROOT, 'components/referral/ProgramContent.vue'), 'utf8')
-    for (const t of ['Programa de Remisión de Pacientes', 'hasta 10 días hábiles', '315 785 7783', 'después de 4 meses']) assert.ok(content.includes(t), t)
+    for (const t of ['Programa de Remisión de Pacientes', 'hasta 10 días hábiles', '318 804 3382', 'después de 4 meses']) assert.ok(content.includes(t), t)
     const form = readFileSync(join(ROOT, 'components/referral/ReferralForm.vue'), 'utf8')
-    assert.ok(form.includes('data-testid="referral-form-not-functional"') && form.includes('role="alert"'))
-    assert.ok(form.includes('@submit.prevent') && !/\$fetch|useFetch|fetch\(|axios/.test(form), 'no envía datos')
+    assert.ok(!form.includes('referral-form-not-functional'), 'el aviso de maqueta se retiró')
+    assert.ok(form.includes('@submit.prevent="onSubmit"') && form.includes('referralService.submit') && !/\$fetch|useFetch|fetch\(|axios/.test(form), 'envía solo por el servicio de Planmed')
     assert.ok(!/v-html|localStorage/.test(content + form))
   })
 })

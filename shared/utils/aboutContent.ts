@@ -72,7 +72,7 @@ export function aboutDefaultContent(): AboutContent {
       city: 'Medellín',
       region: 'Antioquia, Colombia',
       phone: '+57 318 8043382',
-      email: 'pqrs.institucional@gmail.com',
+      email: 'planmedequipodetrabajo@gmail.com',
       schedule: '',
       socials: {
         instagram: 'https://www.instagram.com/planmed_financia_cirugia',

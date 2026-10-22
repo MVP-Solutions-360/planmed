@@ -117,3 +117,11 @@ export function wellezyPublicGet<T>(event: H3Event, path: string): Promise<Welle
   if (!lineSlug) console.error('[prp] NUXT_WELLEZY_LINE_SLUG no está configurada.')
   return call<T>(event, path, { method: 'GET', headers: { 'X-Tenant-Linea': lineSlug } })
 }
+
+// Escritura pública (sin Bearer) en la API web de Hub (p. ej. inscripción al PRP). El tenant sale de la configuración del servidor;
+// `headers` admite la clave de idempotencia. Sin reintentos: el llamador decide (una escritura repetida solo es segura con la misma clave).
+export function wellezyPublicPost<T>(event: H3Event, path: string, body: Record<string, unknown>, headers: Record<string, string> = {}): Promise<WellezyResult<T>> {
+  const lineSlug = String(useRuntimeConfig(event).wellezyLineSlug || '')
+  if (!lineSlug) console.error('[prp] NUXT_WELLEZY_LINE_SLUG no está configurada.')
+  return call<T>(event, path, { method: 'POST', body, headers: { 'X-Tenant-Linea': lineSlug, ...headers } })
+}

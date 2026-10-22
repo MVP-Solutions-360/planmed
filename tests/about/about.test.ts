@@ -58,7 +58,7 @@ describe('contenido inicial', () => {
   test('contacto: solo datos verificados (sin horario ni mapa inventados)', () => {
     const k = C.aboutDefaultContent().contact
     assert.equal(k.phone, '+57 318 8043382')
-    assert.equal(k.email, 'pqrs.institucional@gmail.com')
+    assert.equal(k.email, 'planmedequipodetrabajo@gmail.com')
     assert.equal(k.schedule, '')
     assert.equal(k.map.enabled, false)
   })

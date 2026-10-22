@@ -6,8 +6,8 @@
 </template>
 
 <script setup lang="ts">
-import { useSeoMeta, useHead } from '#imports'
+import { useSeoMeta, useHead, useSiteConfig } from '#imports'
 
 useSeoMeta({ title: 'Estudio de créditos | Planmed', ogTitle: 'Estudio de créditos | Planmed', ogType: 'website' })
-useHead({ link: [{ rel: 'canonical', href: 'https://planmed.com/estudio-de-creditos' }] })
+useHead({ link: [{ rel: 'canonical', href: `${String(useSiteConfig().url ?? '').replace(/\/+$/, '')}/estudio-de-creditos` }] })
 </script>

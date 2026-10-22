@@ -268,7 +268,7 @@ const route = useRoute()
 
 // Configuración Constants
 // (En producción estos datos deberían venir del entorno o tenant base)
-const WHATSAPP_NUMBER = 'TBD_WHATSAPP_NUMBER' 
+const WHATSAPP_NUMBER = '573188043382' 
 
 const { getVisitorUuid, trackFormStart, trackFormSubmit, trackWhatsAppClick, trackPolicyView } = useTracking()
 

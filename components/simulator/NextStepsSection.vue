@@ -58,7 +58,7 @@
             {{ 'Por eso, durante tu proceso de asesoría podremos orientarte sobre alternativas complementarias que podrían ayudarte a hacer realidad tu procedimiento.' }}
           </p>
           <a 
-            href="https://wa.me/573014746735?text=Estuve revisando la página y me gustaría más información acerca de las opciones de financiación." 
+            href="https://wa.me/573188043382?text=Estuve revisando la página y me gustaría más información acerca de las opciones de financiación." 
             target="_blank" 
             class="inline-block bg-black text-white px-10 py-4 rounded-full font-bold text-base hover:bg-white hover:text-black border-2 border-transparent hover:border-black transition-all shadow-md active:scale-95"
           >

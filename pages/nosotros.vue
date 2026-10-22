@@ -82,7 +82,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useFetch, useSeoMeta, useHead } from '#imports'
+import { useFetch, useSeoMeta, useHead, useSiteConfig } from '#imports'
 import { aboutDefaultContent, aboutPublicView, aboutYoutubeId, aboutYoutubeEmbedUrl, type AboutContent } from '#shared/utils/aboutContent'
 
 // Contenido administrado desde /admin/nosotros y persistido en el servidor de la web (GET /api/public/about).
@@ -105,7 +105,7 @@ useSeoMeta({
 
 useHead({
   link: [
-    { rel: 'canonical', href: 'https://planmed.com/nosotros' }
+    { rel: 'canonical', href: `${String(useSiteConfig().url ?? '').replace(/\/+$/, '')}/nosotros` }
   ]
 })
 </script>

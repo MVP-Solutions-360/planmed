@@ -56,7 +56,7 @@
             </div>
             <div>
               <span class="inline-block"><button type="button" class="btn-primary" :class="{ 'opacity-60 pointer-events-none': busy[`${c.id}:image`] }" @click="pick($event)">{{ busy[`${c.id}:image`] ? 'Subiendo…' : (c.image ? 'Cambiar imagen' : 'Subir imagen') }}</button><input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" tabindex="-1" @change="onMainImage($event, c)" /></span>
-              <p class="hint">JPG, PNG o WebP. Se optimiza automáticamente.</p>
+              <p class="hint">JPG, PNG o WebP. Se optimiza automáticamente. Medidas recomendadas: 1080 × 1080 px (cuadrada) o 1920 × 1080 px (horizontal).</p>
             </div>
           </div>
           <p v-if="err(i, 'image')" class="msg">{{ err(i, 'image') }}</p>
@@ -72,7 +72,7 @@
             </li>
           </ul>
           <span class="inline-block"><button type="button" class="btn-sm" :class="{ 'opacity-60 pointer-events-none': busy[`${c.id}:gallery`] || c.gallery.length >= CLINIC_LIMITS.gallery }" @click="pick($event)">{{ busy[`${c.id}:gallery`] ? 'Subiendo…' : 'Agregar imágenes' }}</button><input type="file" multiple accept="image/png,image/jpeg,image/webp" class="hidden" tabindex="-1" @change="onGallery($event, c)" /></span>
-          <p class="hint">Hasta {{ CLINIC_LIMITS.gallery }} imágenes.</p>
+          <p class="hint">Hasta {{ CLINIC_LIMITS.gallery }} imágenes. Medidas recomendadas: 1080 × 1080 px (cuadrada) o 1920 × 1080 px (horizontal).</p>
           <p v-if="err(i, 'gallery')" class="msg">{{ err(i, 'gallery') }}</p>
         </div>
 

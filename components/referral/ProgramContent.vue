@@ -27,8 +27,8 @@
         <li>
           <span>Puedes referirnos de las siguientes maneras:</span>
           <ul class="bullets mt-3">
-            <li>Entregándole a tu referida nuestro número de atención: <a href="https://wa.me/573157857783" target="_blank" rel="noopener noreferrer" class="num">315 785 7783</a> y recordarle que mencione tu nombre o código al contactarnos.</li>
-            <li>Compartiendo el número de tu referida con nuestras asesoras vía WhatsApp al <a href="https://wa.me/573157857783" target="_blank" rel="noopener noreferrer" class="num">315 785 7783</a>. Nuestro equipo se encargará del resto.</li>
+            <li>Entregándole a tu referida nuestro número de atención: <a href="https://wa.me/573188043382" target="_blank" rel="noopener noreferrer" class="num">318 804 3382</a> y recordarle que mencione tu nombre o código al contactarnos.</li>
+            <li>Compartiendo el número de tu referida con nuestras asesoras vía WhatsApp al <a href="https://wa.me/573188043382" target="_blank" rel="noopener noreferrer" class="num">318 804 3382</a>. Nuestro equipo se encargará del resto.</li>
           </ul>
         </li>
       </ol>

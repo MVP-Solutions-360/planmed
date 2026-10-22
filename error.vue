@@ -1,15 +1,8 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-[#fcf9f8] text-black font-sans">
-    <!-- Cabecera mínima: no depende del Hub (el menú del sitio consulta datos externos y no debe poder romper la página de error). -->
-    <header class="w-full bg-[#fcf9f8] border-b border-[#e5e2e1]">
-      <div class="max-w-[1440px] mx-auto px-6 h-[88px] flex items-center">
-        <a href="/" class="block rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0C2619] focus-visible:ring-offset-4" aria-label="Planmed, ir al inicio">
-          <img src="/images/branding/logo.jpg" alt="Planmed" class="h-10 md:h-14 w-auto object-contain" />
-        </a>
-      </div>
-    </header>
-
-    <main id="contenido" class="flex-grow flex items-center justify-center px-6 py-16 md:py-24">
+  <!-- Mismo layout que el resto del sitio público (menú, pie y chat): así las páginas de error ofrecen las MISMAS opciones de navegación.
+       El menú tolera un Hub caído (cada consulta es independiente y su fallo no se propaga), por lo que no puede romper esta página. -->
+  <NuxtLayout>
+    <div id="contenido" class="flex items-center justify-center px-6 py-16 md:py-24 bg-[#fcf9f8]">
       <section class="w-full max-w-2xl text-center" aria-labelledby="error-titulo">
         <p class="font-serif text-[7.5rem] sm:text-[10rem] leading-none text-[#D3A76A] select-none" aria-hidden="true">{{ view.code }}</p>
         <p class="mt-2 text-[11px] font-bold tracking-[0.2em] uppercase text-[#4c4546]">Error {{ view.code }}</p>
@@ -31,12 +24,9 @@
           <pre class="mt-3 whitespace-pre-wrap break-words">{{ technical }}</pre>
         </details>
       </section>
-    </main>
+    </div>
 
-    <footer class="border-t border-[#e5e2e1] py-6 px-6 text-center text-xs text-[#4c4546]">
-      © Planmed. Si el problema continúa, escríbenos por <a class="font-bold underline hover:text-black" href="https://wa.me/573014746735" target="_blank" rel="noopener noreferrer">WhatsApp</a>.
-    </footer>
-  </div>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">

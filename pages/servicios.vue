@@ -42,7 +42,7 @@
 <script setup lang="ts">
 // Página «Servicios»: texto y videos entregados por Planmed (contenido estático); las preguntas frecuentes se comparten con /nosotros.
 import { computed } from 'vue'
-import { useFetch, useSeoMeta, useHead } from '#imports'
+import { useFetch, useSeoMeta, useHead, useSiteConfig } from '#imports'
 import { aboutDefaultContent, aboutPublicView, aboutYoutubeEmbedUrl, type AboutContent } from '#shared/utils/aboutContent'
 
 const { data } = await useFetch<AboutContent>('/api/public/about', { key: 'about-page', default: () => aboutPublicView(aboutDefaultContent()) })
@@ -50,7 +50,7 @@ const faqs = computed(() => (data.value ?? aboutPublicView(aboutDefaultContent()
 
 const description = 'Asesoría y financiación de cirugía plástica estética con Planmed: acompañamiento en la financiación, las valoraciones y el post operatorio, y casa de recuperación.'
 useSeoMeta({ title: 'Servicios | Planmed', ogTitle: 'Servicios | Planmed', description, ogDescription: description, ogType: 'website' })
-useHead({ link: [{ rel: 'canonical', href: 'https://planmed.com/servicios' }] })
+useHead({ link: [{ rel: 'canonical', href: `${String(useSiteConfig().url ?? '').replace(/\/+$/, '')}/servicios` }] })
 </script>
 
 <style scoped>
