@@ -1,3 +1,4 @@
+import type { AdminBlock, BlockInput, ColumnLayout } from '../shared/utils/contentBlocks'
 // Modelos de la API administrativa de Recomendaciones de Wellezy Hub (/cms/recommendation-*), tal como los entrega Hub (snake_case).
 // Jerarquía: Tema principal → Subtemas → Secciones → Recomendaciones individuales.
 
@@ -32,7 +33,7 @@ export interface TreeSubtopic {
 }
 
 export type SectionType = 'description' | 'recommendations' | 'callout' | 'contact' | 'custom'
-export type SectionField = 'subtitle' | 'content' | 'image' | 'video' | 'layout' | 'cta'
+export type SectionField = 'subtitle' | 'content' | 'image' | 'video' | 'layout' | 'cta' | 'blocks'
 
 export interface TreeSection {
   id: number
@@ -42,7 +43,13 @@ export interface TreeSection {
   title: string
   subtitle: string | null
   content: string | null
+  /** Posición de la imagen del formato anterior (solo secciones sin bloques). */
   layout: 'stacked' | 'media_left' | 'media_right'
+  /** Distribución de los bloques (solo con `blocks_mode`). */
+  column_layout: ColumnLayout
+  /** true = la sección se administra con bloques apilables por columna; false = formato anterior (texto + imagen + video + diseño). */
+  blocks_mode: boolean
+  blocks: AdminBlock[]
   image_url: string | null
   image_alt: string | null
   video_url: string | null
@@ -74,6 +81,6 @@ export interface TreeShortLink { url: string | null, active: boolean, state: str
 
 /** Cuerpo de crear/editar una sección (solo los campos enviados). */
 export type SectionInput = Partial<{
-  type: SectionType, title: string, subtitle: string | null, content: string | null, layout: string, image_alt: string | null,
-  video_url: string | null, cta_label: string | null, cta_url: string | null, orden: number, visible: boolean
+  type: SectionType, title: string, subtitle: string | null, content: string | null, layout: string, column_layout: ColumnLayout, blocks: BlockInput[],
+  image_alt: string | null, video_url: string | null, cta_label: string | null, cta_url: string | null, orden: number, visible: boolean
 }>

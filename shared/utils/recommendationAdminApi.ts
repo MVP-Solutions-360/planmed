@@ -27,7 +27,8 @@ export interface Def { method: AdminHttpMethod, pattern: string, hub: string, bo
 const TOPIC = ['title', 'menu_label', 'slug', 'orden', 'published'] as const
 const SUBTOPIC_CREATE = ['title', 'menu_label', 'slug', 'grupo', 'orden', 'published', 'content', 'video_url'] as const
 const SUBTOPIC_UPDATE = ['title', 'menu_label', 'slug', 'grupo', 'orden', 'published', 'topic_id'] as const
-const SECTION = ['type', 'title', 'subtitle', 'content', 'layout', 'image_alt', 'video_url', 'cta_label', 'cta_url', 'orden', 'visible'] as const
+// `blocks[]:…` = lista de bloques apilables por columna; de cada bloque solo viajan estos campos (nunca company_id ni linea_id).
+const SECTION = ['type', 'title', 'subtitle', 'content', 'layout', 'column_layout', 'image_alt', 'video_url', 'cta_label', 'cta_url', 'orden', 'visible', 'blocks[]:id,slot,type,content,url,alt,from_section_image'] as const
 const ITEM = ['title', 'content', 'slug', 'orden', 'published'] as const
 const REORDER = ['ids'] as const
 
@@ -64,6 +65,9 @@ const DEFS: readonly Def[] = [
   { method: 'DELETE', pattern: 'sections/:id', hub: '/recommendation-sections/:id' },
   { method: 'POST', pattern: 'sections/:id/image', hub: '/recommendation-sections/:id/image', body: ['image'], upload: true },
   { method: 'DELETE', pattern: 'sections/:id/image', hub: '/recommendation-sections/:id/image' },
+  // Imagen de un bloque de tipo imagen (el bloque se crea antes con la lista de bloques de la sección).
+  { method: 'POST', pattern: 'section-blocks/:id/image', hub: '/recommendation-section-blocks/:id/image', body: ['image'], upload: true },
+  { method: 'DELETE', pattern: 'section-blocks/:id/image', hub: '/recommendation-section-blocks/:id/image' },
 
   { method: 'GET', pattern: 'sections/:id/items', hub: '/recommendation-sections/:id/items' },
   { method: 'POST', pattern: 'sections/:id/items', hub: '/recommendation-sections/:id/items', body: ITEM },

@@ -454,7 +454,12 @@ describe('pantallas del panel de Recomendaciones', () => {
     assert.ok(form.includes('placeholder="Escribe aquí la descripción o el contenido de la sección..."'))
     assert.match(form, /Falta el destino del botón\./)
     assert.match(form, /Falta el texto del botón\./)
-    for (const field of ['subtitle', 'content', 'video', 'image', 'layout', 'cta']) assert.ok(form.includes(`allows('${field}')`), field)
+    for (const field of ['subtitle', 'content', 'blocks', 'cta']) assert.ok(form.includes(`allows('${field}')`), field)
+    // los campos sueltos de vídeo, imagen y distribución se reemplazaron por el editor de bloques (una o dos columnas)
+    assert.match(form, /<AdminContentBlocksEditor[^>]*v-model:layout="draft\.column_layout"/)
+    for (const loose of ['id="sec-video"', 'id="sec-layout"', 'id="sec-alt"']) assert.equal(form.includes(loose), false, loose)
+    assert.match(form, /fromSectionImage: true/) // la imagen del formato anterior se copia al bloque
+    assert.match(form, /api\.setBlockImage\(id, b\.newImage\)/)
     // los placeholders no son valores por defecto
     assert.match(form, /title: '', subtitle: '', content: ''/)
     assert.equal(/ref\(['"]Ej\. /.test(form), false)

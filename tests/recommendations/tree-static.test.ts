@@ -175,7 +175,10 @@ describe('sin atajos', () => {
     }
   })
 
-  test('el módulo compartido es puro (sin imports) para poder usarse en navegador, servidor y pruebas', () => {
-    assert.equal(/^import\s/m.test(read('shared/utils/recommendationTree.ts')), false)
+  test('el módulo compartido es puro: solo importa módulos puros relativos (con extensión) para poder usarse en navegador, servidor y pruebas', () => {
+    const imports = read('shared/utils/recommendationTree.ts').match(/^import\s.*$/gm) ?? []
+    assert.deepEqual(imports.map(i => /from '(\.\/[A-Za-z]+\.ts)'/.exec(i)?.[1]), ['./contentBlocks.ts'])
+    assert.equal(/^import\s/m.test(read('shared/utils/contentBlocks.ts')), true) // contentBlocks solo importa embedUrl (también puro)
+    assert.equal(/^import\s/m.test(read('shared/utils/embedUrl.ts')), false)
   })
 })

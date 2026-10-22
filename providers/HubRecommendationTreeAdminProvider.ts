@@ -78,6 +78,9 @@ export class HubRecommendationTreeAdminProvider {
   deleteSection(id: number) { return this.call<void>('DELETE', `/sections/${id}`) }
   setSectionImage(id: number, dataUrl: string) { return this.call<TreeSection>('POST', `/sections/${id}/image`, { image: dataUrl }) }
   removeSectionImage(id: number) { return this.call<TreeSection>('DELETE', `/sections/${id}/image`) }
+  /** Imagen de un bloque de tipo imagen (data URL). Devuelve la sección completa con sus bloques. */
+  setBlockImage(blockId: number, dataUrl: string) { return this.call<TreeSection>('POST', `/section-blocks/${blockId}/image`, { image: dataUrl }) }
+  removeBlockImage(blockId: number) { return this.call<TreeSection>('DELETE', `/section-blocks/${blockId}/image`) }
 
   // Recomendaciones individuales (solo en secciones de tipo «recommendations»)
   listItems(sectionId: number) { return this.call<TreeItem[]>('GET', `/sections/${sectionId}/items`) }

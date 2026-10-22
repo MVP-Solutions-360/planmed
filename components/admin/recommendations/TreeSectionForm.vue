@@ -29,45 +29,20 @@
           <p v-if="fieldError('subtitle')" class="err">{{ fieldError('subtitle') }}</p>
         </div>
 
-        <div v-if="allows('content')">
+        <!-- Tipos con bloques: una o dos columnas; cada una apila texto, imágenes, YouTube e Instagram (reemplaza texto, vídeo, imagen y distribución sueltos). -->
+        <template v-if="blocksCapable">
+          <p v-if="legacy" class="text-xs text-sky-900 bg-sky-50 border border-sky-200 rounded px-3 py-2" data-testid="section-legacy-notice">
+            Esta sección usa el formato anterior (texto, imagen y vídeo). Al guardar pasará a bloques: el contenido se convierte en bloques y el anterior se conserva en el sistema.
+          </p>
+          <AdminContentBlocksEditor :key="`blocks-${editorKey}`" v-model:layout="draft.column_layout" :blocks="draft.blocks" />
+          <p v-if="fieldError('blocks') || fieldError('column_layout')" class="err">{{ fieldError('blocks') || fieldError('column_layout') }}</p>
+        </template>
+
+        <div v-else-if="allows('content')">
           <label class="label">{{ draft.type === 'recommendations' ? 'Texto de la sección (opcional)' : 'Texto' }}</label>
           <AdminRichTextEditor :key="`content-${editorKey}`" v-model="draft.content" min-height="14rem" placeholder="Escribe aquí la descripción o el contenido de la sección..." />
           <p v-if="fieldError('content')" class="err">{{ fieldError('content') }}</p>
           <p v-if="draft.type === 'recommendations'" class="hint">Este texto es independiente de las recomendaciones individuales de abajo: no se convierten entre sí ni se duplican.</p>
-        </div>
-
-        <div v-if="allows('video')">
-          <label class="label" for="sec-video">Vídeo de YouTube (opcional)</label>
-          <input id="sec-video" v-model="draft.video_url" type="url" class="field" placeholder="https://www.youtube.com/watch?v=..." :aria-invalid="!!fieldError('video_url')">
-          <p v-if="fieldError('video_url')" class="err">{{ fieldError('video_url') }}</p>
-        </div>
-
-        <div v-if="allows('image')">
-          <label class="label">Imagen (opcional)</label>
-          <div class="flex flex-wrap items-start gap-4">
-            <label class="block w-40 aspect-[4/3] border-2 border-dashed border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-[#0C2619] bg-gray-50 relative">
-              <img v-if="imageSrc" :src="imageSrc" alt="Imagen de la sección" class="w-full h-full object-cover">
-              <span v-else class="absolute inset-0 flex items-center justify-center text-xs text-gray-400 text-center px-3">Haz clic para subir</span>
-              <input type="file" accept="image/*" class="hidden" @change="onImage">
-            </label>
-            <button v-if="imageSrc" type="button" class="text-xs font-bold text-gray-400 hover:text-red-600 uppercase tracking-wider" @click="clearImage">Quitar imagen</button>
-          </div>
-          <p v-if="fieldError('image')" class="err">{{ fieldError('image') }}</p>
-          <div v-if="imageSrc" class="mt-3 grid gap-4 sm:grid-cols-2">
-            <div>
-              <label class="label" for="sec-alt">Texto alternativo</label>
-              <input id="sec-alt" v-model="draft.image_alt" type="text" class="field" maxlength="255">
-              <p v-if="fieldError('image_alt')" class="err">{{ fieldError('image_alt') }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="allows('layout')">
-          <label class="label" for="sec-layout">Distribución</label>
-          <select id="sec-layout" v-model="draft.layout" class="field">
-            <option v-for="l in catalog.layouts" :key="l.value" :value="l.value">{{ l.label }}</option>
-          </select>
-          <p v-if="fieldError('layout')" class="err">{{ fieldError('layout') }}</p>
         </div>
 
         <fieldset v-if="allows('cta')" class="rounded-lg border border-gray-200 p-4 space-y-4" data-testid="cta">
@@ -127,8 +102,8 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { describeTreeError, type TreeErrorInfo } from '#shared/utils/recommendationAdminApi'
 import { recommendationTreeAdmin as api } from '~/providers/HubRecommendationTreeAdminProvider'
-import { fileToOptimizedDataUrl } from '~/utils/imageFile'
 import { isRichHtmlEmpty } from '~/utils/richText'
+import { activeSlots, buildBlockInputs, draftFromAdmin, newDraftBlock, type ColumnLayout, type DraftBlock } from '#shared/utils/contentBlocks'
 import type { SectionField, SectionInput, SectionTypesCatalog, TreeSection } from '~/types/recommendationTree'
 
 const props = defineProps<{ subtopicId: number, topicId: number, sectionId?: number }>()
@@ -142,15 +117,16 @@ const section = ref<TreeSection | null>(null)
 const ready = ref(false)
 const loadError = ref<TreeErrorInfo | null>(null)
 const editorKey = ref(0)
+const legacy = ref(false)
+/** Imagen del formato anterior que se quitará al guardar (solo cuando el tipo elegido ya no admite imagen). */
+const removeLegacyImage = ref(false)
 const clientErrors = reactive<Record<string, string>>({})
 
 const draft = reactive({
   type: 'description', title: '', subtitle: '', content: '', layout: 'stacked', image_alt: '', video_url: '',
   cta_label: '', cta_url: '', visible: true,
-  /** Imagen elegida y aún no enviada (data URL). */
-  newImage: '' as string,
-  /** Imagen guardada en Hub que se quitará al guardar. */
-  removeImage: false
+  column_layout: 'one_column' as ColumnLayout,
+  blocks: [] as DraftBlock[]
 })
 
 const backUrl = computed(() => `/admin/recomendaciones/temas/${props.topicId}/subtemas/${props.subtopicId}`)
@@ -159,19 +135,18 @@ const currentTypeLabel = computed(() => catalog.value.types.find(t => t.value ==
 const fieldError = (name: string) => clientErrors[name] ?? action.error.value?.fields[name] ?? null
 const ctaError = (name: string) => fieldError(name)
 
-const imageSrc = computed(() => draft.newImage || (!draft.removeImage ? section.value?.image_url ?? '' : ''))
-
+const blocksCapable = computed(() => allows('blocks'))
 const hasText = (v: string) => v.trim() !== ''
 
 // Campos con contenido que el tipo elegido NO admite (se muestran para poder vaciarlos de forma explícita).
 const incompatible = computed(() => {
   const list: { key: string, label: string, clear: () => void }[] = []
   if (!allows('subtitle') && hasText(draft.subtitle)) list.push({ key: 'subtitle', label: 'Subtítulo', clear: () => { draft.subtitle = '' } })
-  if (!allows('content') && !isRichHtmlEmpty(draft.content)) list.push({ key: 'content', label: 'Texto', clear: () => { draft.content = ''; editorKey.value++ } })
+  if (!allows('content') && !allows('blocks') && !isRichHtmlEmpty(draft.content)) list.push({ key: 'content', label: 'Texto', clear: () => { draft.content = ''; editorKey.value++ } })
   if (!allows('video') && hasText(draft.video_url)) list.push({ key: 'video_url', label: 'Vídeo de YouTube', clear: () => { draft.video_url = '' } })
   if (!allows('layout') && draft.layout !== 'stacked') list.push({ key: 'layout', label: 'Distribución de la imagen', clear: () => { draft.layout = 'stacked' } })
   if (!allows('image') && hasText(draft.image_alt)) list.push({ key: 'image_alt', label: 'Texto alternativo de la imagen', clear: () => { draft.image_alt = '' } })
-  if (!allows('image') && imageSrc.value) list.push({ key: 'image', label: 'Imagen', clear: () => clearImage() })
+  if (!allows('image') && hasText(section.value?.image_url ?? '')) list.push({ key: 'image', label: 'Imagen', clear: () => { removeLegacyImage.value = true } })
   if (!allows('cta') && (hasText(draft.cta_label) || hasText(draft.cta_url))) {
     list.push({ key: 'cta_label', label: 'Botón de acción', clear: () => { draft.cta_label = ''; draft.cta_url = '' } })
   }
@@ -180,9 +155,27 @@ const incompatible = computed(() => {
 
 // Campos que ya se muestran junto a su control (el resto de errores de Hub se lista en el aviso general).
 const shownFields = computed(() => {
-  const shown = ['type', 'title', 'subtitle', 'content', 'video_url', 'image', 'image_alt', 'layout', 'cta_label', 'cta_url']
+  const shown = ['type', 'title', 'subtitle', 'content', 'video_url', 'image', 'image_alt', 'layout', 'column_layout', 'blocks', 'cta_label', 'cta_url']
   return shown
 })
+
+/** Distribución y bloques iniciales: los guardados o, en el formato anterior, el texto, la imagen y el vídeo de la sección (la imagen se COPIA al bloque en Hub). */
+function initial(s: TreeSection | null): { layout: ColumnLayout, blocks: DraftBlock[] } {
+  if (!s) return { layout: 'one_column', blocks: [] }
+  if (s.blocks_mode) return { layout: s.column_layout, blocks: draftFromAdmin(s.blocks) }
+
+  const text = !isRichHtmlEmpty(s.content ?? '') ? newDraftBlock('main', 'text', { content: s.content! }) : null
+  const image = s.image_url ? newDraftBlock('main', 'image', { imageUrl: s.image_url, alt: s.image_alt ?? '', fromSectionImage: true }) : null
+  const video = hasText(s.video_url ?? '') ? newDraftBlock('main', 'youtube', { url: s.video_url! }) : null
+  const media = [image, video].filter((b): b is DraftBlock => b !== null)
+  if (text && media.length && s.layout !== 'stacked') {
+    const mediaFirst = s.layout !== 'media_right'
+    text.slot = mediaFirst ? 'right' : 'left'
+    for (const m of media) m.slot = mediaFirst ? 'left' : 'right'
+    return { layout: 'two_columns', blocks: mediaFirst ? [...media, text] : [text, ...media] }
+  }
+  return { layout: 'one_column', blocks: [...media, ...(text ? [text] : [])] }
+}
 
 function fill(s: TreeSection | null) {
   draft.type = s?.type ?? 'description'
@@ -195,8 +188,11 @@ function fill(s: TreeSection | null) {
   draft.cta_label = s?.cta?.label ?? ''
   draft.cta_url = s?.cta?.url ?? ''
   draft.visible = s?.visible ?? true
-  draft.newImage = ''
-  draft.removeImage = false
+  const start = initial(s)
+  draft.column_layout = start.layout
+  draft.blocks = start.blocks
+  legacy.value = !!s && !s.blocks_mode && allows('blocks') && start.blocks.length > 0
+  removeLegacyImage.value = false
   editorKey.value++
 }
 
@@ -221,25 +217,6 @@ async function init() {
   }
 }
 
-async function onImage(e: Event) {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-  if (!file) return
-  if (file.size > 10 * 1024 * 1024) return void notify.error('La imagen no puede superar los 10 MB.')
-  try {
-    draft.newImage = await fileToOptimizedDataUrl(file)
-    draft.removeImage = false
-  } catch (err: any) {
-    void notify.error(err.message)
-  }
-}
-
-function clearImage() {
-  draft.newImage = ''
-  draft.removeImage = !!section.value?.image_url
-}
-
 const orNull = (v: string) => (v.trim() === '' ? null : v.trim())
 
 /** El botón es opcional: texto y destino juntos o ninguno, con el dato faltante identificado. */
@@ -253,19 +230,30 @@ function validateCta(): boolean {
   return !clientErrors.cta_label && !clientErrors.cta_url
 }
 
-function buildInput(): SectionInput {
-  // Cada campo se envía con su valor (o null si está vacío): lo que el tipo no admite lo decide Hub (422 por campo), no se descarta aquí.
-  return {
+/** Bloques validados de la distribución elegida (null si el tipo no usa bloques). */
+function buildBlocks() {
+  if (!blocksCapable.value) return null
+  return buildBlockInputs(draft.blocks, activeSlots(draft.column_layout))
+}
+
+function buildInput(built: ReturnType<typeof buildBlocks>): SectionInput {
+  const base: SectionInput = {
     type: draft.type as SectionInput['type'],
     title: draft.title.trim(),
     subtitle: orNull(draft.subtitle),
-    content: isRichHtmlEmpty(draft.content) ? null : draft.content,
-    layout: draft.layout,
-    image_alt: orNull(draft.image_alt),
-    video_url: orNull(draft.video_url),
     cta_label: orNull(draft.cta_label),
     cta_url: orNull(draft.cta_url),
     visible: draft.visible
+  }
+  // Con bloques viaja SIEMPRE la lista completa (también la columna inactiva); los campos del formato anterior no se envían: Hub los conserva sin tocar.
+  if (built) return { ...base, column_layout: draft.column_layout, blocks: built.inputs }
+  // Cada campo se envía con su valor (o null si está vacío): lo que el tipo no admite lo decide Hub (422 por campo), no se descarta aquí.
+  return {
+    ...base,
+    content: isRichHtmlEmpty(draft.content) ? null : draft.content,
+    layout: draft.layout,
+    image_alt: orNull(draft.image_alt),
+    video_url: orNull(draft.video_url)
   }
 }
 
@@ -274,24 +262,29 @@ async function submit() {
   const titleOk = hasText(draft.title)
   if (!titleOk) clientErrors.title = 'Escribe un título para la sección.'
   const ctaOk = validateCta()
-  if (!titleOk || !ctaOk) return
+  const built = buildBlocks()
+  if (built?.error) clientErrors.blocks = built.error
+  if (!titleOk || !ctaOk || built?.error) return
 
   const editing = props.sectionId
+  let uploadFailed = false
   const res = await action.run(async () => {
-    if (editing) {
-      // Quitar la imagen es una orden explícita del usuario y va antes de cambiar el tipo (Hub no deja un tipo sin imagen con imagen).
-      if (draft.removeImage && section.value?.image_url) await api.removeSectionImage(editing)
-      let saved = await api.updateSection(editing, buildInput())
-      if (draft.newImage) saved = await api.setSectionImage(editing, draft.newImage)
-      return saved
+    // Quitar la imagen del formato anterior es una orden explícita y va antes de cambiar el tipo (Hub no deja un tipo sin imagen con imagen).
+    if (editing && removeLegacyImage.value && section.value?.image_url) await api.removeSectionImage(editing)
+    const saved = editing ? await api.updateSection(editing, buildInput(built)) : await api.createSection(props.subtopicId, buildInput(built))
+    if (!built) return saved
+    // Hub devuelve los bloques por columna y orden, igual que se enviaron: las imágenes nuevas se suben con el id de su bloque.
+    let latest = saved
+    for (const [i, b] of built.ordered.entries()) {
+      if (b.type !== 'image' || !b.newImage) continue
+      const id = saved.blocks?.[i]?.id
+      if (!id) { uploadFailed = true; continue }
+      try { latest = await api.setBlockImage(id, b.newImage) } catch { uploadFailed = true }
     }
-    const created = await api.createSection(props.subtopicId, buildInput())
-    if (draft.newImage) {
-      try { await api.setSectionImage(created.id, draft.newImage) } catch { void notify.warning('La sección se creó, pero la imagen no se pudo subir. Vuelve a intentarlo al editarla.') }
-    }
-    return created
+    return latest
   })
   if (!res.ok) return
+  if (uploadFailed) void notify.warning('La sección se guardó, pero alguna imagen no se pudo subir. Vuelve a abrirla para subirla de nuevo.')
 
   if (editing) {
     section.value = res.value

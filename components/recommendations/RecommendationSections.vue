@@ -19,8 +19,18 @@
       <div class="relative">
         <h2 v-if="section.title" class="font-serif text-2xl md:text-3xl mb-4 break-words">{{ section.title }}</h2>
         <p v-if="section.subtitle" class="text-white/70 font-light mb-4">{{ section.subtitle }}</p>
-        <CommonRichContent v-if="has(section.content)" :html="section.content" class="reco-callout-body" />
-        <RecommendationsSectionMedia v-if="section.image || section.video" :section="section" class="mt-6" />
+        <!-- Con bloques: una o dos columnas, cada una apila texto, imágenes, YouTube e Instagram (texto claro sobre el fondo oscuro). -->
+        <template v-if="section.blocksMode">
+          <div v-if="section.columnLayout === 'two_columns'" class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 md:items-start" data-testid="section-columns">
+            <ContentBlocks :blocks="section.blocks.left" tone="light" />
+            <ContentBlocks :blocks="section.blocks.right" tone="light" />
+          </div>
+          <ContentBlocks v-else :blocks="section.blocks.main" tone="light" />
+        </template>
+        <template v-else>
+          <CommonRichContent v-if="has(section.content)" :html="section.content" class="reco-callout-body" />
+          <RecommendationsSectionMedia v-if="section.image || section.video" :section="section" class="mt-6" />
+        </template>
         <div v-if="section.cta" class="mt-8">
           <RecommendationsSectionCta :cta="section.cta" variant="light" />
         </div>
@@ -34,9 +44,18 @@
         <p v-if="section.subtitle" class="mt-3 text-[#4c4546] font-light">{{ section.subtitle }}</p>
       </header>
 
-      <!-- Texto con imagen/vídeo: la distribución la define el Hub (columna única, imagen a la izquierda o a la derecha). -->
+      <!-- Con bloques: una o dos columnas desde md (izquierda → derecha; apiladas en móvil); cada una apila texto, imágenes, YouTube e Instagram. -->
+      <template v-if="section.blocksMode">
+        <div v-if="section.columnLayout === 'two_columns'" class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 md:items-start" data-testid="section-columns">
+          <ContentBlocks :blocks="section.blocks.left" />
+          <ContentBlocks :blocks="section.blocks.right" />
+        </div>
+        <ContentBlocks v-else :blocks="section.blocks.main" />
+      </template>
+
+      <!-- Formato anterior: texto con imagen/vídeo; la distribución la define el Hub (columna única, imagen a la izquierda o a la derecha). -->
       <div
-        v-if="section.image || section.video"
+        v-else-if="section.image || section.video"
         :class="section.layout !== 'stacked' && has(section.content) ? 'md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-10 md:items-start' : ''"
       >
         <RecommendationsSectionMedia
@@ -48,7 +67,7 @@
       <CommonRichContent v-else-if="has(section.content)" :html="section.content" class="reco-body" />
 
       <!-- Recomendaciones individuales: solo si el Hub entrega registros (si la lista vive en `content`, ya se mostró arriba) -->
-      <ul v-if="section.items.length" class="reco-items" :class="has(section.content) || section.image || section.video ? 'mt-8' : ''">
+      <ul v-if="section.items.length" class="reco-items" :class="has(section.content) || section.image || section.video || section.blocksMode ? 'mt-8' : ''">
         <li v-for="(item, j) in section.items" :key="item.slug || j">
           <strong v-if="item.title" class="reco-item-title">{{ item.title }}</strong>
           <CommonRichContent v-if="has(item.content)" :html="item.content" class="reco-item-body" />

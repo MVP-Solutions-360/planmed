@@ -1,5 +1,5 @@
 // Árbol de Recomendaciones de Wellezy Hub: TEMA PRINCIPAL → SUBTEMAS → SECCIONES → RECOMENDACIONES.
-// Módulo PURO (sin imports), compartido por el navegador, el servidor Nitro y las pruebas.
+// Módulo PURO (solo importa el módulo puro de bloques), compartido por el navegador, el servidor Nitro y las pruebas.
 //
 // Contrato real del Hub (GET /api/v1/web/recommendation-topics[/{topic}[/{subtopic}]]), solo lectura y solo contenido publicado:
 //   · lista:    data[] = { slug, menu_label, title, orden, path, subtopics[] }
@@ -10,6 +10,9 @@
 //                              items[] = { slug, title, content, orden } } }
 // `path` NO se usa: depende de la configuración de la línea (puede ser null o la ruta histórica). Las URLs de Planmed se construyen
 // siempre con los slugs: /recomendaciones/{tema}/{subtema}. Todo valor que no cumple el contrato se descarta; nunca se inventa.
+
+// @ts-expect-error TS5097: la extensión .ts solo se permite con allowImportingTsExtensions (las pruebas de Node no usan los alias de Nuxt).
+import { countBlocks, fromPublicBlock, publicBlocksOf, type ColumnLayout, type PublicBlock, type PublicBlocks } from './contentBlocks.ts'
 
 export const SECTION_TYPES = ['description', 'recommendations', 'callout', 'contact', 'custom'] as const
 export type SectionType = typeof SECTION_TYPES[number]
@@ -32,6 +35,11 @@ export interface TreeSection {
   video: TreeVideo | null
   cta: TreeCta | null
   items: TreeItem[]
+  /** true = la sección usa bloques apilables por columna (texto, imagen, YouTube, Instagram); false = formato anterior (content/image/video/layout). */
+  blocksMode: boolean
+  columnLayout: ColumnLayout
+  /** Bloques de la distribución activa, ya re-validados (también para el formato anterior: derivados). */
+  blocks: PublicBlocks
 }
 export interface TreeSubtopicSummary { slug: string, group: string, menuLabel: string, title: string, order: number, shortUrl: string | null }
 export interface TreeTopic { slug: string, menuLabel: string, title: string, order: number, subtopics: TreeSubtopicSummary[] }
@@ -179,6 +187,18 @@ function item(d: unknown): TreeItem | null {
   return { slug, title, content, order: int(i.orden) }
 }
 
+/** Bloques derivados del formato anterior (Hub sin `blocks`): el medio antes del texto; imagen/video + texto con «imagen a izquierda/derecha» => dos columnas. */
+function legacyBlocks(content: string, img: TreeImage | null, video: TreeVideo | null, layout: SectionLayout): { columnLayout: ColumnLayout, blocks: PublicBlocks } {
+  const text: PublicBlock | null = hasText(content) ? { type: 'text', html: content } : null
+  const media: PublicBlock[] = []
+  if (img) media.push({ type: 'image', url: img.url, alt: img.alt })
+  if (video) media.push({ type: 'youtube', url: video.url })
+  if (text && media.length && layout !== 'stacked') {
+    return { columnLayout: 'two_columns', blocks: layout === 'media_right' ? { main: [], left: [text], right: media } : { main: [], left: media, right: [text] } }
+  }
+  return { columnLayout: 'one_column', blocks: { main: text ? [...media, text] : media, left: [], right: [] } }
+}
+
 function section(d: unknown): TreeSection | null {
   const s = obj(d)
   if (!s) return null
@@ -188,18 +208,29 @@ function section(d: unknown): TreeSection | null {
   const ctaLabel = label(s.cta?.label)
   const ctaUrl = safeCtaUrl(s.cta?.url)
   const items = (Array.isArray(s.items) ? s.items : []).map(item).filter((i): i is TreeItem => !!i)
+  const content = str(s.content)
+  const img = image(s.image)
+  const video = safeVideo(s.video)
+  const blocksMode = s.blocks_mode === true && !!obj(s.blocks)
+  const columnLayout: ColumnLayout = s.column_layout === 'two_columns' ? 'two_columns' : 'one_column'
+  const shape = blocksMode
+    ? { columnLayout, blocks: publicBlocksOf(s.blocks, columnLayout, () => ({ main: [], left: [], right: [] })) }
+    : legacyBlocks(content, img, video, layout)
   return {
     type,
     order: int(s.orden),
     title: label(s.title),
     subtitle: label(s.subtitle),
-    content: str(s.content),
+    content,
     layout,
-    image: image(s.image),
-    video: safeVideo(s.video),
+    image: img,
+    video,
     // El botón es opcional: sin texto o con un destino no válido no existe (no se reserva espacio).
     cta: ctaLabel && ctaUrl ? { label: ctaLabel, url: ctaUrl } : null,
-    items
+    items,
+    blocksMode,
+    columnLayout: shape.columnLayout,
+    blocks: shape.blocks
   }
 }
 
@@ -236,6 +267,17 @@ export const treeSubtopicSlugs = (topics: TreeTopic[]): Set<string> => new Set(t
 /** Qué debe mostrar una sección según sus datos reales (los tipos no comparten campos). */
 export function sectionParts(s: TreeSection) {
   const hasContent = hasText(s.content)
+  if (s.blocksMode) {
+    // Con bloques, el contenido vive en ellos (los campos antiguos llegan vacíos); el texto introductorio de una lista también es un bloque.
+    const total = countBlocks(s.blocks, s.columnLayout)
+    return {
+      hasContent: sectionText(s) !== '',
+      hasItems: s.items.length > 0,
+      hasMedia: activeBlocks(s).some(b => b.type !== 'text'),
+      hasCta: !!s.cta,
+      isEmpty: total === 0 && !s.items.length && !s.cta
+    }
+  }
   return {
     hasContent,
     hasItems: s.items.length > 0,
@@ -246,17 +288,36 @@ export function sectionParts(s: TreeSection) {
   }
 }
 
+/** Bloques de la distribución activa, en orden de lectura. */
+export function activeBlocks(s: TreeSection): PublicBlock[] {
+  return s.columnLayout === 'two_columns' ? [...s.blocks.left, ...s.blocks.right] : s.blocks.main
+}
+
+/** Primer texto de una sección (para SEO): su contenido antiguo o, con bloques, el primer bloque de texto. */
+export function sectionText(s: TreeSection): string {
+  if (hasText(s.content)) return s.content
+  const block = activeBlocks(s).find((b): b is Extract<PublicBlock, { type: 'text' }> => b.type === 'text' && hasText(b.html))
+  return block ? block.html : ''
+}
+
+/** Primera imagen de una sección (para SEO): la antigua o, con bloques, la primera de sus bloques. */
+export function sectionImageUrl(s: TreeSection): string | null {
+  if (s.image) return s.image.url
+  const block = activeBlocks(s).find((b): b is Extract<PublicBlock, { type: 'image' }> => b.type === 'image')
+  return block ? block.url : null
+}
+
 // ── SEO ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 export interface SubtopicSeo { title: string, description: string, image: string | null, canonicalPath: string }
 
 /** Metadatos del subtema: título, descripción (introducción o, si no hay, su primera sección con texto), imagen y ruta canónica. */
 export function subtopicSeo(sub: TreeSubtopic): SubtopicSeo {
-  const firstText = hasText(sub.intro.content) ? sub.intro.content : sub.sections.find(s => hasText(s.content))?.content ?? ''
+  const firstText = hasText(sub.intro.content) ? sub.intro.content : sub.sections.map(sectionText).find(t => t !== '') ?? ''
   let description = plainText(firstText)
   if (description.length > 160) description = description.slice(0, 157).replace(/\s+\S*$/, '') + '...'
   if (!description) description = `Recomendaciones de Planmed: ${sub.title}.`
-  const image = sub.intro.image?.url ?? sub.sections.find(s => s.image)?.image?.url ?? null
+  const image = sub.intro.image?.url ?? sub.sections.map(sectionImageUrl).find(u => !!u) ?? null
   return { title: `${sub.title} | Planmed`, description, image, canonicalPath: subtopicPath(sub.topic.slug, sub.slug) }
 }
 
