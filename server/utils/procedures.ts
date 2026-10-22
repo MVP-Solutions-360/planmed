@@ -20,7 +20,7 @@ export interface ProcedureDto {
   image: string
   galeria: string[]
   /** Solo detalle público: secciones de la línea de Planmed, debajo del contenido del procedimiento. */
-  secciones?: Array<{ orden: number, title: string | null, content: string, layout: 'media_left' | 'media_right', image: { url: string } | null }>
+  secciones?: Array<{ orden: number, title: string | null, content: string, layout: 'media_left' | 'media_right', image: { url: string } | null, columnLayout: ColumnLayout, blocks: PublicBlocks }>
   destacado: boolean
   activo?: boolean
   isMaster?: boolean

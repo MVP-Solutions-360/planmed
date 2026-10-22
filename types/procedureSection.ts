@@ -1,5 +1,4 @@
 // Secciones de contenido de un procedimiento PARA LA LÍNEA del usuario (Wellezy Hub: /cms/procedures/{id}/sections).
-// @ts-expect-error TS5097: la extensión .ts solo se permite con allowImportingTsExtensions.
 import type { AdminBlock, BlockInput, ColumnLayout, PublicBlocks } from '../shared/utils/contentBlocks.ts'
 
 export const PROCEDURE_SECTION_LAYOUTS = ['media_left', 'media_right'] as const
