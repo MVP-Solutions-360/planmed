@@ -13,5 +13,5 @@ export default defineEventHandler(async (event) => {
     if (page >= Number(res.data.meta?.last_page ?? 1)) break
   }
 
-  return rows.map(fromPublicListItem)
+  return await withOrientation(event, rows.map(fromPublicListItem))
 })

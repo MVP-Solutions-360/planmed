@@ -36,8 +36,12 @@ export interface Procedure {
   shortDescription: string;
   whatIsIt: string;
   image: string;
+  /** Orientación de la portada: vertical (1080 × 1920, por defecto) u horizontal (1920 × 1080). Se guarda en Planmed, no en Hub. */
+  imageOrientation?: 'vertical' | 'horizontal';
   secondaryImage?: string;
   galeria?: Array<string | ProcedureImage>;
+  /** Secciones de contenido de la línea (detalle público), debajo del contenido del procedimiento. */
+  secciones?: import('./procedureSection').ProcedureSectionPublic[];
   destacado?: boolean;
   ficha_tecnica?: ProcedureFichaTecnica;
   perfil_paciente?: ProcedurePerfilPaciente;

@@ -25,16 +25,20 @@
       <!-- Cuadrícula editorial (staggered grid en desktop) -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 lg:gap-x-24 gap-y-16">
         <HomeProcedureCard 
-          v-for="(proc, index) in procedures" 
+          v-for="(proc, index) in featured" 
           :key="proc.id" 
           :procedure="proc"
           :class="{ 'md:mt-24': index % 2 !== 0 }"
         />
       </div>
 
-      <div class="mt-16 md:hidden text-center border-t border-[#e5e2e1] pt-8">
-        <NuxtLink :to="'/procedimientos'" class="text-[11px] font-bold tracking-[0.15em] text-[#0C2619] uppercase border-b border-[#0C2619] pb-1">
-          VER TODOS LOS PROCEDIMIENTOS
+      <div class="mt-16 text-center border-t border-[#e5e2e1] pt-12">
+        <NuxtLink
+          :to="'/procedimientos'"
+          class="inline-flex bg-[#0C2619] text-white px-10 py-5 text-xs font-bold tracking-[0.15em] uppercase hover:bg-black transition-colors"
+          data-testid="home-all-procedures"
+        >
+          Ver todos los procedimientos
         </NuxtLink>
       </div>
 
@@ -43,6 +47,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useAsyncData } from '#imports'
 import { publicProcedureService } from '~/services/PublicProcedureService'
 
@@ -50,4 +55,10 @@ const { data: procedures } = await useAsyncData('home-procedures', () => publicP
   default: () => []
 })
 
+// Solo 4 en la home: primero los destacados y, si faltan, se completan con los demás en el orden de la API.
+const HOME_LIMIT = 4
+const featured = computed(() => {
+  const all = procedures.value ?? []
+  return [...all.filter(p => p.destacado), ...all.filter(p => !p.destacado)].slice(0, HOME_LIMIT)
+})
 </script>

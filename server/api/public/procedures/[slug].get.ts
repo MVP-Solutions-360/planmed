@@ -9,5 +9,5 @@ export default defineEventHandler(async (event) => {
   if (res.status === 404 && !isTenantNotResolved(res)) throw createError({ statusCode: 404, message: 'El procedimiento no existe.' })
   assertHubOk('procedures', res, !!res.data?.data, 'No fue posible cargar el procedimiento. Intenta nuevamente.')
 
-  return fromPublicDetail(res.data.data)
+  return (await withOrientation(event, [fromPublicDetail(res.data.data)]))[0]
 })

@@ -22,7 +22,7 @@ export interface AdminRoute {
   hasId: boolean
 }
 
-interface Def { method: AdminHttpMethod, pattern: string, hub: string, body?: readonly string[], query?: readonly string[], upload?: boolean }
+export interface Def { method: AdminHttpMethod, pattern: string, hub: string, body?: readonly string[], query?: readonly string[], upload?: boolean }
 
 const TOPIC = ['title', 'menu_label', 'slug', 'orden', 'published'] as const
 const SUBTOPIC_CREATE = ['title', 'menu_label', 'slug', 'grupo', 'orden', 'published', 'content', 'video_url'] as const
@@ -78,8 +78,13 @@ const ID_RE = /^[1-9]\d{0,9}$/
 
 /** Resuelve (método, segmentos de la URL) a la ruta permitida de Hub, o null si no está en la tabla (404 sin llamar a Hub). */
 export function resolveAdminRoute(method: string, segments: string[]): AdminRoute | null {
+  return matchAdminRoute(DEFS, method, segments)
+}
+
+/** Igual que `resolveAdminRoute` sobre una tabla dada (la usan también otros paneles con el mismo proxy, p. ej. secciones de procedimientos). */
+export function matchAdminRoute(defs: readonly Def[], method: string, segments: string[]): AdminRoute | null {
   const verb = method.toUpperCase()
-  for (const def of DEFS) {
+  for (const def of defs) {
     if (def.method !== verb) continue
     const parts = def.pattern.split('/')
     if (parts.length !== segments.length) continue

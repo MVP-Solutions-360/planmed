@@ -21,6 +21,36 @@ export interface NewsArticleDto {
   seo: { metaTitle?: string, metaDescription?: string }
   youtubeUrl?: string
   instagramUrl?: string
+  sections?: NewsSectionDto[]
+}
+
+export interface NewsSectionDto {
+  orden: number
+  title: string | null
+  layout: 'one_column' | 'two_columns'
+  content: string
+  contentLeft: string
+  contentRight: string
+}
+
+/**
+ * `secciones` del detalle público de Hub → lista normalizada. Defensivo: ignora lo que no es objeto y las secciones sin nada que mostrar en su
+ * distribución; una distribución desconocida cae a una columna. El HTML NO se confía: se sanitiza (lista blanca) al renderizar (CommonRichContent).
+ */
+export function fromPublicNewsSections(raw: unknown): NewsSectionDto[] {
+  if (!Array.isArray(raw)) return []
+  const out: NewsSectionDto[] = []
+  const text = (v: unknown) => (typeof v === 'string' ? v : '')
+  for (const s of raw) {
+    if (!s || typeof s !== 'object') continue
+    const layout = s.layout === 'two_columns' ? 'two_columns' : 'one_column'
+    const title = orNull(s.title)
+    const section: NewsSectionDto = { orden: Number.isFinite(Number(s.orden)) ? Number(s.orden) : 0, title, layout, content: text(s.content), contentLeft: text(s.content_left), contentRight: text(s.content_right) }
+    const body = layout === 'two_columns' ? (section.contentLeft + section.contentRight) : section.content
+    if (!title && body.replace(/<[^>]*>/g, '').trim() === '') continue
+    out.push(section)
+  }
+  return out
 }
 
 /** Detalle/lista pública de Hub (/v1/web/posts) → NewsArticle. Hub solo entrega noticias publicadas y vigentes. */
@@ -36,7 +66,8 @@ export function fromPublicPost(post: any): NewsArticleDto {
     author: typeof post.author_name === 'string' ? post.author_name : undefined,
     seo: { metaTitle: post.seo?.meta_title ?? undefined, metaDescription: post.seo?.meta_description ?? undefined },
     youtubeUrl: post.youtube_url ?? undefined,
-    instagramUrl: post.instagram_url ?? undefined
+    instagramUrl: post.instagram_url ?? undefined,
+    sections: fromPublicNewsSections(post.secciones)
   }
 }
 

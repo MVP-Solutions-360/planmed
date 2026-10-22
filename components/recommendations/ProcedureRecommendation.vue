@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSeoMeta, useRoute, createError, useAsyncData } from '#imports'
+import { useSeoMeta, useRoute, createError, useAsyncData, useNuxtApp } from '#imports'
 import { publicProcedureService } from '~/services/PublicProcedureService'
 import { publicRecommendationsService } from '~/services/PublicRecommendationsService'
 import { isRichHtmlEmpty } from '~/utils/richText'
@@ -22,6 +22,9 @@ const props = defineProps<{ kind: RecommendationKind }>()
 const meta = RECOMMENDATION_KINDS[props.kind]
 
 const slug = useRoute().params.slug as string
+// Contexto de Nuxt capturado ANTES de cualquier await: en SSR (sin asyncContext) se pierde tras el primer await del manejador y
+// useRequestFetch() —que usan los proveedores— lanzaría «[nuxt] instance unavailable» en la segunda llamada (causa del 503 en revisión).
+const nuxtApp = useNuxtApp()
 
 // Procedimiento del Hub (SSR) y, si el Hub informa que una página vinculada y publicada sustituye el texto histórico, esa página.
 // Regla (docs/maestra/04 §2.1): pagina → la página; pagina_oculta → 404 SIN usar el histórico; historico → el texto del
@@ -30,7 +33,8 @@ const { data, error } = await useAsyncData(`procedure-${props.kind}-${slug}`, as
   const procedure = await publicProcedureService.getProcedureBySlug(slug)
   if (!procedure) return null
   const source = resolveRecommendation(procedure as any, props.kind, meta.field, isRichHtmlEmpty)
-  const page = source.type === 'page' ? await publicRecommendationsService.getPage(source.slug) : null
+  // Segunda llamada (tras un await): se ejecuta dentro del contexto de Nuxt para que useRequestFetch() funcione también en SSR.
+  const page = source.type === 'page' ? await nuxtApp.runWithContext(() => publicRecommendationsService.getPage(source.slug)) : null
   return { procedure, source, page }
 })
 

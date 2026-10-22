@@ -17,6 +17,8 @@ export interface ProcedureDto {
   whatIsIt: string
   image: string
   galeria: string[]
+  /** Solo detalle público: secciones de la línea de Planmed, debajo del contenido del procedimiento. */
+  secciones?: Array<{ orden: number, title: string | null, content: string, layout: 'media_left' | 'media_right', image: { url: string } | null }>
   destacado: boolean
   activo?: boolean
   isMaster?: boolean
@@ -73,6 +75,24 @@ export function fromPublicListItem(item: any): ProcedureDto {
   }
 }
 
+/**
+ * `secciones` del detalle público (Hub las entrega ya filtradas por la línea y ordenadas). Lectura defensiva: ausente (Hub anterior) o
+ * inválida => []; posición desconocida => izquierda; solo imágenes http/https; sin título ni contenido ni imagen no hay nada que mostrar.
+ */
+export function fromPublicSections(raw: unknown): NonNullable<ProcedureDto['secciones']> {
+  if (!Array.isArray(raw)) return []
+  const out: NonNullable<ProcedureDto['secciones']> = []
+  for (const s of raw) {
+    if (!s || typeof s !== 'object') continue
+    const url = typeof s.image?.url === 'string' && /^https?:\/\//i.test(s.image.url) ? s.image.url : null
+    const title = orNull(s.title)
+    const content = str(s.content)
+    if (!title && content.trim() === '' && !url) continue
+    out.push({ orden: Number.isFinite(Number(s.orden)) ? Number(s.orden) : 0, title, content, layout: s.layout === 'media_right' ? 'media_right' : 'media_left', image: url ? { url } : null })
+  }
+  return out
+}
+
 /** Detalle de /v1/web/cirugias/{slug}. El id público es el slug (Hub no expone ids en la API pública). */
 export function fromPublicDetail(d: any): ProcedureDto {
   const datos = d.datos_paciente ?? {}
@@ -85,6 +105,7 @@ export function fromPublicDetail(d: any): ProcedureDto {
     whatIsIt: str(d.procedimiento),
     image: str(d.imagen_destacada),
     galeria: Array.isArray(d.galeria) ? d.galeria.filter((u: unknown) => typeof u === 'string') : [],
+    secciones: fromPublicSections(d.secciones),
     destacado: d.destacado === true,
     // Hub devuelve HTML (string) o, en datos históricos, una lista: se muestra como lista sin modificar el dato almacenado.
     recomendaciones_post: recommendationHtml(d.recomendaciones_post),

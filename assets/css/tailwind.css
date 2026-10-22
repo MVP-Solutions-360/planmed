@@ -12,3 +12,59 @@
 .rich-content a { color: #0C2619; font-weight: 700; text-decoration: underline; }
 .rich-content strong { font-weight: 700; }
 .rich-content em { font-style: italic; }
+
+/* Todo lo que se puede pulsar muestra la «manito» (Tailwind v4 deja los botones con cursor por defecto).
+   Va en la capa base: una utilidad explícita (cursor-default, cursor-not-allowed…) sigue teniendo prioridad. */
+@layer base {
+  a[href],
+  button:not(:disabled),
+  summary,
+  select:not(:disabled),
+  label[for],
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"],
+  [role="menuitem"],
+  input:is([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [type="reset"], [type="file"], [type="range"], [type="color"]):not(:disabled),
+  label:has(> input:is([type="checkbox"], [type="radio"]):not(:disabled)) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+/* Texto enriquecido con el estilo de Recomendaciones (cuerpo de la página y detalle de procedimientos). Compartido: vivía en RecommendationShell. */
+.reco-body { color: #4c4546; font-weight: 300; font-size: 1.0625rem; line-height: 1.75; }
+.reco-body p { margin: 0 0 1.25em; }
+.reco-body strong { font-weight: 600; color: #0C2619; }
+.reco-body a { color: #0C2619; text-decoration: underline; text-underline-offset: 3px; }
+
+.reco-body h2, .reco-body h3 {
+  font-family: var(--font-serif, serif);
+  font-size: 1.5rem; font-weight: 500; line-height: 1.25; text-transform: none; color: #0C2619;
+  margin: 2.2em 0 .8em; padding-left: 1rem; border-left: 4px solid #D3A76A;
+}
+.reco-body > :first-child { margin-top: 0; }
+
+.reco-body ul, .reco-body ol { list-style: none; padding: 0; margin: 0 0 1.6em; counter-reset: reco; display: grid; gap: .6rem; }
+.reco-body li {
+  position: relative; padding: .85rem 1rem .85rem 3.25rem; background: #f7faf8; border: 1px solid #e3ede7; border-radius: .75rem;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.reco-body li:hover { transform: translateX(4px); border-color: #0C2619; box-shadow: 0 6px 18px rgba(12, 38, 25, .08); }
+.reco-body li > p { margin: 0; }
+.reco-body li::before {
+  content: ''; position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+  width: 1.5rem; height: 1.5rem; border-radius: 9999px; background: #0C2619 center / .9rem no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D3A76A' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E");
+}
+.reco-body ol li::before {
+  counter-increment: reco; content: counter(reco); background-image: none; color: #D3A76A;
+  font-size: .8rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+
+.reco-title { padding-left: 1rem; border-left: 4px solid #D3A76A; }

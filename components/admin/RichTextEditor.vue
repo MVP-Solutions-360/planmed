@@ -8,7 +8,7 @@
         {{ b.label }}
       </button>
     </div>
-    <EditorContent :editor="editor" class="rich-content px-4 py-3 text-sm" />
+    <EditorContent :editor="editor" class="rich-content px-4 py-3 text-sm" :class="height ? 'overflow-y-auto' : ''" :style="height ? { height } : undefined" />
     <p v-if="placeholder && editor && editor.isEmpty && !readonly" class="pointer-events-none absolute left-4 text-sm text-gray-400" :class="editor && !readonly ? 'top-[3.65rem]' : 'top-3'" data-testid="editor-placeholder">{{ placeholder }}</p>
   </div>
 </template>
@@ -19,7 +19,7 @@ import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { sanitizeRichHtml } from '~/utils/richText'
 
-const props = withDefaults(defineProps<{ modelValue?: string, minHeight?: string, readonly?: boolean, placeholder?: string }>(), { modelValue: '', minHeight: '9rem', readonly: false, placeholder: '' })
+const props = withDefaults(defineProps<{ modelValue?: string, minHeight?: string, height?: string, readonly?: boolean, placeholder?: string }>(), { modelValue: '', minHeight: '9rem', height: '', readonly: false, placeholder: '' })
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 function currentHtml(): string {

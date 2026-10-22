@@ -1,12 +1,21 @@
 <template>
-  <div class="group flex flex-col gap-6 cursor-pointer">
-    <div class="relative w-full aspect-[3/4] md:aspect-[4/5] overflow-hidden bg-[#e5e2e1]">
+  <!-- Toda la tarjeta (imagen, nombre y flecha) lleva al detalle del procedimiento; sin slug no hay ruta válida y queda como bloque informativo. -->
+  <component
+    :is="detailPath ? NuxtLink : 'div'"
+    v-bind="detailPath ? { to: detailPath } : {}"
+    class="group flex flex-col gap-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0C2619]"
+    :class="{ 'cursor-pointer': detailPath }"
+    data-testid="home-procedure-card"
+  >
+    <!-- Contenedor según la orientación elegida en el admin: vertical 9:16 (1080 × 1920, por defecto) u horizontal 16:9 (1920 × 1080): la imagen se muestra completa (contain), a color y sin deformarse. El ancho se limita para que la tarjeta no ocupe más de una pantalla. -->
+    <div class="relative w-full overflow-hidden bg-[#e5e2e1]" :class="procedure.imageOrientation === 'horizontal' ? 'aspect-video' : 'aspect-[9/16] max-w-[420px]'">
       <img 
+        v-if="procedure.image"
         :src="procedure.image" 
         :alt="procedure.name" 
-        class="w-full h-full object-cover grayscale contrast-125 brightness-95 transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
+        loading="lazy"
+        class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
       />
-      <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500 z-10"></div>
     </div>
     <div class="flex flex-col gap-3">
       <div class="flex justify-between items-center">
@@ -19,14 +28,19 @@
         {{ procedure.shortDescription }}
       </p>
     </div>
-  </div>
+  </component>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { NuxtLink } from '#components'
+
+const props = defineProps({
   procedure: {
     type: Object,
     required: true
   }
 })
+
+const detailPath = computed(() => (props.procedure.slug ? `/procedimientos/${encodeURIComponent(props.procedure.slug)}` : ''))
 </script>

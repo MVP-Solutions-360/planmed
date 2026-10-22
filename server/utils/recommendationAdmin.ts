@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { pickAllowed, pickQuery, resolveAdminRoute } from '#shared/utils/recommendationAdminApi'
+import { pickAllowed, pickQuery, resolveAdminRoute, type AdminRoute } from '#shared/utils/recommendationAdminApi'
 
 // Traducción de las respuestas de la API administrativa de Recomendaciones de Hub (/cms/recommendation-*) a errores HTTP de Planmed.
 // A diferencia de `translate` (noticias), conserva el 409 de integridad con el mensaje real del Hub (p. ej. «el tema tiene subtemas»)
@@ -56,6 +56,11 @@ export async function handleTreeRequest(event: H3Event) {
   const { session, token } = await adminSession(event)
   const route = resolveAdminRoute(String(event.method), treeSegments(event))
   if (!route) throw createError({ statusCode: 404, message: 'Ruta no disponible.' })
+  return forwardAdminRoute(event, session, token, route)
+}
+
+/** Reenvía una ruta YA permitida a Hub (con el Bearer de la sesión) y traduce la respuesta; lo comparten los paneles con tabla de rutas propia. */
+export async function forwardAdminRoute(event: H3Event, session: { clear: () => Promise<unknown> }, token: string, route: AdminRoute) {
   const path = `/cms${route.hubPath}`
 
   let res: { status: number, data?: any }

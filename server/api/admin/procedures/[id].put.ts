@@ -8,5 +8,7 @@ export default defineEventHandler(async (event) => {
     ? await hubProcedures(event, 'PUT', `/${id}`, { body: fields })
     : await hubProcedures(event, 'GET', `/${id}`)
   const last = await applyProcedureMedia(event, id, body, res.data)
-  return fromCms(last)
+  const dto = fromCms(last)
+  await saveOrientation(event, dto.slug, body?.imageOrientation)
+  return (await withOrientation(event, [dto]))[0]
 })

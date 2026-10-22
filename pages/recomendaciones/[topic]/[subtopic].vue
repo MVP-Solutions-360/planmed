@@ -6,6 +6,8 @@
     :html="subtopic.intro.content"
     :video-url="subtopic.intro.video?.embedUrl"
     :image="subtopic.intro.image?.url"
+    :share-path="`/recomendaciones/${topic}/${slug}`"
+    :short-url="subtopic.shortUrl"
   >
     <RecommendationsRecommendationSections :sections="subtopic.sections" />
   </RecommendationsRecommendationShell>

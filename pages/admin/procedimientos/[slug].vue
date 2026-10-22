@@ -63,7 +63,7 @@
 
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">¿Qué es? (Descripción detallada) *</label>
-              <AdminRichTextEditor v-model="form.whatIsIt" min-height="10rem" :readonly="readOnly" />
+              <AdminRichTextEditor v-model="form.whatIsIt" height="24rem" :readonly="readOnly" />
             </div>
           </div>
         </div>
@@ -143,11 +143,36 @@
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
           <h3 class="text-xs font-bold tracking-widest text-[#0C2619] uppercase mb-6 border-b border-gray-100 pb-4">Imagen Principal</h3>
           
-          <div v-if="form.image" class="w-full aspect-video rounded-lg overflow-hidden mb-4 border border-gray-200 relative group">
-            <img :src="form.image" alt="Preview" class="w-full h-full object-cover" />
-          </div>
-          <div v-else class="w-full aspect-video rounded-lg mb-4 border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400">
-            Sin imagen
+          <fieldset class="mb-4 min-w-0 border-0 p-0 m-0">
+            <legend class="text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-2">Orientación de la portada</legend>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="flex items-center gap-2 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-[#0C2619] transition-colors text-sm font-bold text-gray-900 has-[:checked]:border-[#0C2619] has-[:checked]:bg-white">
+                <input v-model="form.imageOrientation" type="radio" name="imageOrientation" value="vertical" class="text-[#0C2619] focus:ring-[#0C2619]" />
+                Vertical <span class="text-[10px] font-normal text-gray-500">1080 × 1920</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-[#0C2619] transition-colors text-sm font-bold text-gray-900 has-[:checked]:border-[#0C2619] has-[:checked]:bg-white">
+                <input v-model="form.imageOrientation" type="radio" name="imageOrientation" value="horizontal" class="text-[#0C2619] focus:ring-[#0C2619]" />
+                Horizontal <span class="text-[10px] font-normal text-gray-500">1920 × 1080</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="w-full flex justify-center mb-4">
+            <div
+              v-if="form.image"
+              class="rounded-lg overflow-hidden border border-gray-200 bg-gray-100 relative group"
+              :class="form.imageOrientation === 'vertical' ? 'aspect-[9/16] w-[60%]' : 'aspect-video w-full'"
+              data-testid="cover-preview"
+            >
+              <img :src="form.image" alt="Preview" class="w-full h-full object-contain" />
+            </div>
+            <div
+              v-else
+              class="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400"
+              :class="form.imageOrientation === 'vertical' ? 'aspect-[9/16] w-[60%]' : 'aspect-video w-full'"
+            >
+              Sin imagen
+            </div>
           </div>
 
           <div>
@@ -205,6 +230,16 @@
 
       </div>
     </form>
+
+    <!-- Secciones de contenido de la línea (debajo del contenido del procedimiento en la web). Fuera del formulario: tiene los suyos y también aplica a maestros. -->
+    <AdminProceduresSectionsManager
+      v-if="!isNew && procedureId"
+      :key="procedureId"
+      class="mt-8"
+      :procedure-id="procedureId"
+      :is-master="form.isMaster"
+      :can-write="!form.isMaster || savedActivo"
+    />
   </div>
 </template>
 
@@ -239,6 +274,9 @@ const savedImage = ref('')
 // El slug se autogenera desde el nombre hasta que el administrador lo edita a mano.
 // Los procedimientos existentes arrancan como "manuales": renombrar nunca cambia su URL por sorpresa.
 const slugTouched = ref(!isNew)
+// Id numérico de Hub y estado guardado (no el del checkbox sin guardar): las secciones de un maestro solo se editan si está habilitado en la línea.
+const procedureId = ref(0)
+const savedActivo = ref(false)
 
 function onSlugInput(e: Event) {
   const value = (e.target as HTMLInputElement).value
@@ -264,6 +302,7 @@ const form = ref({
   shortDescription: '',
   whatIsIt: '',
   image: '',
+  imageOrientation: 'vertical' as 'vertical' | 'horizontal',
   activo: true,
   isMaster: false,
   destacado: false,
@@ -303,8 +342,11 @@ onMounted(async () => {
       form.value.shortDescription = data.shortDescription || ''
       form.value.whatIsIt = data.whatIsIt || ''
       form.value.image = data.image || ''
+      form.value.imageOrientation = data.imageOrientation === 'horizontal' ? 'horizontal' : 'vertical'
       savedImage.value = data.image || ''
       form.value.activo = data.activo !== false
+      procedureId.value = Number(data.id) || 0
+      savedActivo.value = data.activo !== false
       form.value.isMaster = data.isMaster === true
       form.value.destacado = data.destacado || false
       form.value.galeriaAssets = data.galeriaAssets ?? []
@@ -393,7 +435,7 @@ async function submitForm() {
   try {
     // Maestro: Hub solo acepta habilitar/deshabilitar y destacar (el contenido global no se envía).
     const payload: Partial<Procedure> = readOnly.value
-      ? { activo: form.value.activo, destacado: form.value.destacado }
+      ? { activo: form.value.activo, destacado: form.value.destacado, imageOrientation: form.value.imageOrientation }
       : {
         name: form.value.name,
         slug: form.value.slug,
@@ -404,6 +446,7 @@ async function submitForm() {
         image: form.value.image.startsWith('data:') ? form.value.image : undefined,
         activo: form.value.activo,
         destacado: form.value.destacado,
+        imageOrientation: form.value.imageOrientation,
         galleryUploads: form.value.galleryUploads,
         galleryRemovals: form.value.galleryRemovals,
         ficha_tecnica: { ...form.value.ficha_tecnica },

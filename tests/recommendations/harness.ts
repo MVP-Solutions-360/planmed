@@ -75,6 +75,9 @@ export async function setup(hub: FakeHub) {
   Object.assign(g, await load('server/utils/publicErrors.ts'))
   const proc = await load('server/utils/procedures.ts')
   Object.assign(g, proc)
+  // Orientación de portada: carpeta inexistente => sin archivo => valor por defecto (sin escribir en disco).
+  g.aboutContentDir = () => '.data/__sin-contenido-de-prueba__'
+  Object.assign(g, await load('server/utils/procedureOrientation.ts'))
 
   return {
     news,

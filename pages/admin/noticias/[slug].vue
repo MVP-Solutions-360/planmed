@@ -149,6 +149,9 @@
 
       </div>
     </form>
+
+    <!-- Secciones de contenido (una o dos columnas) debajo del cuerpo en la web. Fuera del formulario: tiene sus propios formularios. -->
+    <AdminNewsSectionsManager v-if="!isNew && articleId" :key="articleId" class="mt-8" :post-id="articleId" />
   </div>
 </template>
 
@@ -224,6 +227,9 @@ const isSubmitting = ref(false)
 
 const isPublished = ref(false)
 
+/** Id de Hub de la noticia (el CMS lo entrega como id numérico); las secciones se administran por id. */
+const articleId = ref<number | null>(null)
+
 const form = ref({
   title: '',
   slug: '',
@@ -245,6 +251,7 @@ onMounted(async () => {
     if (data) {
       form.value.title = data.title || ''
       form.value.slug = data.slug || ''
+      articleId.value = Number.isSafeInteger(Number(data.id)) && Number(data.id) > 0 ? Number(data.id) : null
       form.value.excerpt = data.excerpt || ''
       form.value.content = data.content || ''
       form.value.coverImage = data.coverImage || ''
