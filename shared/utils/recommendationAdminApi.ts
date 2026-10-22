@@ -107,12 +107,26 @@ export function matchAdminRoute(defs: readonly Def[], method: string, segments: 
   return null
 }
 
-/** Solo los campos permitidos del cuerpo (el resto, p. ej. company_id o linea_id, se descarta). */
+/**
+ * Solo los campos permitidos del cuerpo (el resto, p. ej. company_id o linea_id, se descarta). Una entrada `lista[]:a,b,c` permite una lista de
+ * objetos y en cada elemento conserva SOLO a, b y c (p. ej. los bloques de una sección: nunca company_id ni linea_id anidados).
+ */
 export function pickAllowed(body: unknown, allowed: readonly string[]): Record<string, unknown> {
   const out: Record<string, unknown> = {}
   if (!body || typeof body !== 'object' || Array.isArray(body)) return out
-  for (const key of allowed) {
-    if (Object.prototype.hasOwnProperty.call(body, key)) out[key] = (body as Record<string, unknown>)[key]
+  const source = body as Record<string, unknown>
+  for (const entry of allowed) {
+    const nested = /^([A-Za-z_]+)\[\]:(.+)$/.exec(entry)
+    if (nested) {
+      const [, key, fields] = nested as unknown as [string, string, string]
+      const list = source[key]
+      if (Array.isArray(list)) {
+        const keep = fields.split(',')
+        out[key] = list.map(item => (item && typeof item === 'object' && !Array.isArray(item) ? pickAllowed(item, keep) : item))
+      }
+      continue
+    }
+    if (Object.prototype.hasOwnProperty.call(source, entry)) out[entry] = source[entry]
   }
   return out
 }

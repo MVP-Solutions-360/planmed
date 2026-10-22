@@ -8,12 +8,12 @@
     >
       <h2 v-if="s.title" class="reco-title font-serif text-2xl md:text-[1.75rem] font-medium leading-tight text-[#0C2619] mb-6 break-words">{{ s.title }}</h2>
 
-      <!-- Dos columnas desde md (izquierda → derecha); en móvil se apilan en el mismo orden de lectura. El HTML se sanitiza dentro de CommonRichContent. -->
-      <div v-if="s.layout === 'two_columns'" class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
-        <CommonRichContent :html="s.contentLeft" class="reco-body min-w-0" data-testid="news-section-left" />
-        <CommonRichContent :html="s.contentRight" class="reco-body min-w-0" data-testid="news-section-right" />
+      <!-- Dos columnas desde md (izquierda → derecha); en móvil se apilan en el mismo orden de lectura. Cada columna apila sus bloques. -->
+      <div v-if="s.layout === 'two_columns'" class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 md:items-start">
+        <NewsBlocks :blocks="s.blocks.left" data-testid="news-section-left" />
+        <NewsBlocks :blocks="s.blocks.right" data-testid="news-section-right" />
       </div>
-      <CommonRichContent v-else :html="s.content" class="reco-body" data-testid="news-section-single" />
+      <NewsBlocks v-else :blocks="s.blocks.main" data-testid="news-section-single" />
     </section>
   </div>
 </template>

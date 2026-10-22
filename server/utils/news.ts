@@ -1,4 +1,6 @@
 import type { H3Event } from 'h3'
+// @ts-expect-error TS5097: la extensión .ts solo se permite con allowImportingTsExtensions (las pruebas de Node no usan los alias de Nuxt).
+import { parseEmbedUrl } from '../../shared/utils/embedUrl.ts'
 
 // Noticias de Planmed: la fuente de verdad es Wellezy Hub.
 //  - Público: GET /api/v1/web/posts (tenant por X-Tenant-Linea, sale de la configuración del servidor).
@@ -28,27 +30,60 @@ export interface NewsSectionDto {
   orden: number
   title: string | null
   layout: 'one_column' | 'two_columns'
-  content: string
-  contentLeft: string
-  contentRight: string
+  blocks: { main: NewsBlockDto[], left: NewsBlockDto[], right: NewsBlockDto[] }
+}
+
+export type NewsBlockDto =
+  | { type: 'text', html: string }
+  | { type: 'image', url: string, alt: string }
+  | { type: 'youtube', url: string }
+  | { type: 'instagram', url: string }
+
+/**
+ * Un bloque del contrato público de Hub → bloque validado. NO se confía en la respuesta remota: el texto se sanitiza al renderizar, la imagen
+ * solo se acepta con URL absoluta http(s) y los videos/posts se re-validan (host en lista blanca + identificador) y se reconstruyen en su forma
+ * canónica; un bloque inválido se descarta (nunca se inyecta una URL o un embed recibidos tal cual).
+ */
+function fromPublicBlock(raw: any): NewsBlockDto | null {
+  if (!raw || typeof raw !== 'object') return null
+  switch (raw.type) {
+    case 'text':
+      return typeof raw.html === 'string' && raw.html.replace(/<[^>]*>/g, '').trim() !== '' ? { type: 'text', html: raw.html } : null
+    case 'image':
+      return typeof raw.url === 'string' && /^https?:\/\//i.test(raw.url) ? { type: 'image', url: raw.url, alt: typeof raw.alt === 'string' ? raw.alt : '' } : null
+    case 'youtube':
+    case 'instagram': {
+      const parsed = parseEmbedUrl(raw.url)
+      return parsed && parsed.platform === raw.type ? { type: raw.type, url: parsed.url } : null
+    }
+    default:
+      return null
+  }
 }
 
 /**
- * `secciones` del detalle público de Hub → lista normalizada. Defensivo: ignora lo que no es objeto y las secciones sin nada que mostrar en su
- * distribución; una distribución desconocida cae a una columna. El HTML NO se confía: se sanitiza (lista blanca) al renderizar (CommonRichContent).
+ * `secciones` del detalle público de Hub → lista normalizada, con los bloques de cada columna. Defensivo: ignora lo que no es objeto y las secciones
+ * sin nada que mostrar en su distribución; una distribución desconocida cae a una columna. Un Hub anterior (sin `blocks`) se adapta desde sus
+ * campos de texto antiguos.
  */
 export function fromPublicNewsSections(raw: unknown): NewsSectionDto[] {
   if (!Array.isArray(raw)) return []
   const out: NewsSectionDto[] = []
-  const text = (v: unknown) => (typeof v === 'string' ? v : '')
+  const legacy = (html: unknown): NewsBlockDto[] => { const b = fromPublicBlock({ type: 'text', html }); return b ? [b] : [] }
   for (const s of raw) {
     if (!s || typeof s !== 'object') continue
     const layout = s.layout === 'two_columns' ? 'two_columns' : 'one_column'
     const title = orNull(s.title)
-    const section: NewsSectionDto = { orden: Number.isFinite(Number(s.orden)) ? Number(s.orden) : 0, title, layout, content: text(s.content), contentLeft: text(s.content_left), contentRight: text(s.content_right) }
-    const body = layout === 'two_columns' ? (section.contentLeft + section.contentRight) : section.content
-    if (!title && body.replace(/<[^>]*>/g, '').trim() === '') continue
-    out.push(section)
+    const list = (slot: 'main' | 'left' | 'right', fallback: unknown): NewsBlockDto[] => {
+      if (s.blocks && typeof s.blocks === 'object') return (Array.isArray(s.blocks[slot]) ? s.blocks[slot] : []).map(fromPublicBlock).filter((b: NewsBlockDto | null): b is NewsBlockDto => b !== null)
+      return legacy(fallback)
+    }
+    const blocks = layout === 'two_columns'
+      ? { main: [], left: list('left', s.content_left), right: list('right', s.content_right) }
+      : { main: list('main', s.content), left: [], right: [] }
+    const shown = blocks.main.length + blocks.left.length + blocks.right.length
+    if (!title && shown === 0) continue
+    out.push({ orden: Number.isFinite(Number(s.orden)) ? Number(s.orden) : 0, title, layout, blocks })
   }
   return out
 }

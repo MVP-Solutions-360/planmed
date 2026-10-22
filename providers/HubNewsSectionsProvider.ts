@@ -42,6 +42,9 @@ export class HubNewsSectionsProvider {
   reorder(postId: number, ids: number[]) { return this.call<unknown>('POST', `/posts/${postId}/reorder`, { ids }) }
   update(id: number, data: Partial<NewsSectionInput>) { return this.call<NewsSectionAdmin>('PUT', `/sections/${id}`, { ...data }) }
   remove(id: number) { return this.call<void>('DELETE', `/sections/${id}`) }
+  /** Imagen de un bloque de tipo imagen (data URL). Devuelve la sección completa con sus bloques. */
+  setBlockImage(blockId: number, dataUrl: string) { return this.call<NewsSectionAdmin>('POST', `/blocks/${blockId}/image`, { image: dataUrl }) }
+  removeBlockImage(blockId: number) { return this.call<NewsSectionAdmin>('DELETE', `/blocks/${blockId}/image`) }
 }
 
 export const newsSectionsAdmin = new HubNewsSectionsProvider()

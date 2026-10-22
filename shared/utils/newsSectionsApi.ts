@@ -5,7 +5,8 @@
 // @ts-expect-error TS5097: la extensión .ts solo se permite con allowImportingTsExtensions.
 import { matchAdminRoute, type AdminRoute, type Def } from './recommendationAdminApi.ts'
 
-const SECTION = ['title', 'layout', 'content', 'content_left', 'content_right', 'orden', 'visible'] as const
+// `blocks[]:…` = lista de bloques apilables por columna; de cada bloque solo viajan estos campos (nunca company_id ni linea_id).
+const SECTION = ['title', 'layout', 'content', 'content_left', 'content_right', 'orden', 'visible', 'blocks[]:id,slot,type,content,url,alt'] as const
 const REORDER = ['ids'] as const
 
 const DEFS: readonly Def[] = [
@@ -15,7 +16,11 @@ const DEFS: readonly Def[] = [
 
   { method: 'GET', pattern: 'sections/:id', hub: '/post-sections/:id' },
   { method: 'PUT', pattern: 'sections/:id', hub: '/post-sections/:id', body: SECTION },
-  { method: 'DELETE', pattern: 'sections/:id', hub: '/post-sections/:id' }
+  { method: 'DELETE', pattern: 'sections/:id', hub: '/post-sections/:id' },
+
+  // Imagen de un bloque de tipo imagen (el bloque se crea antes con la lista de bloques de la sección).
+  { method: 'POST', pattern: 'blocks/:id/image', hub: '/post-section-blocks/:id/image', body: ['image'], upload: true },
+  { method: 'DELETE', pattern: 'blocks/:id/image', hub: '/post-section-blocks/:id/image' }
 ]
 
 export function resolveNewsSectionRoute(method: string, segments: string[]): AdminRoute | null {
