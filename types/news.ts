@@ -18,50 +18,24 @@ export interface NewsArticle {
   /** Secciones de contenido (solo detalle público; [] o ausente en noticias antiguas). */
   sections?: NewsSection[];
 }
-/** Bloque de contenido dentro de una columna de una sección (contrato público de Hub, ya validado por Planmed). */
-export type NewsBlock =
-  | { type: 'text'; html: string }
-  | { type: 'image'; url: string; alt: string }
-  | { type: 'youtube'; url: string }
-  | { type: 'instagram'; url: string };
+import type { AdminBlock, BlockInput, BlockSlot, BlockType, ColumnLayout, PublicBlock, PublicBlocks } from '../shared/utils/contentBlocks';
 
-export interface NewsSectionBlocks {
-  main: NewsBlock[];
-  left: NewsBlock[];
-  right: NewsBlock[];
-}
+/** Bloques de contenido apilables por columna (ver shared/utils/contentBlocks.ts). */
+export type NewsBlock = PublicBlock;
+export type NewsSectionBlocks = PublicBlocks;
 
 /** Sección de contenido de una noticia (contrato público de Hub). Solo trae los bloques de su distribución activa. */
 export interface NewsSection {
   orden: number;
   title: string | null;
-  layout: 'one_column' | 'two_columns';
+  layout: ColumnLayout;
   blocks: NewsSectionBlocks;
 }
 
-export type NewsBlockType = 'text' | 'image' | 'youtube' | 'instagram';
-export type NewsBlockSlot = 'main' | 'left' | 'right';
-
-/** Bloque tal como lo administra el editor. */
-export interface NewsBlockAdmin {
-  id: number;
-  slot: NewsBlockSlot;
-  type: NewsBlockType;
-  content: string | null;
-  url: string | null;
-  alt: string | null;
-  image_url: string | null;
-  orden: number;
-}
-
-export interface NewsBlockInput {
-  id?: number;
-  slot: NewsBlockSlot;
-  type: NewsBlockType;
-  content?: string | null;
-  url?: string | null;
-  alt?: string | null;
-}
+export type NewsBlockType = BlockType;
+export type NewsBlockSlot = BlockSlot;
+export type NewsBlockAdmin = AdminBlock;
+export type NewsBlockInput = BlockInput;
 
 /** Sección tal como la administra el editor. `blocks_mode` false = formato anterior (contenidos content / content_left / content_right). */
 export interface NewsSectionAdmin {

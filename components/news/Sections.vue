@@ -10,10 +10,10 @@
 
       <!-- Dos columnas desde md (izquierda → derecha); en móvil se apilan en el mismo orden de lectura. Cada columna apila sus bloques. -->
       <div v-if="s.layout === 'two_columns'" class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 md:items-start">
-        <NewsBlocks :blocks="s.blocks.left" data-testid="news-section-left" />
-        <NewsBlocks :blocks="s.blocks.right" data-testid="news-section-right" />
+        <ContentBlocks :blocks="s.blocks.left" data-testid="news-section-left" />
+        <ContentBlocks :blocks="s.blocks.right" data-testid="news-section-right" />
       </div>
-      <NewsBlocks v-else :blocks="s.blocks.main" data-testid="news-section-single" />
+      <ContentBlocks v-else :blocks="s.blocks.main" data-testid="news-section-single" />
     </section>
   </div>
 </template>

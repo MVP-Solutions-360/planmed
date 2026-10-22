@@ -134,7 +134,7 @@ describe('contrato público: secciones con bloques', () => {
 
 describe('representación pública', () => {
   const comp = read('components/news/Sections.vue')
-  const blocks = read('components/news/Blocks.vue')
+  const blocks = read('components/content/Blocks.vue')
 
   test('una columna a todo el ancho y dos columnas con izquierda antes que derecha, apiladas en móvil', () => {
     assert.match(comp, /v-if="s\.layout === 'two_columns'"/)
@@ -179,47 +179,50 @@ describe('representación pública', () => {
 
 describe('editor administrativo', () => {
   const mgr = read('components/admin/news/SectionsManager.vue')
+  const editor = read('components/admin/content/BlocksEditor.vue')
+  const util = read('shared/utils/contentBlocks.ts')
   const admin = read('pages/admin/noticias/[slug].vue')
   const provider = read('providers/HubNewsSectionsProvider.ts')
 
   test('se monta fuera del formulario y solo con la noticia ya guardada (id de Hub)', () => {
     assert.match(admin, /<AdminNewsSectionsManager v-if="!isNew && articleId"/)
     assert.ok(admin.indexOf('</form>') < admin.indexOf('<AdminNewsSectionsManager'))
+    assert.match(mgr, /<AdminContentBlocksEditor v-model:layout="draft\.layout" :blocks="draft\.blocks"/)
   })
 
   test('cada columna activa apila bloques de los cuatro tipos y se pueden agregar, ordenar, mover de columna y quitar', () => {
-    assert.match(mgr, /const TYPES: NewsBlockType\[\] = \['text', 'image', 'youtube', 'instagram'\]/)
-    assert.match(mgr, /v-for="slot in slots"/)
-    for (const fn of ['addBlock', 'removeBlock', 'moveBlock', 'moveToOtherSlot']) assert.match(mgr, new RegExp(`function ${fn}\\(`))
-    assert.match(mgr, /v-if="b\.type === 'text'"[^>]*<AdminRichTextEditor|<AdminRichTextEditor v-if="b\.type === 'text'"/)
-    assert.match(mgr, /type="file" accept="image\/png,image\/jpeg,image\/webp"/)
-    assert.match(mgr, /parseEmbedUrl\(b\.url\)\?\.platform === b\.type/)
+    assert.match(util, /export const BLOCK_TYPES: readonly BlockType\[\] = \['text', 'image', 'youtube', 'instagram'\]/)
+    assert.match(editor, /v-for="slot in slots"/)
+    for (const fn of ['addBlock', 'removeBlock', 'moveBlock', 'moveToOtherSlot']) assert.match(editor, new RegExp(`function ${fn}\\(`))
+    assert.match(editor, /<AdminRichTextEditor v-if="b\.type === 'text'"/)
+    assert.match(editor, /type="file" accept="image\/png,image\/jpeg,image\/webp"/)
+    assert.match(util, /parseEmbedUrl\(b\.url\)\?\.platform === b\.type/)
   })
 
   test('cambiar de distribución no descarta bloques: se envían SIEMPRE los de ambas columnas y se pide confirmación al reducir', () => {
-    assert.match(mgr, /for \(const slot of SLOT_ORDER\)[\s\S]*slotBlocks\(slot\)/) // recorre todas las columnas, no solo las activas
-    assert.match(mgr, /function setLayout[\s\S]*window\.confirm\(/)
-    assert.match(mgr, /data-testid="news-kept-columns"/)
+    assert.match(util, /for \(const slot of SLOT_ORDER\)[\s\S]*blocks\.filter\(x => x\.slot === slot\)/) // recorre todas las columnas, no solo las activas
+    assert.match(editor, /function setLayout[\s\S]*window\.confirm\(/)
+    assert.match(editor, /data-testid="blocks-kept-columns"/)
   })
 
   test('las secciones del formato anterior se editan como bloques de texto y se avisa de la conversión', () => {
-    assert.match(mgr, /if \(hasText\(s\.content\)\) out\.push\(newBlock\('main', 'text'/)
+    assert.match(mgr, /if \(hasText\(s\.content\)\) out\.push\(newDraftBlock\('main', 'text'/)
     assert.match(mgr, /data-testid="news-legacy-notice"/)
   })
 
   test('las imágenes se suben aparte con el id del bloque que devuelve Hub; el orden de envío coincide con el de Hub (por columna)', () => {
-    assert.match(mgr, /const SLOT_ORDER: NewsBlockSlot\[\] = \['left', 'main', 'right'\]/)
+    assert.match(util, /export const SLOT_ORDER: readonly BlockSlot\[\] = \['left', 'main', 'right'\]/)
     assert.match(mgr, /api\.setBlockImage\(id, b\.newImage\)/)
     assert.match(provider, /\/blocks\/\$\{blockId\}\/image/)
   })
 
   test('la edición solo habla con el proxy de Planmed (nunca con Hub) y sin company_id ni linea_id', () => {
     assert.match(provider, /\/api\/admin\/news-sections/)
-    const code = (mgr + provider).split(/\r?\n/).filter(l => !l.trim().startsWith('//')).join(' ')
+    const code = (mgr + editor + provider).split(/\r?\n/).filter(l => !l.trim().startsWith('//')).join(' ')
     assert.doesNotMatch(code, /company_id|linea_id/)
   })
 
   test('los controles clicables tienen cursor de mano', () => {
-    assert.ok((mgr.match(/cursor-pointer/g) ?? []).length >= 6)
+    assert.ok(((mgr + editor).match(/cursor-pointer/g) ?? []).length >= 6)
   })
 })

@@ -1,4 +1,6 @@
 import type { H3Event } from 'h3'
+// @ts-expect-error TS5097: la extensión .ts solo se permite con allowImportingTsExtensions (las pruebas de Node no usan los alias de Nuxt).
+import { countBlocks, fromPublicBlock, publicBlocksOf, type ColumnLayout, type PublicBlock, type PublicBlocks } from '../../shared/utils/contentBlocks.ts'
 
 // Procedimientos de Planmed: la fuente de verdad es Wellezy Hub (tabla `cirugias` + `cirugia_linea`).
 //  - Público: GET /api/v1/web/cirugias[/{slug}] (tenant por X-Tenant-Linea, sale de la configuración del servidor).
@@ -76,8 +78,20 @@ export function fromPublicListItem(item: any): ProcedureDto {
 }
 
 /**
- * `secciones` del detalle público (Hub las entrega ya filtradas por la línea y ordenadas). Lectura defensiva: ausente (Hub anterior) o
- * inválida => []; posición desconocida => izquierda; solo imágenes http/https; sin título ni contenido ni imagen no hay nada que mostrar.
+ * Bloques derivados del formato anterior de una sección (Hub sin `blocks`): imagen y texto => dos columnas en el orden de su posición; solo texto o solo
+ * imagen => una columna. Misma regla que aplica Hub al derivarlos.
+ */
+function legacyProcedureBlocks(text: PublicBlock | null, image: PublicBlock | null, layout: string): { columnLayout: ColumnLayout, blocks: PublicBlocks } {
+  if (text && image) {
+    return { columnLayout: 'two_columns', blocks: { main: [], left: [layout === 'media_right' ? text : image], right: [layout === 'media_right' ? image : text] } }
+  }
+  return { columnLayout: 'one_column', blocks: { main: [text ?? image].filter((b): b is PublicBlock => b !== null), left: [], right: [] } }
+}
+
+/**
+ * `secciones` del detalle público (Hub las entrega ya filtradas por la línea y ordenadas). Lectura defensiva: ausente (Hub anterior) o inválida => [];
+ * posición desconocida => izquierda; los bloques se re-validan (imágenes solo http/https, YouTube e Instagram solo con host permitido); sin título ni
+ * bloques no hay nada que mostrar. Un Hub anterior (sin `blocks`) se adapta desde título + texto + imagen + posición.
  */
 export function fromPublicSections(raw: unknown): NonNullable<ProcedureDto['secciones']> {
   if (!Array.isArray(raw)) return []
@@ -87,8 +101,17 @@ export function fromPublicSections(raw: unknown): NonNullable<ProcedureDto['secc
     const url = typeof s.image?.url === 'string' && /^https?:\/\//i.test(s.image.url) ? s.image.url : null
     const title = orNull(s.title)
     const content = str(s.content)
-    if (!title && content.trim() === '' && !url) continue
-    out.push({ orden: Number.isFinite(Number(s.orden)) ? Number(s.orden) : 0, title, content, layout: s.layout === 'media_right' ? 'media_right' : 'media_left', image: url ? { url } : null })
+    const layout = s.layout === 'media_right' ? 'media_right' : 'media_left'
+    const columnLayout: ColumnLayout = s.column_layout === 'two_columns' ? 'two_columns' : 'one_column'
+
+    let shape: { columnLayout: ColumnLayout, blocks: PublicBlocks }
+    if (s.blocks && typeof s.blocks === 'object') {
+      shape = { columnLayout, blocks: publicBlocksOf(s.blocks, columnLayout, () => ({ main: [], left: [], right: [] })) }
+    } else {
+      shape = legacyProcedureBlocks(fromPublicBlock({ type: 'text', html: content }), url ? fromPublicBlock({ type: 'image', url, alt: title ?? '' }) : null, layout)
+    }
+    if (!title && countBlocks(shape.blocks, shape.columnLayout) === 0) continue
+    out.push({ orden: Number.isFinite(Number(s.orden)) ? Number(s.orden) : 0, title, content, layout, image: url ? { url } : null, columnLayout: shape.columnLayout, blocks: shape.blocks })
   }
   return out
 }

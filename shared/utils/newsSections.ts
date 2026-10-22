@@ -1,14 +1,13 @@
 // Secciones de contenido de una noticia: qué se muestra. Módulo PURO (lo usan el componente público y las pruebas).
+// @ts-expect-error TS5097: la extensión .ts solo se permite con allowImportingTsExtensions.
+import { activeSlots, type ColumnLayout } from './contentBlocks.ts'
+
+export { activeSlots }
 
 export interface NewsSectionView {
   title: string | null
-  layout: 'one_column' | 'two_columns'
+  layout: ColumnLayout
   blocks: { main: readonly unknown[], left: readonly unknown[], right: readonly unknown[] }
-}
-
-/** Columnas de la distribución activa, en orden de lectura (izquierda → derecha). */
-export function activeSlots(layout: 'one_column' | 'two_columns'): Array<'main' | 'left' | 'right'> {
-  return layout === 'two_columns' ? ['left', 'right'] : ['main']
 }
 
 /** Hub ya entrega las secciones visibles y ordenadas; aquí solo se descarta lo que no tiene nada que mostrar en su distribución activa. */

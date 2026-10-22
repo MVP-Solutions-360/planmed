@@ -5,7 +5,8 @@
 // @ts-expect-error TS5097: la extensión .ts solo se permite con allowImportingTsExtensions.
 import { matchAdminRoute, type AdminRoute, type Def } from './recommendationAdminApi.ts'
 
-const SECTION = ['title', 'content', 'layout', 'orden', 'visible'] as const
+// `blocks[]:…` = lista de bloques apilables por columna; de cada bloque solo viajan estos campos (nunca company_id ni linea_id).
+const SECTION = ['title', 'content', 'layout', 'column_layout', 'orden', 'visible', 'blocks[]:id,slot,type,content,url,alt,from_section_image'] as const
 const REORDER = ['ids'] as const
 
 const DEFS: readonly Def[] = [
@@ -17,7 +18,11 @@ const DEFS: readonly Def[] = [
   { method: 'PUT', pattern: 'sections/:id', hub: '/procedure-sections/:id', body: SECTION },
   { method: 'DELETE', pattern: 'sections/:id', hub: '/procedure-sections/:id' },
   { method: 'POST', pattern: 'sections/:id/image', hub: '/procedure-sections/:id/image', body: ['image'], upload: true },
-  { method: 'DELETE', pattern: 'sections/:id/image', hub: '/procedure-sections/:id/image' }
+  { method: 'DELETE', pattern: 'sections/:id/image', hub: '/procedure-sections/:id/image' },
+
+  // Imagen de un bloque de tipo imagen (el bloque se crea antes con la lista de bloques de la sección).
+  { method: 'POST', pattern: 'blocks/:id/image', hub: '/procedure-section-blocks/:id/image', body: ['image'], upload: true },
+  { method: 'DELETE', pattern: 'blocks/:id/image', hub: '/procedure-section-blocks/:id/image' }
 ]
 
 export function resolveProcedureSectionRoute(method: string, segments: string[]): AdminRoute | null {

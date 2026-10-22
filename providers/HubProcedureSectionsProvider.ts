@@ -44,6 +44,9 @@ export class HubProcedureSectionsProvider {
   remove(id: number) { return this.call<void>('DELETE', `/sections/${id}`) }
   setImage(id: number, dataUrl: string) { return this.call<ProcedureSectionAdmin>('POST', `/sections/${id}/image`, { image: dataUrl }) }
   removeImage(id: number) { return this.call<ProcedureSectionAdmin>('DELETE', `/sections/${id}/image`) }
+  /** Imagen de un bloque de tipo imagen (data URL). Devuelve la sección completa con sus bloques. */
+  setBlockImage(blockId: number, dataUrl: string) { return this.call<ProcedureSectionAdmin>('POST', `/blocks/${blockId}/image`, { image: dataUrl }) }
+  removeBlockImage(blockId: number) { return this.call<ProcedureSectionAdmin>('DELETE', `/blocks/${blockId}/image`) }
 }
 
 export const procedureSectionsAdmin = new HubProcedureSectionsProvider()
