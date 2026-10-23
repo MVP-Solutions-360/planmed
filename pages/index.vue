@@ -114,8 +114,8 @@ import HomeHowItWorksSection from '~/components/home/HowItWorksSection.vue'
 import HomeClinicsSection from '~/components/home/ClinicsSection.vue'
 
 useSeoMeta({
-  title: 'FINANCIACIÓN DE CIRUGÍAS PLÁSTICAS',
-  ogTitle: 'FINANCIACIÓN DE CIRUGÍAS PLÁSTICAS',
+  title: 'FINANCIACIÓN DE CIRUGÍAS PLÁSTICAS | PLANMED',
+  ogTitle: 'FINANCIACIÓN DE CIRUGÍAS PLÁSTICAS | PLANMED',
   description: 'Financiamos desde el 50% hasta el 100% de tu procedimiento médico o estético directamente.',
 })
 </script>
