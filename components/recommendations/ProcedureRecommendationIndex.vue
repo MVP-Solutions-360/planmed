@@ -1,20 +1,15 @@
 <template>
   <div class="bg-[#fcf9f8] min-h-screen font-sans">
-    <header class="relative overflow-hidden bg-gradient-to-br from-[#0C2619] via-[#12392a] to-[#1b5a3f] text-white pt-32 md:pt-40 pb-20 md:pb-28">
-      <div class="absolute -top-24 -right-24 w-[420px] h-[420px] rounded-full bg-[#D3A76A]/15 blur-3xl"></div>
-      <div class="relative max-w-[900px] mx-auto px-6 text-center">
-        <p class="inline-block px-4 py-1.5 rounded-full bg-[#D3A76A]/20 text-[#D3A76A] text-[11px] font-bold tracking-[0.2em] uppercase mb-6">Recomendaciones</p>
-        <h1 class="font-serif text-[34px] md:text-[54px] font-medium leading-[1.08] tracking-[-0.02em]">{{ meta.indexTitle }}</h1>
-        <p class="mt-6 text-white/70 font-light text-lg max-w-2xl mx-auto leading-relaxed">{{ meta.subtitle }}</p>
-      </div>
-    </header>
+    <div class="max-w-[1200px] mx-auto px-6 pt-6 md:pt-10">
+      <CommonPageHero eyebrow="RECOMENDACIONES" :lines="[meta.indexTitle]" :lead="meta.subtitle" :facts="heroFacts" class="!mb-0" />
+    </div>
 
-    <main class="max-w-[1100px] mx-auto px-6 py-16 md:py-20">
+    <main class="max-w-[1200px] mx-auto px-6 py-12 md:py-16">
       <CommonHubUnavailable v-if="error" :retrying="status === 'pending'" @retry="refresh()" />
       <div v-else-if="items.length || extras.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <NuxtLink
           v-for="p in items" :key="p.slug" :to="`/recomendaciones/${kind}/${p.slug}`"
-          class="group bg-white border border-[#e5e2e1] rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+          class="group bg-white border border-[#e5e2e1] border-t-4 border-t-[#D3A76A] overflow-hidden hover:shadow-xl transition-all duration-300"
         >
           <div class="aspect-[16/9] bg-gray-100 overflow-hidden">
             <img v-if="p.image" :src="p.image" :alt="p.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
@@ -29,7 +24,7 @@
         </NuxtLink>
         <NuxtLink
           v-for="x in extras" :key="x.slug" :to="`/recomendaciones/${x.slug}`"
-          class="group bg-white border border-[#e5e2e1] rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+          class="group bg-white border border-[#e5e2e1] border-t-4 border-t-[#D3A76A] overflow-hidden hover:shadow-xl transition-all duration-300"
         >
           <div class="aspect-[16/9] bg-gradient-to-br from-[#0C2619] to-[#1b5a3f] overflow-hidden">
             <img v-if="x.image" :src="x.image" :alt="x.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
@@ -83,6 +78,10 @@ useServiceUnavailable(error)
 
 const items = computed(() => data.value.items)
 const extras = computed(() => data.value.extras)
+const heroFacts = computed(() => {
+  const n = items.value.length + extras.value.length
+  return n ? [{ value: String(n), label: n === 1 ? 'Guía' : 'Guías' }] : []
+})
 const loaded = true
 
 useSeoMeta({ title: `${meta.indexTitle} | Planmed`, description: meta.subtitle })

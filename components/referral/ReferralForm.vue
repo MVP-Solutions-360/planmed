@@ -1,5 +1,5 @@
 <template>
-  <section aria-labelledby="ref-form-title" class="mt-14">
+  <section aria-labelledby="ref-form-title" class="mt-14 border-t border-black pt-10">
     <!-- Resultado: «completed» solo cuando el CRM médico confirmó; «received» = guardada, pendiente de procesar. -->
     <div v-if="status === 'completed' || status === 'received'" role="status" :data-testid="`referral-${status}`" class="bg-white border border-[#e5e2e1] p-8 md:p-12 text-center">
       <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-[#0C2619] text-[#D3A76A] flex items-center justify-center">
@@ -12,8 +12,11 @@
       </p>
     </div>
 
-    <form v-else novalidate class="bg-white border border-[#e5e2e1] p-5 sm:p-8 md:p-10 space-y-6" data-testid="referral-form" @submit.prevent="onSubmit">
-      <h2 id="ref-form-title" class="font-serif text-2xl md:text-3xl font-medium text-[#0C2619]">Regístrate en el programa</h2>
+    <form v-else novalidate class="bg-white border border-[#e5e2e1] border-t-4 border-t-[#0C2619] p-5 sm:p-8 md:p-12 space-y-6" data-testid="referral-form" @submit.prevent="onSubmit">
+      <div>
+        <p class="text-[11px] font-bold tracking-[0.15em] text-[#848484] uppercase mb-3">Inscripción</p>
+        <h2 id="ref-form-title" class="font-serif text-3xl md:text-4xl font-medium text-[#0C2619]">Regístrate en el programa</h2>
+      </div>
 
       <div v-if="status === 'error'" role="alert" data-testid="referral-error" class="border border-red-300 border-l-4 border-l-red-600 bg-red-50 text-red-800 px-4 py-3 text-sm leading-relaxed">
         {{ errorMessage }}

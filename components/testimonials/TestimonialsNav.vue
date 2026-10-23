@@ -1,15 +1,15 @@
 <template>
-  <div class="flex flex-wrap justify-center gap-3 mb-12">
+  <nav aria-label="Secciones de pacientes" class="flex flex-wrap justify-center md:justify-start gap-2 mb-14">
     <NuxtLink
       v-for="item in visibleItems"
       :key="item.to"
       :to="item.to"
-      class="px-5 py-2.5 text-[11px] font-bold tracking-[0.15em] uppercase border border-[#0C2619] transition-colors"
-      :class="$route.path === item.to ? 'bg-[#0C2619] text-white' : 'text-[#0C2619] hover:bg-[#0C2619]/5'"
+      class="px-5 py-2.5 text-[11px] font-bold tracking-[0.15em] uppercase border transition-colors"
+      :class="$route.path === item.to ? 'bg-[#0C2619] text-white border-[#0C2619]' : 'bg-white text-[#0C2619] border-[#e5e2e1] hover:border-[#0C2619]'"
     >
       {{ item.label }}
     </NuxtLink>
-  </div>
+  </nav>
 </template>
 
 <script setup lang="ts">

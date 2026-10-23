@@ -1,21 +1,13 @@
 <template>
-  <div class="bg-[#fcf9f8] min-h-screen font-sans selection:bg-[#0C2619] selection:text-white pt-24 md:pt-32 pb-24">
+  <div class="bg-[#fcf9f8] min-h-screen font-sans selection:bg-[#0C2619] selection:text-white pt-6 md:pt-10 pb-24">
     <div class="max-w-[1200px] mx-auto px-6">
       
-      <!-- HEADER EDITORIAL -->
-      <div class="mb-16 md:mb-24 text-center md:text-left border-t border-black pt-8">
-        <p class="text-[11px] font-bold tracking-[0.15em] text-[#848484] uppercase mb-4 flex items-center justify-center md:justify-start gap-3">
-          <span class="w-2 h-2 rounded-full bg-[#0C2619]"></span>
-          PORTAFOLIO MÉDICO
-        </p>
-        <h1 class="font-serif text-[40px] md:text-[56px] lg:text-[72px] font-medium leading-[1.05] tracking-[-0.02em] text-black uppercase max-w-4xl">
-          NUESTROS<br/>
-          PROCEDIMIENTOS.
-        </h1>
-        <p class="mt-8 text-lg text-gray-600 font-light max-w-2xl leading-relaxed mx-auto md:mx-0">
-          Explora los tratamientos estéticos disponibles y descubre cómo podemos ayudarte a financiarlos sin comprometer tu estilo de vida.
-        </p>
-      </div>
+      <CommonPageHero
+        eyebrow="PORTAFOLIO MÉDICO"
+        :lines="['NUESTROS', 'PROCEDIMIENTOS.']"
+        lead="Explora los tratamientos estéticos disponibles y descubre cómo podemos ayudarte a financiarlos sin comprometer tu estilo de vida."
+        :facts="heroFacts"
+      />
 
       <!-- Hub caído: aviso con reintento (no un catálogo vacío). Lista vacía válida => cuadrícula vacía. -->
       <CommonHubUnavailable v-if="error" :retrying="status === 'pending'" @retry="refresh()" />
@@ -135,6 +127,14 @@ useServiceUnavailable(error)
 
 // Buscador y filtro por tipo: todo en el cliente sobre la lista que ya llega de Hub (no se duplica ni se guarda información).
 const query = ref('')
+const heroFacts = computed(() => {
+  const n = (cirugias.value ?? []).length
+  const c = new Set((cirugias.value ?? []).map(p => p.category).filter(Boolean)).size
+  return [
+    { value: String(n), label: n === 1 ? 'Procedimiento' : 'Procedimientos' },
+    ...(c ? [{ value: String(c), label: c === 1 ? 'Categoría' : 'Categorías' }] : [])
+  ]
+})
 const category = ref('')
 const fold = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 const categoryLabel = (slug) => { const t = String(slug).replace(/[-_]+/g, ' ').trim(); return t ? t.charAt(0).toUpperCase() + t.slice(1) : '' }

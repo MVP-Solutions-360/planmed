@@ -102,7 +102,7 @@ describe('páginas de listado (SSR + cliente)', () => {
     assert.match(src('pages/testimonios/antes-y-despues.vue'), /v-if="error"[\s\S]*?v-else-if="loaded && !visibility"/)
     assert.match(src('pages/testimonios/programa-de-referidos.vue'), /v-if="error"[\s\S]*?v-else-if="referral\.content"/)
     assert.match(src('pages/procedimientos/index.vue'), /v-if="error"[\s\S]*?<div v-else class="grid/)
-    assert.match(src('pages/noticias/index.vue'), /v-if="error"[\s\S]*?<div v-else class="grid/)
+    assert.match(src('pages/noticias/index.vue'), /v-if="error"[\s\S]*?<template v-else>/)
     assert.match(src('components/recommendations/ProcedureRecommendationIndex.vue'), /v-if="error"[\s\S]*?v-else-if="items\.length \|\| extras\.length"/)
   })
 

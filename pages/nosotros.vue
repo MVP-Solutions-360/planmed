@@ -1,8 +1,10 @@
 <template>
   <div class="bg-white font-sans selection:bg-[#0C2619] selection:text-white">
 
-    <!-- 1. PORTADA -->
-    <section class="relative isolate overflow-hidden bg-[#0C2619]" aria-labelledby="about-hero-title">
+    <!-- 1. PORTADA: vista principal; misma caja contenida con barra dorada que CommonPageHero, con la foto de fondo. -->
+    <div class="bg-[#fcf9f8] pt-6 md:pt-10 px-6">
+    <section class="relative isolate overflow-hidden bg-[#0C2619] max-w-[1200px] mx-auto" aria-labelledby="about-hero-title">
+      <span aria-hidden="true" class="absolute left-0 top-0 z-10 h-full w-1.5 bg-[#D3A76A]"></span>
       <img
         :src="content.hero.image"
         :alt="content.hero.imageAlt"
@@ -12,15 +14,16 @@
         class="absolute inset-0 -z-10 w-full h-full object-cover object-[72%_center] md:object-center"
       />
       <div class="absolute inset-0 -z-10 bg-gradient-to-t from-[#0C2619]/95 via-[#0C2619]/55 to-[#0C2619]/10 md:bg-gradient-to-r md:from-[#0C2619]/90 md:via-[#0C2619]/45 md:to-transparent" aria-hidden="true"></div>
-      <div class="max-w-[1200px] mx-auto px-6 md:px-12 min-h-[420px] md:min-h-[520px] lg:min-h-[600px] flex items-end md:items-center pb-12 md:pb-0">
+      <div class="max-w-[1200px] mx-auto px-6 md:px-12 min-h-[360px] md:min-h-[440px] lg:min-h-[500px] flex items-end md:items-center pb-12 md:pb-0">
         <div class="max-w-xl">
-          <span class="block w-12 h-[2px] bg-[#D3A76A] mb-6" aria-hidden="true"></span>
+          <p class="text-[11px] font-bold tracking-[0.2em] text-[#D3A76A] uppercase mb-5 flex items-center gap-3"><span class="w-8 h-px bg-[#D3A76A]"></span>Planmed</p>
           <h1 id="about-hero-title" class="font-serif text-[44px] sm:text-[56px] lg:text-[76px] font-medium leading-[1.02] tracking-[-0.02em] text-white uppercase break-words">
             {{ content.hero.title }}
           </h1>
         </div>
       </div>
     </section>
+    </div>
 
     <!-- 2. INFORMACIÓN INSTITUCIONAL -->
     <section class="bg-[#fcf9f8]" aria-labelledby="about-institutional-title">

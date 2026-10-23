@@ -1,13 +1,14 @@
 <template>
   <!-- Redes de Planmed + acceso al simulador. Se usa al final de «Videos» y de «Antes y después». -->
-  <section class="mt-14 text-center">
-    <p class="text-[11px] font-bold tracking-[0.15em] text-[#848484] uppercase mb-5">Conoce más testimonios en nuestras redes sociales</p>
+  <section class="mt-20 bg-[#0C2619] text-white px-6 py-12 md:px-14 md:py-16 text-center">
+    <p class="text-[11px] font-bold tracking-[0.15em] text-[#D3A76A] uppercase mb-4">Redes sociales</p>
+    <h2 class="font-serif text-2xl md:text-4xl font-medium leading-tight max-w-2xl mx-auto mb-8">Conoce más testimonios en nuestras redes</h2>
     <div class="flex flex-wrap justify-center gap-3">
       <a v-for="s in socials" :key="s.label" :href="s.href" target="_blank" rel="noopener noreferrer"
-        class="px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase border border-[#0C2619] text-[#0C2619] hover:bg-[#0C2619] hover:text-white transition-colors">
+        class="px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase border border-white/40 text-white hover:bg-white hover:text-[#0C2619] transition-colors">
         {{ s.label }}
       </a>
-      <NuxtLink to="/financiacion#calculadora" class="px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase bg-[#0C2619] text-white border border-[#0C2619] hover:bg-black transition-colors">
+      <NuxtLink to="/financiacion#calculadora" class="px-6 py-3 text-[11px] font-bold tracking-[0.15em] uppercase bg-[#D3A76A] text-[#0C2619] border border-[#D3A76A] hover:bg-white hover:border-white transition-colors">
         Simular financiación
       </NuxtLink>
     </div>

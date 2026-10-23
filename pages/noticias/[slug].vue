@@ -10,10 +10,7 @@
 
       <div class="relative max-w-[900px] mx-auto px-6">
         <!-- Navegación de regreso -->
-        <NuxtLink to="/noticias" class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.15em] text-white/60 hover:text-white transition-colors uppercase mb-10 cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-          VOLVER A NOTICIAS
-        </NuxtLink>
+        <CommonDetailBack to="/noticias" label="Volver a noticias" />
 
         <div class="text-center">
           <p v-if="article.publishedAt" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D3A76A]/20 text-[#D3A76A] text-[11px] font-bold tracking-[0.2em] uppercase mb-6">

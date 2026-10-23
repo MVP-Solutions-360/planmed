@@ -2,6 +2,8 @@
   <RecommendationsRecommendationShell
     v-if="subtopic"
     :eyebrow="subtopic.topic.title"
+    :back-to="`/recomendaciones/${topic}`"
+    :back-label="`Volver a ${subtopic.topic.title}`"
     :title="subtopic.title"
     :html="subtopic.intro.content"
     :video-url="subtopic.intro.video?.embedUrl"

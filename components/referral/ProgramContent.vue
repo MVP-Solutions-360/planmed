@@ -1,13 +1,13 @@
 <template>
-  <div class="space-y-12 text-gray-700">
-    <section aria-labelledby="ref-intro">
+  <div class="space-y-6 text-gray-700">
+    <section aria-labelledby="ref-intro" class="card">
       <h2 id="ref-intro" class="h2">Gana beneficios recomendando Plan Médico y Quirúrgico</h2>
       <div class="prose-p mt-4">
         <p>En Plan Médico y Quirúrgico valoramos profundamente la confianza que cada paciente deposita en nosotros. Por eso, creamos nuestro <strong>Programa de Remisión de Pacientes</strong>, como una forma de agradecerte por recomendarnos con tus familiares, amig@s, conocidos y personas interesadas en vivir una experiencia segura, profesional y transformadora.</p>
       </div>
     </section>
 
-    <section aria-labelledby="ref-consiste">
+    <section aria-labelledby="ref-consiste" class="card">
       <h2 id="ref-consiste" class="h2">¿En qué consiste el programa?</h2>
       <div class="prose-p mt-4">
         <p>Cada vez que refieras a alguien y esa persona se opere con nosotros, recibirás una <strong>bonificación especial</strong>. Esta bonificación podrá redimirse de tres formas:</p>
@@ -19,7 +19,7 @@
       </div>
     </section>
 
-    <section aria-labelledby="ref-participar">
+    <section aria-labelledby="ref-participar" class="card">
       <h2 id="ref-participar" class="h2">¿Cómo participar?</h2>
       <ol class="steps prose-p mt-4">
         <li><span><strong>Diligencia el formulario</strong> que encontrarás al final de esta página, o visítanos en cualquiera de nuestras sedes para llenarlo de forma presencial.</span></li>
@@ -34,7 +34,7 @@
       </ol>
     </section>
 
-    <section aria-labelledby="ref-bono">
+    <section aria-labelledby="ref-bono" class="card">
       <h2 id="ref-bono" class="h2">¿Cuándo recibes tu bono?</h2>
       <div class="prose-p mt-4">
         <p>Una vez que la persona referida se opere con nosotros, te contactaremos en un plazo de <strong>hasta 10 días hábiles</strong> después de la cirugía para informarte el valor de tu bono (el monto varía según el tipo de procedimiento realizado).</p>
@@ -47,7 +47,9 @@
 </template>
 
 <style scoped>
-.h2 { font-family: var(--font-serif, serif); font-size: 1.5rem; line-height: 1.25; font-weight: 500; color: #0C2619; }
+.card { background: #fff; border: 1px solid #e5e2e1; border-top: 4px solid #D3A76A; padding: 2rem; }
+@media (min-width: 768px) { .card { padding: 2.5rem; } }
+.h2 { font-family: var(--font-serif, serif); font-size: 1.75rem; line-height: 1.2; font-weight: 500; color: #0C2619; }
 .prose-p { color: #4b5563; font-weight: 300; font-size: 1.0625rem; line-height: 1.75; }
 .prose-p > * + * { margin-top: 1rem; }
 .prose-p strong { color: #0C2619; font-weight: 600; }

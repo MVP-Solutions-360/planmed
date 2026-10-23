@@ -8,6 +8,7 @@
       <svg class="absolute inset-0 w-full h-full opacity-[0.05]" aria-hidden="true"><defs><pattern id="reco-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="#fff" /></pattern></defs><rect width="100%" height="100%" fill="url(#reco-dots)" /></svg>
 
       <div class="relative max-w-[900px] mx-auto px-6 text-center">
+        <div v-if="backTo" class="text-left"><CommonDetailBack :to="backTo" :label="backLabel || 'Volver'" /></div>
         <p class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D3A76A]/20 text-[#D3A76A] text-[11px] font-bold tracking-[0.2em] uppercase mb-6">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           {{ eyebrow }}
@@ -57,6 +58,8 @@ import { computed, useSlots } from 'vue'
 
 const props = defineProps<{
   eyebrow: string
+  backTo?: string
+  backLabel?: string
   title: string
   subtitle?: string
   html?: string
