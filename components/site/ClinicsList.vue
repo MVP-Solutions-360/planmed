@@ -49,7 +49,7 @@
       tabindex="-1"
       @click.self="close"
       @keydown="onKey"
-      @touchstart.passive="touchX = $event.touches[0].clientX"
+      @touchstart.passive="touchX = $event.touches[0]?.clientX ?? null"
       @touchend.passive="onTouchEnd"
     >
       <button type="button" class="absolute top-4 right-4 text-white text-3xl leading-none px-3" aria-label="Cerrar" @click="close">×</button>
@@ -73,7 +73,7 @@ const clinics = computed(() => data.value?.clinics ?? [])
 // Visor: una sola ventana para todas las clínicas; `active` identifica la clínica y la imagen abiertas.
 const active = ref<{ id: string, index: number } | null>(null)
 const dialog = ref<HTMLElement | null>(null)
-const touchX = ref(0)
+const touchX = ref<number | null>(null)
 let opener: HTMLElement | null = null
 
 const current = computed(() => {
@@ -102,7 +102,11 @@ function onKey(e: KeyboardEvent) {
   else if (e.key === 'ArrowRight') step(1)
 }
 function onTouchEnd(e: TouchEvent) {
-  const dx = e.changedTouches[0].clientX - touchX.value
+  const endX = e.changedTouches[0]?.clientX
+  const startX = touchX.value
+  touchX.value = null
+  if (endX === undefined || startX === null) return
+  const dx = endX - startX
   if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1)
 }
 
