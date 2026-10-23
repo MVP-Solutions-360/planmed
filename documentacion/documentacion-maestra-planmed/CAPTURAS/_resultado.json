@@ -1,0 +1,807 @@
+[
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "inicio",
+  "path": "/",
+  "status": 200,
+  "final": "/",
+  "title": "Planmed | Financiación Médica Directa"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "procedimientos-listado",
+  "path": "/procedimientos",
+  "status": 200,
+  "final": "/procedimientos",
+  "title": "Procedimientos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "procedimiento-detalle",
+  "path": "/procedimientos/mamoplastia-de-aumento",
+  "status": 200,
+  "final": "/procedimientos/mamoplastia-de-aumento",
+  "title": "Mamoplastia de aumento | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "procedimiento-inexistente-404",
+  "path": "/procedimientos/no-existe",
+  "status": 404,
+  "final": "/procedimientos/no-existe",
+  "title": "Esta página no está disponible | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "noticias-listado",
+  "path": "/noticias",
+  "status": 200,
+  "final": "/noticias",
+  "title": "Noticias | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "noticia-detalle",
+  "path": "/noticias/noticia-de-ejemplo",
+  "status": 200,
+  "final": "/noticias/noticia-de-ejemplo",
+  "title": "Noticia de ejemplo | Planmed Noticias"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "financiacion",
+  "path": "/financiacion",
+  "status": 200,
+  "final": "/financiacion",
+  "title": "Financiación de cirugías plásticas | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "nosotros",
+  "path": "/nosotros",
+  "status": 200,
+  "final": "/nosotros",
+  "title": "Nosotros | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "quienes-somos",
+  "path": "/quienes-somos",
+  "status": 200,
+  "final": "/quienes-somos",
+  "title": "Quiénes somos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "servicios",
+  "path": "/servicios",
+  "status": 200,
+  "final": "/servicios",
+  "title": "Servicios | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "clinicas-aliadas",
+  "path": "/clinicas-aliadas",
+  "status": 200,
+  "final": "/clinicas-aliadas",
+  "title": "Clínicas aliadas | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "estudio-de-creditos",
+  "path": "/estudio-de-creditos",
+  "status": 200,
+  "final": "/estudio-de-creditos",
+  "title": "Estudio de créditos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "informacion-precontractual",
+  "path": "/informacion-precontractual",
+  "status": 200,
+  "final": "/informacion-precontractual",
+  "title": "Información precontractual | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "politica-datos-personales",
+  "path": "/politica-datos-personales",
+  "status": 200,
+  "final": "/politica-datos-personales",
+  "title": "Política y protección de datos personales | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "recursos",
+  "path": "/recursos",
+  "status": 200,
+  "final": "/recursos",
+  "title": "Recursos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "testimonios-videos",
+  "path": "/testimonios",
+  "status": 200,
+  "final": "/testimonios",
+  "title": "Pacientes felices | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "testimonios-antes-despues",
+  "path": "/testimonios/antes-y-despues",
+  "status": 200,
+  "final": "/testimonios/antes-y-despues",
+  "title": "Antes y después | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "testimonios-programa-referidos",
+  "path": "/testimonios/programa-de-referidos",
+  "status": 200,
+  "final": "/testimonios/programa-de-referidos",
+  "title": "Programa de referidos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "recomendaciones-tema",
+  "path": "/recomendaciones/cuidados-de-cirugias",
+  "status": 200,
+  "final": "/recomendaciones/cuidados-de-cirugias",
+  "title": "Cuidados de cirugías | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "recomendaciones-subtema",
+  "path": "/recomendaciones/cuidados-de-cirugias/antes-de-tu-cirugia",
+  "status": 200,
+  "final": "/recomendaciones/cuidados-de-cirugias/antes-de-tu-cirugia",
+  "title": "Antes de tu cirugía | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "recomendaciones-cuidados-listado",
+  "path": "/recomendaciones/cuidados",
+  "status": 200,
+  "final": "/recomendaciones/cuidados",
+  "title": "Cuidados de tu cirugía | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "recomendaciones-revision-listado",
+  "path": "/recomendaciones/revision",
+  "status": 200,
+  "final": "/recomendaciones/revision",
+  "title": "Recomendaciones para tu cita de revisión | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "prp-micrositio",
+  "path": "/prp/prp-de-prueba",
+  "status": 200,
+  "final": "/prp/prp-de-prueba",
+  "title": "AGENDA TU VALORACIÓN | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "prp-inexistente-404",
+  "path": "/prp/no-existe",
+  "status": 404,
+  "final": "/prp/no-existe",
+  "title": "Esta página no está disponible | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "desktop",
+  "name": "ruta-inexistente-404",
+  "path": "/ruta-que-no-existe",
+  "status": 404,
+  "final": "/ruta-que-no-existe",
+  "title": "Esta página no está disponible | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "inicio",
+  "path": "/",
+  "status": 200,
+  "final": "/",
+  "title": "Planmed | Financiación Médica Directa"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "procedimientos-listado",
+  "path": "/procedimientos",
+  "status": 200,
+  "final": "/procedimientos",
+  "title": "Procedimientos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "procedimiento-detalle",
+  "path": "/procedimientos/mamoplastia-de-aumento",
+  "status": 200,
+  "final": "/procedimientos/mamoplastia-de-aumento",
+  "title": "Mamoplastia de aumento | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "procedimiento-inexistente-404",
+  "path": "/procedimientos/no-existe",
+  "status": 404,
+  "final": "/procedimientos/no-existe",
+  "title": "Esta página no está disponible | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "noticias-listado",
+  "path": "/noticias",
+  "status": 200,
+  "final": "/noticias",
+  "title": "Noticias | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "noticia-detalle",
+  "path": "/noticias/noticia-de-ejemplo",
+  "status": 200,
+  "final": "/noticias/noticia-de-ejemplo",
+  "title": "Noticia de ejemplo | Planmed Noticias"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "financiacion",
+  "path": "/financiacion",
+  "status": 200,
+  "final": "/financiacion",
+  "title": "Financiación de cirugías plásticas | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "nosotros",
+  "path": "/nosotros",
+  "status": 200,
+  "final": "/nosotros",
+  "title": "Nosotros | Planmed"
+ },
+ {
+  "name": "quienes-somos",
+  "err": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "quienes-somos",
+  "path": "/quienes-somos",
+  "status": null,
+  "final": "/quienes-somos",
+  "title": "Quiénes somos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "servicios",
+  "path": "/servicios",
+  "status": 200,
+  "final": "/servicios",
+  "title": "Servicios | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "clinicas-aliadas",
+  "path": "/clinicas-aliadas",
+  "status": 200,
+  "final": "/clinicas-aliadas",
+  "title": "Clínicas aliadas | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "estudio-de-creditos",
+  "path": "/estudio-de-creditos",
+  "status": 200,
+  "final": "/estudio-de-creditos",
+  "title": "Estudio de créditos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "informacion-precontractual",
+  "path": "/informacion-precontractual",
+  "status": 200,
+  "final": "/informacion-precontractual",
+  "title": "Información precontractual | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "politica-datos-personales",
+  "path": "/politica-datos-personales",
+  "status": 200,
+  "final": "/politica-datos-personales",
+  "title": "Política y protección de datos personales | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "recursos",
+  "path": "/recursos",
+  "status": 200,
+  "final": "/recursos",
+  "title": "Recursos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "testimonios-videos",
+  "path": "/testimonios",
+  "status": 200,
+  "final": "/testimonios",
+  "title": "Pacientes felices | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "testimonios-antes-despues",
+  "path": "/testimonios/antes-y-despues",
+  "status": 200,
+  "final": "/testimonios/antes-y-despues",
+  "title": "Antes y después | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "testimonios-programa-referidos",
+  "path": "/testimonios/programa-de-referidos",
+  "status": 200,
+  "final": "/testimonios/programa-de-referidos",
+  "title": "Programa de referidos | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "recomendaciones-tema",
+  "path": "/recomendaciones/cuidados-de-cirugias",
+  "status": 200,
+  "final": "/recomendaciones/cuidados-de-cirugias",
+  "title": "Cuidados de cirugías | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "recomendaciones-subtema",
+  "path": "/recomendaciones/cuidados-de-cirugias/antes-de-tu-cirugia",
+  "status": 200,
+  "final": "/recomendaciones/cuidados-de-cirugias/antes-de-tu-cirugia",
+  "title": "Antes de tu cirugía | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "recomendaciones-cuidados-listado",
+  "path": "/recomendaciones/cuidados",
+  "status": 200,
+  "final": "/recomendaciones/cuidados",
+  "title": "Cuidados de tu cirugía | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "recomendaciones-revision-listado",
+  "path": "/recomendaciones/revision",
+  "status": 200,
+  "final": "/recomendaciones/revision",
+  "title": "Recomendaciones para tu cita de revisión | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "prp-micrositio",
+  "path": "/prp/prp-de-prueba",
+  "status": 200,
+  "final": "/prp/prp-de-prueba",
+  "title": "AGENDA TU VALORACIÓN | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "prp-inexistente-404",
+  "path": "/prp/no-existe",
+  "status": 404,
+  "final": "/prp/no-existe",
+  "title": "Esta página no está disponible | Planmed"
+ },
+ {
+  "dir": "publico",
+  "vp": "movil",
+  "name": "ruta-inexistente-404",
+  "path": "/ruta-que-no-existe",
+  "status": 404,
+  "final": "/ruta-que-no-existe",
+  "title": "Esta página no está disponible | Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "login",
+  "path": "/admin/login",
+  "status": 200,
+  "final": "/admin/login",
+  "title": "Iniciar sesión | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "login",
+  "path": "/admin/login",
+  "status": 200,
+  "final": "/admin/login",
+  "title": "Iniciar sesión | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "redireccion-sin-sesion",
+  "path": "/admin/procedimientos",
+  "status": 200,
+  "final": "/admin/login",
+  "title": "Iniciar sesión | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "dashboard",
+  "path": "/admin",
+  "status": 200,
+  "final": "/admin",
+  "title": "Dashboard | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "procedimientos-listado",
+  "path": "/admin/procedimientos",
+  "status": 200,
+  "final": "/admin/procedimientos",
+  "title": "Procedimientos | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "procedimiento-nuevo",
+  "path": "/admin/procedimientos/nuevo",
+  "status": 200,
+  "final": "/admin/procedimientos/nuevo",
+  "title": "Editar Procedimiento | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "noticias-listado",
+  "path": "/admin/noticias",
+  "status": 200,
+  "final": "/admin/noticias",
+  "title": "Noticias | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "noticia-nueva",
+  "path": "/admin/noticias/nuevo",
+  "status": 200,
+  "final": "/admin/noticias/nuevo",
+  "title": "Editor de Noticias | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "pacientes",
+  "path": "/admin/testimonios",
+  "status": 200,
+  "final": "/admin/testimonios",
+  "title": "Nuestros Pacientes | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "recomendaciones-temas",
+  "path": "/admin/recomendaciones/temas",
+  "status": 200,
+  "final": "/admin/recomendaciones/temas",
+  "title": "Temas de recomendaciones | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "recomendaciones-tema",
+  "path": "/admin/recomendaciones/temas/1",
+  "status": 200,
+  "final": "/admin/recomendaciones/temas/1",
+  "title": "Tema de recomendaciones | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "recomendaciones-subtema",
+  "path": "/admin/recomendaciones/temas/1/subtemas/1",
+  "status": 200,
+  "final": "/admin/recomendaciones/temas/1/subtemas/1",
+  "title": "Subtema de recomendaciones | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "recomendaciones-seccion-nueva",
+  "path": "/admin/recomendaciones/temas/1/subtemas/1/secciones/nueva",
+  "status": 200,
+  "final": "/admin/recomendaciones/temas/1/subtemas/1/secciones/nueva",
+  "title": "Nueva sección | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "recomendaciones-historico",
+  "path": "/admin/recomendaciones/historico",
+  "status": 200,
+  "final": "/admin/recomendaciones/historico",
+  "title": "Recomendaciones (heredado) | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "nosotros",
+  "path": "/admin/nosotros",
+  "status": 200,
+  "final": "/admin/nosotros",
+  "title": "Nosotros | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "pagina-clinicas-aliadas",
+  "path": "/admin/paginas/clinicas-aliadas",
+  "status": 200,
+  "final": "/admin/paginas/clinicas-aliadas",
+  "title": "Clínicas aliadas | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "micrositios-listado",
+  "path": "/admin/micrositios",
+  "status": 200,
+  "final": "/admin/micrositios",
+  "title": "Micrositios | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "micrositio-nuevo",
+  "path": "/admin/micrositios/nuevo",
+  "status": 200,
+  "final": "/admin/micrositios/nuevo",
+  "title": "Editor de Micrositios | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "configuracion",
+  "path": "/admin/configuracion",
+  "status": 200,
+  "final": "/admin/configuracion",
+  "title": "Configuración | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "configuracion-tasa",
+  "path": "/admin/configuracion?tab=tasa",
+  "status": 200,
+  "final": "/admin/configuracion?tab=tasa",
+  "title": "Configuración | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "desktop",
+  "name": "configuracion-guia",
+  "path": "/admin/configuracion?tab=guia",
+  "status": 200,
+  "final": "/admin/configuracion?tab=guia",
+  "title": "Configuración | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "dashboard",
+  "path": "/admin",
+  "status": 200,
+  "final": "/admin",
+  "title": "Dashboard | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "procedimientos-listado",
+  "path": "/admin/procedimientos",
+  "status": 200,
+  "final": "/admin/procedimientos",
+  "title": "Procedimientos | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "procedimiento-nuevo",
+  "path": "/admin/procedimientos/nuevo",
+  "status": 200,
+  "final": "/admin/procedimientos/nuevo",
+  "title": "Editar Procedimiento | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "noticias-listado",
+  "path": "/admin/noticias",
+  "status": 200,
+  "final": "/admin/noticias",
+  "title": "Noticias | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "noticia-nueva",
+  "path": "/admin/noticias/nuevo",
+  "status": 200,
+  "final": "/admin/noticias/nuevo",
+  "title": "Editor de Noticias | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "pacientes",
+  "path": "/admin/testimonios",
+  "status": 200,
+  "final": "/admin/testimonios",
+  "title": "Nuestros Pacientes | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "recomendaciones-temas",
+  "path": "/admin/recomendaciones/temas",
+  "status": 200,
+  "final": "/admin/recomendaciones/temas",
+  "title": "Temas de recomendaciones | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "recomendaciones-tema",
+  "path": "/admin/recomendaciones/temas/1",
+  "status": 200,
+  "final": "/admin/recomendaciones/temas/1",
+  "title": "Tema de recomendaciones | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "recomendaciones-subtema",
+  "path": "/admin/recomendaciones/temas/1/subtemas/1",
+  "status": 200,
+  "final": "/admin/recomendaciones/temas/1/subtemas/1",
+  "title": "Subtema de recomendaciones | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "recomendaciones-seccion-nueva",
+  "path": "/admin/recomendaciones/temas/1/subtemas/1/secciones/nueva",
+  "status": 200,
+  "final": "/admin/recomendaciones/temas/1/subtemas/1/secciones/nueva",
+  "title": "Nueva sección | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "recomendaciones-historico",
+  "path": "/admin/recomendaciones/historico",
+  "status": 200,
+  "final": "/admin/recomendaciones/historico",
+  "title": "Recomendaciones (heredado) | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "nosotros",
+  "path": "/admin/nosotros",
+  "status": 200,
+  "final": "/admin/nosotros",
+  "title": "Nosotros | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "pagina-clinicas-aliadas",
+  "path": "/admin/paginas/clinicas-aliadas",
+  "status": 200,
+  "final": "/admin/paginas/clinicas-aliadas",
+  "title": "Clínicas aliadas | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "micrositios-listado",
+  "path": "/admin/micrositios",
+  "status": 200,
+  "final": "/admin/micrositios",
+  "title": "Micrositios | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "micrositio-nuevo",
+  "path": "/admin/micrositios/nuevo",
+  "status": 200,
+  "final": "/admin/micrositios/nuevo",
+  "title": "Editor de Micrositios | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "configuracion",
+  "path": "/admin/configuracion",
+  "status": 200,
+  "final": "/admin/configuracion",
+  "title": "Configuración | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "configuracion-tasa",
+  "path": "/admin/configuracion?tab=tasa",
+  "status": 200,
+  "final": "/admin/configuracion?tab=tasa",
+  "title": "Configuración | Admin Planmed"
+ },
+ {
+  "dir": "admin",
+  "vp": "movil",
+  "name": "configuracion-guia",
+  "path": "/admin/configuracion?tab=guia",
+  "status": 200,
+  "final": "/admin/configuracion?tab=guia",
+  "title": "Configuración | Admin Planmed"
+ }
+]
