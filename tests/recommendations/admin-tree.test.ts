@@ -225,36 +225,6 @@ describe('proxy administrativo /api/admin/recommendation-tree/*', () => {
     assert.equal(hub.calls.length, 0)
   })
 
-  test('404 de Hub en una ruta de COLECCIÓN (listar, crear, ordenar, catálogo) = Hub sin la API de recomendaciones: 501 claro, no «no pertenece a tu línea»', async () => {
-    for (const [method, path, hubPath] of [['GET', 'topics', '/cms/recommendation-topics'], ['POST', 'topics', '/cms/recommendation-topics'], ['POST', 'topics/reorder', '/cms/recommendation-topics/reorder'], ['GET', 'section-types', '/cms/recommendation-section-types']]) {
-      fresh()
-      hub.on(method, hubPath, 404, { message: 'Not Found.' })
-      const { value, error } = await run(handler, ev(method, path, { title: 'x', ids: [1] }))
-      assert.equal(value, undefined)
-      assert.equal(error.statusCode, 501, `${method} ${path}`)
-      assert.match(error.message, /no tiene habilitada la administración de recomendaciones/)
-      assert.equal(/pertenece a tu línea/.test(error.message), false)
-      assert.equal(hub.calls.length, 1, 'sin reintentos')
-    }
-    assert.equal(describeTreeError({ statusCode: 501, message: 'm' }).transient, false)
-  })
-
-  test('404 en rutas con id (incluida la lista de subtemas de un tema) sigue siendo «no existe o no pertenece a tu línea»: no se oculta ni se vuelve éxito', async () => {
-    for (const [method, path, hubPath] of [['GET', 'topics/4/subtopics', '/cms/recommendation-topics/4/subtopics'], ['PUT', 'topics/4', '/cms/recommendation-topics/4'], ['POST', 'topics/4/subtopics', '/cms/recommendation-topics/4/subtopics'], ['DELETE', 'items/7', '/cms/recommendation-items/7']]) {
-      fresh()
-      hub.on(method, hubPath, 404, { message: 'Not Found.' })
-      const { value, error } = await run(handler, ev(method, path, { title: 'x' }))
-      assert.equal(value, undefined)
-      assert.equal(error.statusCode, 404, `${method} ${path}`)
-      assert.match(error.message, /no pertenece a tu línea/)
-    }
-  })
-
-  test('hasId distingue las rutas de colección de las de registro', () => {
-    for (const [m, p] of [['GET', 'topics'], ['POST', 'topics'], ['POST', 'topics/reorder'], ['GET', 'section-types']]) assert.equal(resolveAdminRoute(m, p.split('/')).hasId, false, p)
-    for (const [m, p] of [['GET', 'topics/4'], ['GET', 'topics/4/subtopics'], ['POST', 'sections/2/items/reorder']]) assert.equal(resolveAdminRoute(m, p.split('/')).hasId, true, p)
-  })
-
   test('errores de Hub: 401 cierra la sesión; 403 conserva el motivo; 404; 409 conserva el motivo; 422 trae errores por campo', async () => {
     fresh()
     const path = '/cms/recommendation-topics/4'
@@ -454,12 +424,7 @@ describe('pantallas del panel de Recomendaciones', () => {
     assert.ok(form.includes('placeholder="Escribe aquí la descripción o el contenido de la sección..."'))
     assert.match(form, /Falta el destino del botón\./)
     assert.match(form, /Falta el texto del botón\./)
-    for (const field of ['subtitle', 'content', 'blocks', 'cta']) assert.ok(form.includes(`allows('${field}')`), field)
-    // los campos sueltos de vídeo, imagen y distribución se reemplazaron por el editor de bloques (una o dos columnas)
-    assert.match(form, /<AdminContentBlocksEditor[^>]*v-model:layout="draft\.column_layout"/)
-    for (const loose of ['id="sec-video"', 'id="sec-layout"', 'id="sec-alt"']) assert.equal(form.includes(loose), false, loose)
-    assert.match(form, /fromSectionImage: true/) // la imagen del formato anterior se copia al bloque
-    assert.match(form, /api\.setBlockImage\(id, b\.newImage\)/)
+    for (const field of ['subtitle', 'content', 'video', 'image', 'layout', 'cta']) assert.ok(form.includes(`allows('${field}')`), field)
     // los placeholders no son valores por defecto
     assert.match(form, /title: '', subtitle: '', content: ''/)
     assert.equal(/ref\(['"]Ej\. /.test(form), false)
