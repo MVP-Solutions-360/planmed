@@ -20,6 +20,8 @@ const LEADER = { id: 7, name: 'Líder Planmed', email: 'lider@x.test', role: { i
 const DESIGNER = { id: 20, name: 'Diseñadora Planmed', email: 'disenadoraplanmed@gmail.com', role: { id: 19, name: 'Diseñador gráfico' }, is_area_leader: false }
 const OTHER_CMS = { id: 21, name: 'Editora', email: 'e@x.test', role: { id: 25, name: 'Editor' }, is_area_leader: false }
 const OUTSIDER = { id: 22, name: 'Otra', email: 'o@x.test', role: { id: 99, name: 'Ventas' }, is_area_leader: false }
+const PLANMED = { company: { slug: 'planmed' }, line: { slug: 'planmed' } }
+for (const u of [LEADER, DESIGNER, OTHER_CMS, OUTSIDER]) Object.assign(u, PLANMED)
 const hubUsers = { 'tk-leader': LEADER, 'tk-designer': DESIGNER, 'tk-other': OTHER_CMS, 'tk-outsider': OUTSIDER }
 
 let getAdmin, putAdmin, getPublic, access, F
@@ -41,7 +43,7 @@ before(async () => {
   g.setHeader = () => {}
   g.readBody = async e => e.body
   g.createError = o => Object.assign(new Error(o.message ?? 'error'), o)
-  g.useRuntimeConfig = () => ({ sessionPassword: 'x'.repeat(40), wellezyApiBaseUrl: 'https://hub.test/api', planmedAdminRoleIds: '19,25', planmedRateEditorRoleIds: '19', ...state.config })
+  g.useRuntimeConfig = () => ({ sessionPassword: 'x'.repeat(40), wellezyApiBaseUrl: 'https://hub.test/api', planmedAdminRoleIds: '19,25', planmedRateEditorRoleIds: '19', wellezyCompanySlug: 'planmed', wellezyLineSlug: 'planmed', ...state.config })
   g.useSession = async (e) => ({ data: e.session ?? {}, clear: async () => { state.cleared = true }, update: async () => {} })
   g.getRequestHeader = (e, name) => e.headers[name.toLowerCase()]
   g.aboutContentDir = () => state.dir

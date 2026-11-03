@@ -56,11 +56,26 @@ export function allowedRoleIds(event: H3Event): number[] {
     .filter(n => Number.isSafeInteger(n) && n > 0)
 }
 
-// Acceso al panel: rol principal en la lista, o superadmin global verificado por Hub (`is_global_admin === true` en /auth/me, derivado de
-// users.is_superadmin; no depende de nombres de rol ni del navegador). El rol `admin` no recibe esta excepción.
+// Política ÚNICA de acceso al panel (la usan login, /auth/me y los helpers que revalidan contra Hub). Coincide con Wellezy Hub
+// (ApiAccessService::validateAccess):
+//  A. Superadmin global: `is_global_admin === true` (estricto), verificado por Hub (users.is_superadmin). Único acceso sin pertenecer a la
+//     empresa y línea de Planmed.
+//  B. Todos los demás usuarios —con cualquier rol, incluido `admin`—: deben pertenecer a la empresa y línea de Planmed. La pertenencia se compara
+//     con company.slug / line.slug que devuelve Hub (contexto del token) contra NUXT_WELLEZY_COMPANY_SLUG / NUXT_WELLEZY_LINE_SLUG; nunca con
+//     datos del navegador. Si falta algún dato, se deniega.
+// El rol `admin` NO concede acceso global y NUXT_PLANMED_ADMIN_ROLE_IDS NO interviene en el acceso. Entrar al panel no implica permiso para cada
+// operación (ver los helpers siguientes y los permisos de Hub).
+function belongsToPlanmed(event: H3Event, user: WellezyUser): boolean {
+  const config = useRuntimeConfig(event)
+  const company = String(config.wellezyCompanySlug ?? '').trim().toLowerCase()
+  const line = String(config.wellezyLineSlug ?? '').trim().toLowerCase()
+  if (!company || !line) return false
+  return user.company?.slug?.trim().toLowerCase() === company && user.line?.slug?.trim().toLowerCase() === line
+}
+
 export function isAuthorizedUser(event: H3Event, user: WellezyUser): boolean {
   if (user.is_global_admin === true) return true
-  return !!user.role && allowedRoleIds(event).includes(Number(user.role.id))
+  return belongsToPlanmed(event, user)
 }
 
 // Acceso al panel (isAuthorizedUser) NO implica permiso para cada operación: ver los helpers siguientes.
@@ -98,8 +113,8 @@ export function toPublicUser(user: WellezyUser, event?: H3Event): PublicAdminUse
     id: Number(user.id),
     name: user.name,
     email: user.email,
-    // El superadmin global puede no tener rol principal en la línea (contexto virtual de Hub).
-    role: user.role ? { id: Number(user.role.id), name: user.role.name } : { id: 0, name: 'Superadmin' },
+    // Sin rol principal: el superadmin global (contexto virtual de Hub) se muestra como Superadmin; un usuario de la línea sin rol, como «Sin rol».
+    role: user.role ? { id: Number(user.role.id), name: user.role.name } : { id: 0, name: user.is_global_admin === true ? 'Superadmin' : 'Sin rol' },
     isAreaLeader: user.is_area_leader === true,
     canEditRate: event ? canManageFinancingRate(event, user) : user.is_area_leader === true,
     canCreatePrp: hasHubPermission(user, 'prp_referrers.crear'),

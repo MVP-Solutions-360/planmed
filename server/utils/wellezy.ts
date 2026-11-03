@@ -12,6 +12,9 @@ export interface WellezyUser {
   role: { id: number, name: string } | null
   /** personnels.is_area_leader del Hub (líder de la línea). */
   is_area_leader?: boolean
+  /** Empresa y línea del contexto con que Hub emitió el token (ApiAuthUserResource: company.slug / line.slug). Ausentes => contexto no verificable. */
+  company?: { slug: string } | null
+  line?: { slug: string } | null
   /** Superadmin global, verificado por Hub (users.is_superadmin). Solo `true` estricto cuenta; el rol `admin` NO lo es. */
   is_global_admin?: boolean
   /** Permisos efectivos del usuario en Hub (`/auth/me`). Solo servidor: nunca se envían tal cual al navegador. Ausente = sin permisos. */
@@ -62,6 +65,11 @@ function isWellezyUser(value: any): value is WellezyUser {
     && (value.role === null || (value.role && Number.isSafeInteger(Number(value.role.id)) && typeof value.role.name === 'string'))
 }
 
+function slugOf(value: unknown): { slug: string } | null {
+  const slug = (value as any)?.slug
+  return typeof slug === 'string' && slug.trim() ? { slug: slug.trim().toLowerCase() } : null
+}
+
 /** Conserva solo los campos conocidos; `permissions` se reduce a un arreglo de cadenas (cualquier otra cosa => sin permisos). */
 function normalizeUser(value: WellezyUser): WellezyUser {
   const permissions = Array.isArray((value as any).permissions)
@@ -72,6 +80,8 @@ function normalizeUser(value: WellezyUser): WellezyUser {
     name: value.name,
     email: value.email,
     role: value.role ? { id: Number(value.role.id), name: value.role.name } : null,
+    company: slugOf((value as any).company),
+    line: slugOf((value as any).line),
     is_area_leader: value.is_area_leader === true,
     is_global_admin: (value as any).is_global_admin === true,
     permissions
