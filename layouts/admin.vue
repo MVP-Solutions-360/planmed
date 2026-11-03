@@ -30,12 +30,12 @@
           <NuxtLink to="/admin/recomendaciones/temas" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]" data-testid="nav-recommendation-topics">
             Recomendaciones
           </NuxtLink>
-          <!-- Submenú «Nosotros»: solo las páginas administrables -->
-          <button type="button" class="w-full flex items-center justify-between px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" :class="isPagesRoute ? 'text-[#D3A76A]' : ''" :aria-expanded="pagesOpen ? 'true' : 'false'" aria-controls="admin-pages-submenu" @click="pagesOpen = !pagesOpen">
+          <!-- Submenú «Nosotros»: solo las páginas administrables; solo perfiles editores de contenido -->
+          <button v-if="user?.canEditContent" type="button" class="w-full flex items-center justify-between px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" :class="isPagesRoute ? 'text-[#D3A76A]' : ''" :aria-expanded="pagesOpen ? 'true' : 'false'" aria-controls="admin-pages-submenu" @click="pagesOpen = !pagesOpen">
             <span>Nosotros</span>
             <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': pagesOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
           </button>
-          <div v-show="pagesOpen" id="admin-pages-submenu" class="ml-3 pl-3 border-l border-white/10 space-y-1 mt-1">
+          <div v-if="user?.canEditContent" v-show="pagesOpen" id="admin-pages-submenu" class="ml-3 pl-3 border-l border-white/10 space-y-1 mt-1">
             <NuxtLink v-for="l in pageLinks" :key="l.to" :to="l.to" class="block px-4 py-2 rounded-lg text-sm transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">{{ l.label }}</NuxtLink>
           </div>
           <NuxtLink to="/admin/micrositios" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">

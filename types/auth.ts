@@ -12,4 +12,9 @@ export interface AdminUser {
   isAreaLeader: boolean;
   /** Puede ver y modificar la tasa de interés del simulador (solo informativo para la UI; el servidor es la autoridad). */
   canEditRate: boolean;
+  /** Capacidades de micrositios y contenido local (solo informativas para la UI; el servidor/Hub es la autoridad). */
+  canCreatePrp: boolean;
+  canEditPrp: boolean;
+  canDeletePrp: boolean;
+  canEditContent: boolean;
 }

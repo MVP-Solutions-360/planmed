@@ -88,8 +88,9 @@ export async function readAboutImage(event: H3Event, name: string): Promise<Buff
 }
 
 /**
- * Autorización para ESCRIBIR: además de la sesión (y el control de origen) de adminSession, se revalida en cada guardado que el
- * usuario siga autorizado para el CMS (rol en NUXT_PLANMED_ADMIN_ROLE_IDS) consultando /auth/me de Hub, igual que /api/auth/me.
+ * Autorización para ESCRIBIR: además de la sesión (y el control de origen) de adminSession, se revalida en cada guardado, consultando
+ * /auth/me de Hub, que el usuario siga autorizado para el CMS (rol en NUXT_PLANMED_ADMIN_ROLE_IDS) Y sea un perfil editor de contenido
+ * (canEditLocalContent). Estar en la lista del panel solo da acceso al panel, no a escribir este contenido.
  * Es necesario porque esta escritura no pasa por Hub (que en los demás módulos revalida el token y los permisos).
  */
 export async function requireAboutEditor(event: H3Event) {
@@ -102,6 +103,7 @@ export async function requireAboutEditor(event: H3Event) {
   if (res.status === 403) throw authError(403, MSG_FORBIDDEN)
   if (res.status !== 200 || !res.data) throw authError(503, MSG_UNAVAILABLE)
   if (!isAuthorizedUser(event, res.data.user)) throw authError(403, MSG_FORBIDDEN)
+  if (!canEditLocalContent(event, res.data.user)) throw authError(403, MSG_CONTENT_FORBIDDEN)
   return res.data.user
 }
 

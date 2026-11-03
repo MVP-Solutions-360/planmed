@@ -10,6 +10,12 @@ export interface PublicAdminUser {
   isAreaLeader: boolean
   /** Puede ver y modificar la tasa de interés del simulador (líder o rol de diseño configurado). Solo informativo para la UI. */
   canEditRate: boolean
+  /** Capacidades de micrositios (permisos prp_referrers.* de Hub). Solo informativas para la UI; Hub las impone en cada llamada. */
+  canCreatePrp: boolean
+  canEditPrp: boolean
+  canDeletePrp: boolean
+  /** Puede escribir el contenido local (Nosotros, Clínicas aliadas, páginas informativas). Solo informativo para la UI. */
+  canEditContent: boolean
 }
 
 interface AdminSessionData {
@@ -50,19 +56,56 @@ export function allowedRoleIds(event: H3Event): number[] {
     .filter(n => Number.isSafeInteger(n) && n > 0)
 }
 
+// Acceso al panel: rol principal en la lista, o superadmin global verificado por Hub (`is_global_admin === true` en /auth/me, derivado de
+// users.is_superadmin; no depende de nombres de rol ni del navegador). El rol `admin` no recibe esta excepción.
 export function isAuthorizedUser(event: H3Event, user: WellezyUser): boolean {
+  if (user.is_global_admin === true) return true
   return !!user.role && allowedRoleIds(event).includes(Number(user.role.id))
 }
 
-// Solo los datos públicos mínimos: nunca el token ni los permisos.
+// Acceso al panel (isAuthorizedUser) NO implica permiso para cada operación: ver los helpers siguientes.
+
+/** ¿El usuario tiene este permiso de Hub (lista `permissions` de /auth/me, ya verificada en servidor)? Sin lista => no. */
+export function hasHubPermission(user: Pick<WellezyUser, 'permissions'>, permission: string): boolean {
+  return Array.isArray(user.permissions) && user.permissions.includes(permission)
+}
+
+// Perfiles de Hub que pueden ESCRIBIR el contenido local de la web (Nosotros, Clínicas aliadas, páginas informativas), que no pasa por Hub:
+// «Administrador de contenido de línea», «Diseñador gráfico», «admin» y superadmin (en Hub: «Superadmin»/«super_admin»). Se identifican por el
+// rol principal que Hub devuelve en /auth/me (id o nombre), nunca por datos del navegador. Los ids opcionales se configuran en
+// NUXT_PLANMED_CONTENT_EDITOR_ROLE_IDS (los ids difieren entre UAT y producción).
+export const CONTENT_EDITOR_ROLE_NAMES = ['administrador de contenido de línea', 'diseñador gráfico', 'admin', 'superadmin', 'super_admin']
+
+export function contentEditorRoleIds(event: H3Event): number[] {
+  return String(useRuntimeConfig(event).planmedContentEditorRoleIds ?? '')
+    .split(',')
+    .map(s => Number(s.trim()))
+    .filter(n => Number.isSafeInteger(n) && n > 0)
+}
+
+export function canEditLocalContent(event: H3Event | undefined, user: WellezyUser): boolean {
+  // Superadmin global verificado por Hub: puede escribir el contenido local (política de contenido: «Superadmin»).
+  if (user.is_global_admin === true) return true
+  if (!user.role) return false
+  if (event && !isAuthorizedUser(event, user)) return false
+  const name = String(user.role.name ?? '').trim().toLowerCase()
+  return CONTENT_EDITOR_ROLE_NAMES.includes(name) || (!!event && contentEditorRoleIds(event).includes(Number(user.role.id)))
+}
+
+// Solo los datos públicos mínimos: nunca el token ni la lista de permisos (solo banderas derivadas).
 export function toPublicUser(user: WellezyUser, event?: H3Event): PublicAdminUser {
   return {
     id: Number(user.id),
     name: user.name,
     email: user.email,
-    role: { id: Number(user.role!.id), name: user.role!.name },
+    // El superadmin global puede no tener rol principal en la línea (contexto virtual de Hub).
+    role: user.role ? { id: Number(user.role.id), name: user.role.name } : { id: 0, name: 'Superadmin' },
     isAreaLeader: user.is_area_leader === true,
-    canEditRate: event ? canManageFinancingRate(event, user) : user.is_area_leader === true
+    canEditRate: event ? canManageFinancingRate(event, user) : user.is_area_leader === true,
+    canCreatePrp: hasHubPermission(user, 'prp_referrers.crear'),
+    canEditPrp: hasHubPermission(user, 'prp_referrers.editar'),
+    canDeletePrp: hasHubPermission(user, 'prp_referrers.eliminar'),
+    canEditContent: canEditLocalContent(event, user)
   }
 }
 
@@ -112,6 +155,7 @@ export async function resolveConfigAccess(event: H3Event): Promise<ConfigAccess>
 export const MSG_CONFIG_FORBIDDEN = 'No tienes acceso a la configuración.'
 export const MSG_UNAVAILABLE = 'No fue posible conectar con el servicio de autenticación. Intenta nuevamente.'
 export const MSG_LEADER_ONLY = 'Solo el líder de la línea puede acceder a la configuración.'
+export const MSG_CONTENT_FORBIDDEN = 'No tienes permiso para editar este contenido.'
 export const MSG_FORBIDDEN = 'No tienes acceso al panel administrativo de Planmed.'
 
 export function authError(statusCode: number, message: string) {

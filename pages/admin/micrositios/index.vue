@@ -6,7 +6,7 @@
         <h2 class="text-3xl font-serif text-[#0C2619] mb-2 uppercase">Micrositios</h2>
         <p class="text-gray-500 font-light">Administra los micrositios de referidores (PRP) y su enlace público.</p>
       </div>
-      <NuxtLink to="/admin/micrositios/nuevo" class="bg-[#D3A76A] hover:bg-[#c29659] text-white px-6 py-3 rounded-lg font-bold text-xs tracking-widest uppercase transition-colors inline-flex items-center gap-2">
+      <NuxtLink v-if="canCreate" to="/admin/micrositios/nuevo" class="bg-[#D3A76A] hover:bg-[#c29659] text-white px-6 py-3 rounded-lg font-bold text-xs tracking-widest uppercase transition-colors inline-flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Nuevo Micrositio
       </NuxtLink>
@@ -77,6 +77,7 @@
               </td>
               <td class="p-4 text-center">
                 <button
+                  v-if="canToggle(item)"
                   @click="toggleActive(item)"
                   :disabled="togglingId === item.id"
                   :class="item.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
@@ -85,10 +86,17 @@
                 >
                   {{ item.isActive ? 'Activo' : 'Inactivo' }}
                 </button>
+                <span
+                  v-else
+                  :class="item.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                  class="inline-flex px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
+                >
+                  {{ item.isActive ? 'Activo' : 'Inactivo' }}
+                </span>
               </td>
               <td class="p-4 text-right">
                 <div class="flex items-center justify-end gap-2">
-                  <NuxtLink :to="`/admin/micrositios/${item.id}`" class="p-2 text-gray-400 hover:text-[#0C2619] transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg" title="Editar">
+                  <NuxtLink v-if="canEdit" :to="`/admin/micrositios/${item.id}`" class="p-2 text-gray-400 hover:text-[#0C2619] transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg" title="Editar">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                   </NuxtLink>
                 </div>
@@ -115,6 +123,15 @@ import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useHead, useAsyncData } from '#imports'
 import { prpService } from '~/services/PrpService'
 import type { Prp, PrpPage } from '~/types/prp'
+import { authService } from '~/services/AuthService'
+
+// Banderas solo informativas (permisos prp_referrers.* de Hub): ocultan acciones que Hub rechazaría con 403. La seguridad la impone Hub.
+const user = authService.getUser()
+const canCreate = computed(() => user.value?.canCreatePrp === true)
+const canEdit = computed(() => user.value?.canEditPrp === true)
+const canDelete = computed(() => user.value?.canDeletePrp === true)
+// Desactivar usa «eliminar»; reactivar usa «editar».
+const canToggle = (item: Prp) => (item.isActive ? canDelete.value : canEdit.value)
 
 const notify = useNotify()
 
@@ -169,6 +186,7 @@ async function copyLink(slug: string) {
 }
 
 async function toggleActive(item: Prp) {
+  if (!canToggle(item)) return
   if (item.isActive) {
     const ok = await notify.confirm(
       'Desactivar micrositio',

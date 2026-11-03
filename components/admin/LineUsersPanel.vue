@@ -10,16 +10,19 @@
       </div>
 
       <!-- Filtros -->
-      <form class="flex flex-col sm:flex-row gap-3 mb-6" role="search" @submit.prevent="apply">
+      <!-- Búsqueda dinámica: se consulta sola al escribir (350 ms) o al cambiar el estado; Enter la aplica de inmediato. -->
+      <form class="flex flex-col sm:flex-row gap-3 mb-6" role="search" @submit.prevent="applyNow">
         <label class="sr-only" for="lu-search">Buscar por nombre o correo</label>
-        <input id="lu-search" v-model="search" type="search" placeholder="Buscar por nombre o correo" class="flex-1 px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[#0C2619]" />
+        <div class="relative flex-1">
+          <input id="lu-search" v-model="search" type="search" placeholder="Buscar por nombre o correo" autocomplete="off" class="w-full px-3 py-2 pr-9 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[#0C2619]" />
+          <span v-if="loading && page" class="absolute right-3 top-1/2 -translate-y-1/2 inline-block w-4 h-4 border-2 border-gray-300 border-t-[#0C2619] rounded-full animate-spin" role="status" aria-label="Actualizando resultados"></span>
+        </div>
         <label class="sr-only" for="lu-status">Estado</label>
-        <select id="lu-status" v-model="status" class="px-3 py-2 border border-gray-200 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#0C2619]" @change="apply">
+        <select id="lu-status" v-model="status" class="px-3 py-2 border border-gray-200 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#0C2619]">
           <option value="">Todos los estados</option>
           <option value="active">Activos</option>
           <option value="inactive">Inactivos</option>
         </select>
-        <button type="submit" class="px-5 py-2 bg-[#0C2619] text-white text-xs font-bold tracking-widest uppercase rounded-md hover:bg-[#153a28]">Buscar</button>
       </form>
 
       <div v-if="error" role="alert" class="rounded-lg border px-4 py-3 text-sm" :class="forbidden ? 'text-amber-800 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200'">
@@ -76,8 +79,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { lineUsersService, type LineUsersPage } from '~/services/LineUsersService'
+
+const SEARCH_DEBOUNCE_MS = 350
 
 const page = ref<LineUsersPage | null>(null)
 const loading = ref(true)
@@ -87,23 +92,39 @@ const search = ref('')
 const status = ref<'' | 'active' | 'inactive'>('')
 const current = ref(1)
 
+// Evita condiciones de carrera: solo la respuesta de la última consulta puede actualizar la pantalla.
+let requestSeq = 0
+let searchTimer: ReturnType<typeof setTimeout> | undefined
+
 async function load() {
+  const seq = ++requestSeq
   loading.value = true
   error.value = ''
   forbidden.value = false
   try {
-    page.value = await lineUsersService.list({ search: search.value, status: status.value, page: current.value })
+    const result = await lineUsersService.list({ search: search.value, status: status.value, page: current.value })
+    if (seq !== requestSeq) return
+    page.value = result
   } catch (e: any) {
+    if (seq !== requestSeq) return
     forbidden.value = e.statusCode === 403
     error.value = e.message
   } finally {
-    loading.value = false
+    if (seq === requestSeq) loading.value = false
   }
 }
-function apply() { current.value = 1; load() }
+function applyNow() { clearTimeout(searchTimer); current.value = 1; load() }
 function go(p: number) { current.value = p; load() }
 
+// Al escribir se espera una pausa; al borrar el texto se vuelve a consultar con el estado elegido (búsqueda vacía).
+watch(search, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(applyNow, SEARCH_DEBOUNCE_MS)
+})
+watch(status, applyNow)
+
 onMounted(load)
+onBeforeUnmount(() => { clearTimeout(searchTimer); requestSeq++ })
 </script>
 
 <style scoped>

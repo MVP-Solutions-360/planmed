@@ -23,6 +23,13 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     return navigateTo('/admin/login')
   }
 
+  // Nosotros / Clínicas / páginas: solo perfiles editores de contenido. La UI solo lo refleja; el servidor lo impone en cada escritura (403).
+  if (to.path.startsWith('/admin/nosotros') || to.path.startsWith('/admin/paginas')) {
+    if (authService.getUser().value?.canEditContent !== true) {
+      throw createError({ statusCode: 403, statusMessage: 'No tienes permiso para editar este contenido.', fatal: true })
+    }
+  }
+
   // Configuración: solo el líder de la línea. El servidor decide (403); la UI solo lo refleja.
   if (to.path.startsWith('/admin/configuracion')) {
     try {

@@ -100,6 +100,7 @@ import { ref, computed, reactive, watch, onMounted } from 'vue'
 import { useRoute, useRouter, useHead } from '#imports'
 import { prpService } from '~/services/PrpService'
 import { PrpError, type PrpFieldErrors } from '~/types/prp'
+import { authService } from '~/services/AuthService'
 
 const notify = useNotify()
 
@@ -114,6 +115,11 @@ const route = useRoute()
 const router = useRouter()
 const idParam = route.params.id as string
 const isNew = idParam === 'nuevo'
+
+// Solo informativo (permisos prp_referrers.* de Hub); Hub rechaza con 403 aunque se evada esta pantalla.
+const authUser = authService.getUser()
+const canCreate = authUser.value?.canCreatePrp === true
+const canEdit = authUser.value?.canEditPrp === true
 
 const isLoading = ref(!isNew)
 const isSubmitting = ref(false)
@@ -153,6 +159,11 @@ watch(() => form.value.name, (name) => {
 const previewSlug = computed(() => form.value.slug.trim() || (isNew ? slugify(form.value.name) : ''))
 
 onMounted(async () => {
+  if (isNew ? !canCreate : !canEdit) {
+    notify.error(isNew ? 'No tienes permiso para crear micrositios.' : 'No tienes permiso para editar micrositios.')
+    router.push('/admin/micrositios')
+    return
+  }
   if (isNew) return
   const id = Number(idParam)
   try {
@@ -201,7 +212,8 @@ async function submitForm() {
       name: form.value.name,
       externalCode: form.value.externalCode,
       title: form.value.title,
-      isActive: form.value.isActive
+      // Quien solo puede crear (sin «editar») siempre crea el micrositio activo.
+      isActive: isNew && !canEdit ? true : form.value.isActive
     }
 
     if (isNew) {

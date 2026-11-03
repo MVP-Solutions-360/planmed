@@ -13,6 +13,9 @@ export default defineNuxtConfig({
     // IDs de rol que, además del líder de la línea, pueden ver y modificar la tasa de interés del simulador (rol «Diseñador gráfico» = 19 en
     // Wellezy Hub según el repositorio; confirmar en el Hub real). Separados por coma. NUXT_PLANMED_RATE_EDITOR_ROLE_IDS. Deben seguir siendo roles del CMS.
     planmedRateEditorRoleIds: '19',
+    // IDs de rol adicionales (opcional) que pueden ESCRIBIR el contenido local (Nosotros, Clínicas aliadas, páginas). Los perfiles se reconocen
+    // también por nombre (ver auth.ts). NUXT_PLANMED_CONTENT_EDITOR_ROLE_IDS, separados por coma. Vacío = solo por nombre.
+    planmedContentEditorRoleIds: '',
     sessionPassword: '',
     // Proxies de confianza delante de la aplicación para resolver la IP del cliente (límite de peticiones del PRP). 0 = ignorar X-Forwarded-For
     // y usar la IP del socket (seguro, pero tras un proxy todos comparten una sola IP). NUXT_TRUSTED_PROXY_HOPS; subir a 1 SOLO tras confirmar la infraestructura.
