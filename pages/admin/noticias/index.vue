@@ -51,7 +51,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="item in filteredNews" :key="item.slug" class="hover:bg-gray-50/50 transition-colors">
+            <tr v-for="item in pagedNews" :key="item.slug" class="hover:bg-gray-50/50 transition-colors">
               <td class="p-4">
                 <div class="flex items-center gap-4">
                   <img v-if="item.coverImage" :src="item.coverImage" :alt="item.title" class="w-16 h-12 rounded-lg object-cover bg-gray-100 border border-gray-200" />
@@ -93,6 +93,8 @@
           </tbody>
         </table>
       </div>
+
+      <AdminPagination v-if="!pending" v-model:page="page" v-model:per-page="perPage" :last-page="lastPage" :total="filteredNews.length" label="noticias" />
     </div>
 
     <!-- Modal Eliminar -->
@@ -117,7 +119,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { clearNuxtData } from '#app'
 import { richHtmlToText } from '~/utils/richText'
 
@@ -158,6 +160,14 @@ const filteredNews = computed(() => {
     return matchSearch && matchStatus
   })
 })
+
+const page = ref(1)
+const perPage = ref(10)
+const lastPage = computed(() => Math.max(1, Math.ceil(filteredNews.value.length / perPage.value)))
+const pagedNews = computed(() => filteredNews.value.slice((page.value - 1) * perPage.value, page.value * perPage.value))
+watch([searchQuery, statusFilter, perPage], () => { page.value = 1 })
+// Si al eliminar se vacía la última página, retrocede.
+watch(lastPage, (n) => { if (page.value > n) page.value = n })
 
 async function togglePublish(item: NewsArticle) {
   try {

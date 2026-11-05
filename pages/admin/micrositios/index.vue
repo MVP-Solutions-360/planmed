@@ -107,13 +107,7 @@
       </div>
 
       <!-- Paginación -->
-      <div v-if="!pending && !error && lastPage > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
-        <span class="text-xs text-gray-500">Página {{ page }} de {{ lastPage }} · {{ total }} micrositios</span>
-        <div class="flex gap-2">
-          <button @click="page--" :disabled="page <= 1" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Anterior</button>
-          <button @click="page++" :disabled="page >= lastPage" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Siguiente</button>
-        </div>
-      </div>
+      <AdminPagination v-if="!pending && !error" v-model:page="page" v-model:per-page="perPage" :last-page="lastPage" :total="total" label="micrositios" />
     </div>
   </div>
 </template>
@@ -146,6 +140,7 @@ const searchQuery = ref('')
 const debouncedSearch = ref('')
 const statusFilter = ref<'all' | 'active' | 'inactive'>('all')
 const page = ref(1)
+const perPage = ref(10)
 const togglingId = ref<number | null>(null)
 
 // Búsqueda con retardo para no consultar a Hub en cada tecla.
@@ -157,7 +152,7 @@ watch(searchQuery, (value) => {
 onBeforeUnmount(() => clearTimeout(searchTimer))
 
 // Cualquier cambio de filtro vuelve a la primera página.
-watch([debouncedSearch, statusFilter], () => { page.value = 1 })
+watch([debouncedSearch, statusFilter, perPage], () => { page.value = 1 })
 
 const emptyPage: PrpPage = { items: [], currentPage: 1, lastPage: 1, total: 0 }
 
@@ -166,9 +161,10 @@ const { data, pending, error, refresh } = await useAsyncData(
   () => prpService.getPrps({
     search: debouncedSearch.value || undefined,
     isActive: statusFilter.value === 'all' ? undefined : statusFilter.value === 'active',
-    page: page.value
+    page: page.value,
+    perPage: perPage.value
   }),
-  { default: () => emptyPage, server: false, watch: [debouncedSearch, statusFilter, page] }
+  { default: () => emptyPage, server: false, watch: [debouncedSearch, statusFilter, page, perPage] }
 )
 
 const items = computed<Prp[]>(() => data.value?.items ?? [])

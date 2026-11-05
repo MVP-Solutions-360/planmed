@@ -47,7 +47,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="proc in filteredProcedures" :key="proc.slug" class="hover:bg-gray-50/50 transition-colors">
+            <tr v-for="proc in pagedProcedures" :key="proc.slug" class="hover:bg-gray-50/50 transition-colors">
               <td class="p-4">
                 <div class="flex items-center gap-4">
                   <img v-if="proc.image" :src="proc.image" :alt="proc.name" class="w-12 h-12 rounded-lg object-cover bg-gray-100 border border-gray-200" />
@@ -94,6 +94,8 @@
           </tbody>
         </table>
       </div>
+
+      <AdminPagination v-if="!pending" v-model:page="page" v-model:per-page="perPage" :last-page="lastPage" :total="filteredProcedures.length" label="procedimientos" />
     </div>
 
   </div>
@@ -101,7 +103,7 @@
 
 <script setup lang="ts">
 const notify = useNotify()
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useHead, useAsyncData, refreshNuxtData } from '#imports'
 import { procedureService } from '~/services/ProcedureService'
 import type { Procedure } from '~/types/procedure'
@@ -123,6 +125,13 @@ const filteredProcedures = computed(() => {
   const q = searchQuery.value.toLowerCase()
   return procedures.value.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
 })
+
+const page = ref(1)
+const perPage = ref(10)
+const lastPage = computed(() => Math.max(1, Math.ceil(filteredProcedures.value.length / perPage.value)))
+const pagedProcedures = computed(() => filteredProcedures.value.slice((page.value - 1) * perPage.value, page.value * perPage.value))
+watch([searchQuery, perPage], () => { page.value = 1 })
+watch(lastPage, (n) => { if (page.value > n) page.value = n })
 
 async function toggleDestacado(proc: Procedure) {
   try {
