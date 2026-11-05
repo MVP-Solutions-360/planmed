@@ -33,7 +33,7 @@ function baseUrl(event: H3Event): string {
   return base
 }
 
-async function call<T>(event: H3Event, path: string, options: { method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: Record<string, unknown>, query?: Record<string, unknown>, token?: string, headers?: Record<string, string> }): Promise<WellezyResult<T>> {
+async function call<T>(event: H3Event, path: string, options: { method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: Record<string, unknown>, query?: Record<string, unknown>, token?: string, headers?: Record<string, string>, timeout?: number }): Promise<WellezyResult<T>> {
   const base = baseUrl(event)
   if (!base) return { status: 0 }
 
@@ -46,7 +46,7 @@ async function call<T>(event: H3Event, path: string, options: { method: 'GET' | 
       body: options.body,
       query: options.query,
       headers,
-      timeout: TIMEOUT_MS,
+      timeout: options.timeout ?? TIMEOUT_MS,
       retry: 0,
       ignoreResponseError: true
     })
@@ -116,7 +116,7 @@ export function wellezyRequest<T>(
   token: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   path: string,
-  options: { body?: Record<string, unknown>, query?: Record<string, unknown> } = {}
+  options: { body?: Record<string, unknown>, query?: Record<string, unknown>, timeout?: number } = {}
 ): Promise<WellezyResult<T>> {
   return call<T>(event, path, { method, token, ...options })
 }

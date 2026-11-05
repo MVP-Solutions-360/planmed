@@ -48,8 +48,9 @@ before(async () => {
   }
 
   const files = [...walk(join(ROOT, 'server/api/admin')), join(ROOT, 'server/api/auth/login.post.ts'), join(ROOT, 'server/api/auth/logout.post.ts')]
-    // access.get y line-users.get usan requireAreaLeader (consulta /auth/me a Hub); se cubren aparte (tests/about/line-users.test.ts).
-    .filter(f => !f.endsWith(`config${sep}access.get.ts`) && !f.endsWith(`config${sep}line-users.get.ts`))
+    // access.get, line-users.get, line-users.post y line-users/options.get usan requireAreaLeader (consulta /auth/me a Hub); se cubren aparte
+    // (tests/about/line-users.test.ts y tests/about/line-users-create.test.ts: origen, 401, 403 de no líder y de superadmin).
+    .filter(f => !f.endsWith(`config${sep}access.get.ts`) && !f.endsWith(`config${sep}line-users.get.ts`) && !f.endsWith(`config${sep}line-users.post.ts`) && !f.endsWith(`line-users${sep}options.get.ts`))
   handlers = await Promise.all(files.map(async f => {
     const rel = relative(ROOT, f).split(sep).join('/')
     const method = /\.(get|post|put|delete|patch)\.ts$/.exec(rel)[1].toUpperCase()

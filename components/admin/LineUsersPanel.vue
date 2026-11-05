@@ -4,10 +4,42 @@
       <div class="flex flex-wrap items-end justify-between gap-4 border-b border-gray-100 pb-4 mb-6">
         <div>
           <h3 id="line-users-title" class="text-xs font-bold tracking-widest text-[#0C2619] uppercase">Colaboradores de la línea Planmed</h3>
-          <p class="text-sm text-gray-500 mt-1">Personas con usuario que pertenecen a la misma empresa y línea que tu usuario. Datos de solo lectura, tomados de Wellezy Hub.</p>
+          <p class="text-sm text-gray-500 mt-1">Personas con usuario que pertenecen a la misma empresa y línea que tu usuario. Datos tomados de Wellezy Hub.</p>
         </div>
-        <p v-if="page" class="text-sm text-gray-600" aria-live="polite"><strong class="text-gray-900">{{ page.meta.total }}</strong> colaborador{{ page.meta.total === 1 ? '' : 'es' }}</p>
+        <div class="flex items-center gap-4">
+          <p v-if="page" class="text-sm text-gray-600" aria-live="polite"><strong class="text-gray-900">{{ page.meta.total }}</strong> colaborador{{ page.meta.total === 1 ? '' : 'es' }}</p>
+          <button v-if="!showForm && !credentials" type="button" class="px-4 py-2 rounded-lg bg-[#0C2619] text-white text-xs font-bold tracking-wider uppercase" data-testid="new-line-user" @click="showForm = true">Nuevo colaborador</button>
+        </div>
       </div>
+
+      <!-- Credenciales del colaborador recién creado. La contraseña temporal la genera Hub y se muestra UNA sola vez: vive solo en la memoria
+           de este componente (sin almacenamiento del navegador, sin URL, sin logs) y se borra al cerrar el aviso o al salir de la pantalla. -->
+      <div v-if="credentials" role="alert" class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-4 text-sm mb-6" data-testid="credentials">
+        <p class="font-semibold text-amber-900">Colaborador creado: {{ credentials.name }}</p>
+        <p class="mt-1 text-amber-900">
+          Entrega estos datos de acceso al colaborador. <strong>La contraseña temporal se muestra una sola vez</strong>: al cerrar este aviso no se puede volver a ver.
+          En su primer ingreso al panel deberá definir su contraseña personal.
+        </p>
+        <dl class="mt-3 grid sm:grid-cols-2 gap-3">
+          <div>
+            <dt class="text-[10px] uppercase tracking-wider text-amber-800">Correo (usuario)</dt>
+            <dd class="font-mono text-gray-900 break-all select-all" data-testid="cred-email">{{ credentials.email }}</dd>
+          </div>
+          <div>
+            <dt class="text-[10px] uppercase tracking-wider text-amber-800">Contraseña temporal</dt>
+            <dd class="font-mono text-gray-900 break-all select-all" data-testid="cred-password">{{ credentials.password }}</dd>
+          </div>
+        </dl>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button type="button" class="btn-sm" data-testid="copy-password" @click="copy(credentials.password, 'password')">Copiar contraseña</button>
+          <button type="button" class="btn-sm" data-testid="copy-credentials" @click="copy(`Usuario: ${credentials.email}
+Contraseña temporal: ${credentials.password}`, 'all')">Copiar usuario y contraseña</button>
+          <span v-if="copied" class="text-xs text-green-800" role="status">{{ copied === 'password' ? 'Contraseña copiada' : 'Credenciales copiadas' }}</span>
+          <button type="button" class="btn-sm ml-auto" data-testid="close-credentials" @click="closeCredentials">Cerrar y borrar</button>
+        </div>
+      </div>
+
+      <AdminLineUserCreateForm v-if="showForm" @created="onCreated" @cancel="showForm = false" />
 
       <!-- Filtros -->
       <!-- Búsqueda dinámica: se consulta sola al escribir (350 ms) o al cambiar el estado; Enter la aplica de inmediato. -->
@@ -72,7 +104,7 @@
     </div>
 
     <p class="text-xs text-gray-500 leading-relaxed">
-      Solo se listan colaboradores que tienen usuario en el Hub. Activar o desactivar usuarios todavía no está disponible desde este panel.
+      Solo se listan colaboradores que tienen usuario en el Hub. Desde este panel solo se pueden crear colaboradores; activar, desactivar o editar usuarios todavía no está disponible.
       La empresa y la línea se toman del usuario con el que iniciaste sesión, por lo que este listado cambia solo cuando se pase a los datos de producción.
     </p>
   </section>
@@ -80,7 +112,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
-import { lineUsersService, type LineUsersPage } from '~/services/LineUsersService'
+import { lineUsersService, type LineUsersPage, type CreatedLineUser } from '~/services/LineUsersService'
 
 const SEARCH_DEBOUNCE_MS = 350
 
@@ -113,6 +145,35 @@ async function load() {
     if (seq === requestSeq) loading.value = false
   }
 }
+const showForm = ref(false)
+// Credenciales en memoria (nunca persistentes). Mientras estén visibles no se puede abrir otro alta, para no perderlas por accidente.
+const credentials = ref<{ name: string, email: string, password: string } | null>(null)
+const copied = ref<'' | 'password' | 'all'>('')
+let copiedTimer: ReturnType<typeof setTimeout> | undefined
+
+function onCreated(result: CreatedLineUser) {
+  showForm.value = false
+  credentials.value = { name: result.user.name, email: result.user.email, password: result.temporaryPassword }
+  load() // el listado se vuelve a pedir al servidor: no se agrega la fila localmente (sin duplicados) y no incluye la contraseña
+}
+
+function closeCredentials() {
+  credentials.value = null
+  copied.value = ''
+  clearTimeout(copiedTimer)
+}
+
+async function copy(text: string, what: 'password' | 'all') {
+  try {
+    await navigator.clipboard.writeText(text)
+    copied.value = what
+    clearTimeout(copiedTimer)
+    copiedTimer = setTimeout(() => { copied.value = '' }, 2500)
+  } catch {
+    copied.value = '' // sin permiso de portapapeles: la persona puede seleccionar el texto (select-all)
+  }
+}
+
 function applyNow() { clearTimeout(searchTimer); current.value = 1; load() }
 function go(p: number) { current.value = p; load() }
 
@@ -124,7 +185,7 @@ watch(search, () => {
 watch(status, applyNow)
 
 onMounted(load)
-onBeforeUnmount(() => { clearTimeout(searchTimer); requestSeq++ })
+onBeforeUnmount(() => { clearTimeout(searchTimer); clearTimeout(copiedTimer); requestSeq++; credentials.value = null })
 </script>
 
 <style scoped>

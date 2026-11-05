@@ -16,7 +16,7 @@ const run = async (q = {}) => { try { return { value: await route({ method: 'GET
 
 const hubBody = {
   data: [
-    { id: 7, user_id: 20, name: 'Estefania Montoya', email: 'estefania@x.test', role: { id: 19, name: 'Diseñador gráfico' }, status: 'active', is_area_leader: false, password: 'no-debe-salir' },
+    { id: 7, user_id: 20, name: 'Estefania Montoya', email: 'estefania@x.test', role: { id: 19, name: 'Diseñador gráfico' }, status: 'active', is_area_leader: false, password: 'no-debe-salir', temporary_password: 'no-debe-salir-temp' },
     { id: 8, user_id: 21, name: 'Líder Planmed', email: 'lider@x.test', role: null, status: 'inactive', is_area_leader: true }
   ],
   meta: { current_page: 1, last_page: 3, total: 31, per_page: 15 }
@@ -68,6 +68,7 @@ describe('colaboradores de la línea', () => {
     assert.equal(value.users[1].isAreaLeader, true)
     assert.equal(value.users[1].status, 'inactive')
     assert.equal(JSON.stringify(value).includes('no-debe-salir'), false)
+    assert.equal(JSON.stringify(value).includes('temporary'), false) // el listado nunca expone contraseñas temporales
     assert.deepEqual(value.meta, { page: 1, lastPage: 3, total: 31, perPage: 15 })
   })
 
@@ -91,9 +92,9 @@ describe('colaboradores de la línea', () => {
     for (const status of [0, 500, 502]) { state.hub = { status }; assert.equal((await run()).error.statusCode, 503, String(status)) }
   })
 
-  test('solo lectura: ninguna ruta ni servicio de colaboradores escribe en el Hub', () => {
-    const code = ['server/utils/lineUsers.ts', 'server/api/admin/config/line-users.get.ts', 'services/LineUsersService.ts', 'components/admin/LineUsersPanel.vue'].map(f => readFileSync(join(ROOT, f), 'utf8')).join('\n')
-    assert.ok(!/'(POST|PUT|PATCH|DELETE)'|method: ?'(POST|PUT|PATCH|DELETE)'/.test(code))
+  test('alcance: el único método de escritura hacia el Hub es el POST del alta (sin PUT/PATCH/DELETE) y no hay localStorage ni v-html', () => {
+    const code = ['server/utils/lineUsers.ts', 'server/api/admin/config/line-users.get.ts', 'server/api/admin/config/line-users.post.ts', 'server/api/admin/config/line-users/options.get.ts', 'services/LineUsersService.ts', 'components/admin/LineUsersPanel.vue', 'components/admin/LineUserCreateForm.vue'].map(f => readFileSync(join(ROOT, f), 'utf8')).join('\n')
+    assert.ok(!/'(PUT|PATCH|DELETE)'|method: ?'(PUT|PATCH|DELETE)'/.test(code))
     assert.ok(!/localStorage|v-html/.test(code))
   })
 
