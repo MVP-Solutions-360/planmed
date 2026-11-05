@@ -29,6 +29,8 @@ before(async () => {
   g.authError = (statusCode, message) => g.createError({ statusCode, message, data: { message } })
   g.wellezyMe = async () => ({ ...state.me, data: state.me.status === 200 ? { user: { id: 1 } } : undefined })
   g.isAuthorizedUser = () => state.authorized
+  g.canEditLocalContent = () => true // la autorización por perfil se prueba en tests/security/authorization.test.ts
+  g.MSG_CONTENT_FORBIDDEN = 'content forbidden'
   g.assertSameOrigin = () => {}
   g.MSG_FORBIDDEN = 'forbidden'
   g.MSG_UNAVAILABLE = 'unavailable'

@@ -32,6 +32,8 @@ before(async () => {
   g.assertSameOrigin = () => {}
   g.wellezyMe = async () => ({ status: 200, data: { user: { id: 1 } } })
   g.isAuthorizedUser = () => state.authorized
+  g.canEditLocalContent = () => true // la autorización por perfil se prueba en tests/security/authorization.test.ts
+  g.MSG_CONTENT_FORBIDDEN = 'content forbidden'
   g.MSG_FORBIDDEN = 'forbidden'
   g.MSG_UNAVAILABLE = 'unavailable'
   Object.assign(g, C, await imp('server/utils/news.ts'), await imp('server/utils/aboutStore.ts'), await imp('server/utils/clinics.ts'))
