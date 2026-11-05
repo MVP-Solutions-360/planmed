@@ -17,4 +17,6 @@ export interface AdminUser {
   canEditPrp: boolean;
   canDeletePrp: boolean;
   canEditContent: boolean;
+  /** Contraseña temporal pendiente de cambio: solo se permite /admin/cambiar-contrasena (la impone el servidor). */
+  mustChangePassword: boolean;
 }

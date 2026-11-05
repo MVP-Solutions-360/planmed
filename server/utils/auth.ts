@@ -16,6 +16,8 @@ export interface PublicAdminUser {
   canDeletePrp: boolean
   /** Puede escribir el contenido local (Nosotros, Clínicas aliadas, páginas informativas). Solo informativo para la UI. */
   canEditContent: boolean
+  /** Contraseña temporal sin cambiar: el panel solo permite la pantalla de cambio obligatorio. La impone el servidor (middleware) y Hub (403). */
+  mustChangePassword: boolean
 }
 
 interface AdminSessionData {
@@ -120,7 +122,8 @@ export function toPublicUser(user: WellezyUser, event?: H3Event): PublicAdminUse
     canCreatePrp: hasHubPermission(user, 'prp_referrers.crear'),
     canEditPrp: hasHubPermission(user, 'prp_referrers.editar'),
     canDeletePrp: hasHubPermission(user, 'prp_referrers.eliminar'),
-    canEditContent: canEditLocalContent(event, user)
+    canEditContent: canEditLocalContent(event, user),
+    mustChangePassword: user.must_change_password === true
   }
 }
 

@@ -19,6 +19,8 @@ export interface WellezyUser {
   is_global_admin?: boolean
   /** Permisos efectivos del usuario en Hub (`/auth/me`). Solo servidor: nunca se envían tal cual al navegador. Ausente = sin permisos. */
   permissions?: string[]
+  /** Cambio obligatorio de contraseña pendiente en Hub (users.must_change_password): contraseña temporal sin cambiar. Solo `true` estricto cuenta. */
+  must_change_password?: boolean
 }
 
 export interface WellezyResult<T = unknown> {
@@ -84,7 +86,8 @@ function normalizeUser(value: WellezyUser): WellezyUser {
     line: slugOf((value as any).line),
     is_area_leader: value.is_area_leader === true,
     is_global_admin: (value as any).is_global_admin === true,
-    permissions
+    permissions,
+    must_change_password: (value as any).must_change_password === true
   }
 }
 

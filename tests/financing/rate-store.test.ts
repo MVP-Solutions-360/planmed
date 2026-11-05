@@ -221,7 +221,7 @@ describe('permisos: líder y diseñadora; nadie más', () => {
     assert.equal(globalThis.toPublicUser(LEADER, e).canEditRate, true)
     assert.equal(globalThis.toPublicUser(DESIGNER, e).canEditRate, true)
     assert.equal(globalThis.toPublicUser(OTHER_CMS, e).canEditRate, false)
-    assert.deepEqual(Object.keys(globalThis.toPublicUser(DESIGNER, e)).sort(), ['canEditRate', 'email', 'id', 'isAreaLeader', 'name', 'role'])
+    assert.deepEqual(Object.keys(globalThis.toPublicUser(DESIGNER, e)).sort(), ['canCreatePrp', 'canDeletePrp', 'canEditContent', 'canEditPrp', 'canEditRate', 'email', 'id', 'isAreaLeader', 'mustChangePassword', 'name', 'role'])
   })
 
   test('colaboradores sigue siendo solo del líder (la diseñadora no lo gana)', async () => {

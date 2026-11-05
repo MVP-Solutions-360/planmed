@@ -31,6 +31,23 @@ class AuthService {
     userState.value = await this.provider.login(email, password)
   }
 
+  /**
+   * Cambio de contraseña obligatorio o voluntario del usuario de la sesión. Hub es la autoridad (valida actual, política y confirmación);
+   * Hub revoca los tokens al cambiar, así que el servidor renueva la sesión. Si no pudo, el usuario queda sin sesión y hay que ingresar de nuevo.
+   */
+  public async changePassword(currentPassword: string, password: string, confirmation: string): Promise<AdminUser | null> {
+    // Los composables se resuelven antes de cualquier await.
+    const userState = this.getUser()
+    try {
+      const user = await this.provider.changePassword(currentPassword, password, confirmation)
+      userState.value = user
+      return user
+    } catch (e: any) {
+      if (e?.statusCode === 401) userState.value = null // la sesión ya no es válida
+      throw e
+    }
+  }
+
   public async logout(): Promise<void> {
     // Los composables se resuelven antes de cualquier await.
     const userState = this.getUser()

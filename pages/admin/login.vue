@@ -15,6 +15,10 @@
         
         <form @submit.prevent="onSubmit" class="space-y-6">
           
+          <div v-if="changed" role="status" class="p-4 bg-green-50 border-l-4 border-green-600 text-green-800 text-sm" data-testid="password-changed">
+            Tu contraseña se actualizó. Inicia sesión con la contraseña nueva.
+          </div>
+
           <div v-if="error" class="p-4 bg-red-50 border-l-4 border-red-600 text-red-800 text-sm">
             {{ error }}
           </div>
@@ -89,7 +93,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter, useHead, navigateTo } from '#imports'
+import { useRouter, useRoute, useHead, navigateTo } from '#imports'
 import { authService } from '~/services/AuthService'
 
 useHead({
@@ -102,6 +106,8 @@ definePageMeta({
 })
 
 const router = useRouter()
+// Tras cambiar la contraseña sin poder renovar la sesión se llega aquí con ?changed=1.
+const changed = useRoute().query.changed === '1'
 const email = ref('')
 const password = ref('')
 const error = ref('')

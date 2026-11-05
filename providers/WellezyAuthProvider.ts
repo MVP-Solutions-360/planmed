@@ -7,10 +7,12 @@ import { useRequestFetch } from '#imports'
 
 const GENERIC_ERROR = 'No fue posible conectar con el servicio de autenticación. Intenta nuevamente.'
 
-function toError(e: any): Error {
-  const message = e?.data?.data?.message || e?.data?.message
-  const error = new Error(typeof message === 'string' && message ? message : GENERIC_ERROR) as Error & { statusCode?: number }
+function toError(e: any): Error & { statusCode?: number, errors?: Record<string, string[]> } {
+  const data = e?.data?.data ?? e?.data
+  const message = data?.message
+  const error = new Error(typeof message === 'string' && message ? message : GENERIC_ERROR) as Error & { statusCode?: number, errors?: Record<string, string[]> }
   error.statusCode = e?.statusCode ?? e?.response?.status
+  error.errors = data?.errors && typeof data.errors === 'object' ? data.errors : {}
   return error
 }
 
@@ -23,6 +25,19 @@ export class WellezyAuthProvider implements AuthProvider {
         body: { email, password }
       })
       return res.user
+    } catch (e) {
+      throw toError(e)
+    }
+  }
+
+  async changePassword(currentPassword: string, password: string, confirmation: string): Promise<AdminUser | null> {
+    const request = useRequestFetch()
+    try {
+      const res = await request<{ user: AdminUser | null }>('/api/auth/password', {
+        method: 'POST',
+        body: { current_password: currentPassword, password, password_confirmation: confirmation }
+      })
+      return res.user ?? null
     } catch (e) {
       throw toError(e)
     }

@@ -10,18 +10,12 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Ensure session is loaded (especially important on SSR and first load)
   await authService.loadUserSession()
   
-  const isAuth = authService.isAuthenticated()
+  // Sesión, login y cambio obligatorio de contraseña: mientras haya una contraseña temporal sin cambiar, solo se permite
+  // /admin/cambiar-contrasena (el servidor bloquea además todas las rutas /api/admin/**). Reglas en shared/utils/adminPasswordGate.ts.
+  const redirect = adminGateRedirect(to.path, authService.getUser().value)
+  if (redirect) return navigateTo(redirect)
 
-  if (to.path === '/admin/login') {
-    if (isAuth) {
-      return navigateTo('/admin')
-    }
-    return
-  }
-
-  if (!isAuth) {
-    return navigateTo('/admin/login')
-  }
+  if (to.path === '/admin/login') return
 
   // Nosotros / Clínicas / páginas: solo perfiles editores de contenido. La UI solo lo refleja; el servidor lo impone en cada escritura (403).
   if (to.path.startsWith('/admin/nosotros') || to.path.startsWith('/admin/paginas')) {
