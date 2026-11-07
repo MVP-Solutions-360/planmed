@@ -92,6 +92,42 @@ describe('páginas informativas administrables', () => {
   })
 })
 
+describe('video de YouTube en páginas informativas', () => {
+  test('se guarda en forma canónica, el público lo devuelve y un enlace ajeno se rechaza con 422', async () => {
+    const ok = await run(put, ev('clinicas-aliadas', { title: 'Clínicas aliadas', videoUrl: 'https://youtu.be/dQw4w9WgXcQ' }))
+    assert.ok(!ok.error, ok.error?.message)
+    assert.equal(ok.value.videoUrl, 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    assert.equal((await pub(ev('clinicas-aliadas', undefined, 'GET'))).videoUrl, 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    for (const bad of ['https://evil.example/watch?v=dQw4w9WgXcQ', 'javascript:alert(1)', 'https://www.instagram.com/p/ABCDE12345/', 'https://youtube.com/watch?v=<x>']) {
+      const r = await run(put, ev('clinicas-aliadas', { title: 'Clínicas aliadas', videoUrl: bad }))
+      assert.equal(r.error?.statusCode, 422, bad)
+      assert.ok(r.error.data.errors.videoUrl, bad)
+    }
+  })
+  test('el identificador sale de parseEmbedUrl: parámetros extra se ignoran y los enlaces ajenos no producen iframe (validación compartida cliente/servidor)', () => {
+    const id = 'dQw4w9WgXcQ'
+    for (const u of [`https://www.youtube.com/watch?v=${id}&t=30s&list=PL1`, `https://youtu.be/${id}?si=abc`, `https://m.youtube.com/watch?v=${id}`, `https://www.youtube.com/shorts/${id}`]) {
+      assert.equal(S.sitePageVideoId(u), id, u)
+      assert.deepEqual(S.validateSitePage({ title: 't', subtitle: '', body: '', videoUrl: u, updatedAt: '' }), {}, u)
+    }
+    for (const u of ['', 'https://vimeo.com/123456', 'https://youtube.com.evil.example/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=', 'no es una url']) {
+      assert.equal(S.sitePageVideoId(u), '', u)
+    }
+    assert.ok(S.validateSitePage({ title: 't', subtitle: '', body: '', videoUrl: 'https://vimeo.com/123456', updatedAt: '' }).videoUrl)
+    assert.deepEqual(S.validateSitePage({ title: 't', subtitle: '', body: '', videoUrl: '', updatedAt: '' }), {}, 'el video es opcional')
+  })
+  test('vacío quita el video y un cuerpo sin videoUrl no lo borra', async () => {
+    const keep = await run(put, ev('clinicas-aliadas', { title: 'Clínicas aliadas' }))
+    assert.equal(keep.value.videoUrl, 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    const cleared = await run(put, ev('clinicas-aliadas', { title: 'Clínicas aliadas', videoUrl: '' }))
+    assert.equal(cleared.value.videoUrl, '')
+  })
+  test('el editor y la página pública incluyen el campo y la incrustación', () => {
+    assert.ok(readFileSync(join(ROOT, 'pages/admin/paginas/[slug].vue'), 'utf8').includes('id="page-video"'))
+    assert.ok(readFileSync(join(ROOT, 'components/site/ManagedPage.vue'), 'utf8').includes('<NewsYouTubeEmbed'))
+  })
+})
+
 describe('menú y páginas', () => {
   test('existen las rutas públicas y el submenú del admin solo lista las administrables', () => {
     const layout = readFileSync(join(ROOT, 'layouts/admin.vue'), 'utf8')

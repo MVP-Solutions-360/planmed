@@ -57,6 +57,7 @@ export function parseSitePageBody(body: any, current: SitePageContent): SitePage
   const next = normalizeSitePage(body, current)
   next.body = sanitizeRichHtml(next.body)
   const errors = validateSitePage(next)
+  if (!errors.videoUrl) next.videoUrl = sitePageVideoUrl(next.videoUrl)
   const keys = Object.keys(errors)
   if (keys.length) {
     const message = errors[keys[0]!]!

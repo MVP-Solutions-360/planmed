@@ -12,3 +12,7 @@ dist/
 
 # Contenido administrado localmente (pagina Nosotros): datos del entorno, no se versionan
 .data/
+
+# Respaldos y artefactos de despliegue (paquetes .tar.gz y compilación portable de UAT): se conservan en disco, no se versionan
+*.tar.gz
+.output-uat-portable/

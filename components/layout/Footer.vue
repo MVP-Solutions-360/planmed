@@ -37,6 +37,7 @@
         <div class="flex flex-col gap-3 md:gap-4">
           <span class="text-[#D3A76A] text-xs uppercase tracking-widest font-bold mb-2">Compañía</span>
           <NuxtLink :to="'/nosotros'" class="text-[#D3A76A] hover:opacity-80 transition-opacity text-sm">Sobre Planmed</NuxtLink>
+          <NuxtLink :to="'/admin/login'" class="text-[#D3A76A] hover:opacity-80 transition-opacity text-sm" data-testid="footer-login">Iniciar sesión</NuxtLink>
         </div>
       </div>
     </div>

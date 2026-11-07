@@ -35,6 +35,13 @@
           <p v-if="errors.subtitle" class="msg">{{ errors.subtitle }}</p>
         </div>
         <div>
+          <label class="lbl" for="page-video">Video de YouTube (opcional)</label>
+          <input id="page-video" v-model="form.videoUrl" type="url" class="inp" maxlength="2048" placeholder="https://www.youtube.com/watch?v=..." :aria-invalid="!!errors.videoUrl" />
+          <p class="hint">Pega el enlace del video (youtube.com o youtu.be). Se muestra debajo del contenido. Déjalo vacío para no mostrar video.</p>
+          <p v-if="errors.videoUrl" class="msg">{{ errors.videoUrl }}</p>
+          <div v-if="previewEmbed" class="mt-3 max-w-md"><NewsYouTubeEmbed :url="previewEmbed" /></div>
+        </div>
+        <div>
           <label class="lbl">Contenido</label>
           <AdminRichTextEditor v-model="form.body" min-height="20rem" />
           <p class="hint">Si lo dejas vacío, la página muestra «Contenido próximamente».</p>
@@ -66,7 +73,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useHead, useRoute, createError } from '#imports'
 import { sitePagesService } from '~/services/SitePagesService'
-import { SITE_PAGES, isSitePageSlug, normalizeSitePage, validateSitePage, type SitePageContent, type SitePageErrors } from '#shared/utils/sitePages'
+import { SITE_PAGES, isSitePageSlug, sitePageVideoId, normalizeSitePage, validateSitePage, type SitePageContent, type SitePageErrors } from '#shared/utils/sitePages'
 
 definePageMeta({ layout: 'admin' })
 
@@ -89,6 +96,11 @@ const errors = ref<SitePageErrors>({})
 const clinicsDirty = ref(false)
 const textDirty = computed(() => JSON.stringify(form.value) !== snapshot.value)
 const dirty = textDirty
+// Vista previa del video mientras se escribe: solo con un enlace de YouTube válido.
+const previewEmbed = computed(() => {
+  const id = sitePageVideoId(form.value?.videoUrl)
+  return id ? `https://www.youtube.com/embed/${id}` : ''
+})
 
 async function load() {
   loading.value = true

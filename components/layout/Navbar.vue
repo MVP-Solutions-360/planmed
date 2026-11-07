@@ -67,11 +67,6 @@
         <NuxtLink to="/financiacion#calculadora" class="bg-[#0C2619] text-white px-4 py-2.5 font-bold text-[10px] tracking-[0.15em] uppercase hover:bg-black transition-colors rounded-[2px] shadow-sm ml-4 border border-[#0C2619]">
           SIMULAR FINANCIACIÓN
         </NuxtLink>
-        
-        <NuxtLink to="/admin/login" class="text-[11px] font-bold tracking-[0.1em] text-[#0C2619] hover:text-black transition-colors uppercase ml-4 flex items-center gap-1 border border-[#0C2619] px-3 py-2 rounded-[2px]">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-          INICIAR SESIÓN
-        </NuxtLink>
       </div>
 
       <!-- Botón hamburguesa (tablet y móvil) -->
@@ -147,10 +142,6 @@
         <NuxtLink to="/financiacion#calculadora" @click="closeMenu" class="bg-[#0C2619] text-white px-8 py-3.5 mt-6 font-bold text-xs tracking-widest uppercase shadow-md border border-[#0C2619]">
           SIMULAR FINANCIACIÓN
         </NuxtLink>
-        <NuxtLink to="/admin/login" @click="closeMenu" class="mt-4 text-[#0C2619] font-bold text-xs tracking-widest uppercase border border-[#0C2619] px-8 py-3.5 flex items-center justify-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-          INICIAR SESIÓN
-        </NuxtLink>
       </div>
     </div>
   </nav>
@@ -225,6 +216,25 @@ watch(() => route.path, () => { closeMenu(); refreshHubMenu(); refreshPatientSec
 function onResize() {
   if (window.innerWidth >= 1360 && isMobileMenuOpen.value) closeMenu()
 }
-onMounted(() => window.addEventListener('resize', onResize))
-onBeforeUnmount(() => window.removeEventListener('resize', onResize))
+// Recuperación única de los temas: si Hub no respondió en la carga inicial (el servidor lo corta a los 10 s) el menú llega sin Recomendaciones;
+// el navegador vuelve a pedirlo, como máximo 3 veces separadas 3 s, y se detiene en cuanto hay temas o el componente se desmonta.
+// Sin reintento en el servidor (no alarga el render) ni consultas periódicas: si los temas ya llegaron, no se pide nada.
+const hasTopics = () => (hubMenu.value?.topics?.length ?? 0) > 0
+let retryTimer = null
+let unmounted = false
+async function recoverTopics(attempt = 1) {
+  if (unmounted || hasTopics()) return
+  await refreshHubMenu()
+  if (unmounted || hasTopics() || attempt >= 3) return
+  retryTimer = setTimeout(() => recoverTopics(attempt + 1), 3000)
+}
+onMounted(() => {
+  window.addEventListener('resize', onResize)
+  recoverTopics()
+})
+onBeforeUnmount(() => {
+  unmounted = true
+  if (retryTimer) clearTimeout(retryTimer)
+  window.removeEventListener('resize', onResize)
+})
 </script>

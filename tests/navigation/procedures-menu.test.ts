@@ -51,4 +51,11 @@ describe('Navbar.vue — desplegable de Procedimientos', () => {
     // Las dos listas (procedimientos y árbol de temas) se piden de forma independiente; el menú ya no usa el contrato histórico.
     assert.match(navbar, /Promise\.allSettled\(\[publicProcedureService\.getProcedures\(\), publicRecommendationsService\.getTopics\(\)\]\)/)
   })
+  test('si el servidor no trajo los temas, el navegador los vuelve a pedir al montar (menú siempre igual)', () => {
+    assert.match(navbar, /recoverTopics\(\)/)
+    assert.match(navbar, /attempt >= 3/, 'máximo 3 intentos')
+    assert.match(navbar, /if \(unmounted \|\| hasTopics\(\)\) return/, 'se detiene si ya hay temas o se desmontó')
+    assert.match(navbar, /clearTimeout\(retryTimer\)/, 'limpia el temporizador al desmontar')
+    assert.ok(!/setInterval/.test(navbar), 'sin consultas periódicas')
+  })
 })

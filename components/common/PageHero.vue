@@ -13,7 +13,7 @@
           <span class="w-8 h-px bg-[#D3A76A]"></span>
           {{ eyebrow }}
         </p>
-        <h1 class="font-serif text-[40px] md:text-[56px] lg:text-[72px] font-medium leading-[1.05] tracking-[-0.02em] text-white uppercase max-w-4xl break-words">
+        <h1 class="font-serif font-medium tracking-[-0.02em] text-white uppercase max-w-4xl break-words text-balance hyphens-auto" :class="titleSize" lang="es">
           <template v-for="(line, i) in lines" :key="i">{{ line }}<br v-if="i < lines.length - 1" /></template>
         </h1>
         <p v-if="lead" class="mt-8 text-lg text-white/80 font-light max-w-2xl leading-relaxed mx-auto md:mx-0">{{ lead }}</p>
@@ -32,12 +32,22 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 // Sin `facts` se muestran las cifras que ya comunica el sitio (7,000 pacientes, 15 años, 72 meses); `:facts="[]"` las oculta.
-withDefaults(defineProps<{ eyebrow: string, lines: string[], lead?: string, facts?: { value: string, label: string }[] }>(), {
+const props = withDefaults(defineProps<{ eyebrow: string, lines: string[], lead?: string, facts?: { value: string, label: string }[] }>(), {
   facts: () => [
     { value: '+7.000', label: 'Pacientes satisfechos' },
     { value: '+15', label: 'Años de experiencia' },
     { value: '72', label: 'Meses para pagar' }
   ]
+})
+
+// Tamaño del título según su longitud: los títulos largos (p. ej. «Recomendaciones para asistir a cita de preanestesia») usan una escala
+// menor para que no se desborden ni se amontonen en móvil y tablet; los cortos conservan la escala grande de siempre.
+const titleSize = computed(() => {
+  const n = props.lines.join(' ').length
+  if (n > 40) return 'text-[26px] leading-[1.15] sm:text-[32px] md:text-[40px] lg:text-[48px]'
+  if (n > 22) return 'text-[32px] leading-[1.1] sm:text-[38px] md:text-[48px] lg:text-[60px]'
+  return 'text-[40px] leading-[1.05] md:text-[56px] lg:text-[72px]'
 })
 </script>

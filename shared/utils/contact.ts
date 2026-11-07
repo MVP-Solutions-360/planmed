@@ -13,3 +13,6 @@ export const CONTACT_EMAIL = 'planmedequipodetrabajo@gmail.com'
 export const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}`
 
 export const MESSENGER_URL = 'https://www.facebook.com/Financicioncirugiaplastica/'
+
+/** Perfil oficial de Planmed en Instagram. */
+export const INSTAGRAM_URL = 'https://www.instagram.com/financiacion_cirugia_plastica/'

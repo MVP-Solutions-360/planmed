@@ -1,6 +1,7 @@
 <template>
   <SitePageShell :title="page.title" :subtitle="page.subtitle" :wide="wide">
     <CommonRichContent v-if="page.body" :html="page.body" class="text-lg font-light" />
+    <div v-if="videoUrl" class="w-full" data-testid="page-video"><NewsYouTubeEmbed :url="videoUrl" /></div>
     <slot />
   </SitePageShell>
 </template>
@@ -9,12 +10,17 @@
 // Página informativa administrada desde /admin/paginas/<slug> (GET /api/public/pages/<slug>). Sin texto guardado muestra «Contenido próximamente».
 import { computed } from 'vue'
 import { useFetch, useSeoMeta, useHead, useSiteConfig } from '#imports'
-import { SITE_PAGES, sitePageDefault, type SitePageContent, type SitePageSlug } from '#shared/utils/sitePages'
+import { SITE_PAGES, sitePageDefault, sitePageVideoId, type SitePageContent, type SitePageSlug } from '#shared/utils/sitePages'
 
 const props = defineProps<{ slug: SitePageSlug, wide?: boolean }>()
 
 const { data } = await useFetch<SitePageContent>(`/api/public/pages/${props.slug}`, { key: `site-page-${props.slug}`, default: () => sitePageDefault(props.slug) })
 const page = computed(() => data.value ?? sitePageDefault(props.slug))
+// Solo se incrusta una URL de YouTube válida (se vuelve a validar aquí: no se confía en lo guardado).
+const videoUrl = computed(() => {
+  const id = sitePageVideoId(page.value.videoUrl)
+  return id ? `https://www.youtube.com/embed/${id}` : ''
+})
 
 const title = `${page.value.title} | Planmed`
 useSeoMeta({ title, ogTitle: title, ogType: 'website', description: () => page.value.subtitle || `${page.value.title} - Planmed`, ogDescription: () => page.value.subtitle || `${page.value.title} - Planmed` })
