@@ -25,7 +25,7 @@ import { useSeoMeta } from '#imports'
 const documents = [
   { label: 'Políticas de Tratamiento de Datos Personales', href: 'https://planmed.com.co/wp-content/uploads/2021/01/Politica-de-Tratamiento-Personal-3-1.pdf' },
   { label: 'Aviso de Privacidad', href: 'https://planmed.com.co/wp-content/uploads/2019/03/AVISO-DE-PRIVACIDAD-PLANMED.pdf' },
-  { label: 'Formato de Autorización de Tratamiento de Datos Personales', href: 'https://planmed.com.co/wp-content/uploads/2019/03/AVISO-DE-PRIVACIDAD-Y-AUTORIZACI%C3%93N-EXPRESA-PARA-EL-TRATAMIENTO-DE-DATOS-PERSONALES-PLANMED.pdf' },
+  { label: 'Formato de Autorización de Tratamiento de Datos Personales', href: 'https://planmed.com.co/wp-content/uploads/2021/04/AVISO-DE-PRIVACIDAD-Y-AUTORIZACI%C3%93N-EXPRESA-PARA-EL-TRATAMIENTO-DE-DATOS-PERSONALES-PLANMED-1-1.pdf' },
   { label: 'Formato de Reclamación de Tratamiento de Datos Personales', href: 'https://planmed.com.co/wp-content/uploads/2019/03/RECLAMACIONES-DATOS-PERSONALES.docx.pdf' }
 ]
 
