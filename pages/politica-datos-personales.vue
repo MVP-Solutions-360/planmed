@@ -22,10 +22,11 @@
 // Página estática (sin administración). Texto y documentos entregados por Planmed (los PDF siguen alojados en planmed.com.co).
 import { useSeoMeta } from '#imports'
 
+// OJO: el PDF de autorización tiene la Ó guardada descompuesta (O + acento combinado) en el servidor de WordPress: va como %4F%CC%81, no %C3%93 (con ésa da 404).
 const documents = [
   { label: 'Políticas de Tratamiento de Datos Personales', href: 'https://planmed.com.co/wp-content/uploads/2021/01/Politica-de-Tratamiento-Personal-3-1.pdf' },
   { label: 'Aviso de Privacidad', href: 'https://planmed.com.co/wp-content/uploads/2019/03/AVISO-DE-PRIVACIDAD-PLANMED.pdf' },
-  { label: 'Formato de Autorización de Tratamiento de Datos Personales', href: 'https://planmed.com.co/wp-content/uploads/2021/04/AVISO-DE-PRIVACIDAD-Y-AUTORIZACI%C3%93N-EXPRESA-PARA-EL-TRATAMIENTO-DE-DATOS-PERSONALES-PLANMED-1-1.pdf' },
+  { label: 'Formato de Autorización de Tratamiento de Datos Personales', href: 'https://planmed.com.co/wp-content/uploads/2021/04/AVISO-DE-PRIVACIDAD-Y-AUTORIZACI%4F%CC%81N-EXPRESA-PARA-EL-TRATAMIENTO-DE-DATOS-PERSONALES-PLANMED-1-1.pdf' },
   { label: 'Formato de Reclamación de Tratamiento de Datos Personales', href: 'https://planmed.com.co/wp-content/uploads/2019/03/RECLAMACIONES-DATOS-PERSONALES.docx.pdf' }
 ]
 
