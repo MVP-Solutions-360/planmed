@@ -3,6 +3,15 @@ export interface NewsSEO {
   metaDescription?: string;
 }
 
+/** Página de noticias públicas (paginación de Hub). */
+export interface NewsPage {
+  items: NewsArticle[];
+  page: number;
+  perPage: number;
+  total: number;
+  lastPage: number;
+}
+
 export interface NewsArticle {
   id: string;
   slug: string;

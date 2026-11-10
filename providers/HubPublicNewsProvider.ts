@@ -1,5 +1,5 @@
 import type { PublicNewsProvider } from './PublicNewsProvider'
-import type { NewsArticle } from '~/types/news'
+import type { NewsArticle, NewsPage } from '~/types/news'
 import { useRequestFetch } from '#imports'
 
 // Habla únicamente con las rutas internas de Nitro (/api/public/news*). Nitro consulta a Wellezy Hub con el tenant de la
@@ -10,6 +10,11 @@ export class HubPublicNewsProvider implements PublicNewsProvider {
   async getNews(): Promise<NewsArticle[]> {
     const request = useRequestFetch()
     return await request<NewsArticle[]>('/api/public/news')
+  }
+
+  async getNewsPage(page: number, perPage?: number): Promise<NewsPage> {
+    const request = useRequestFetch()
+    return await request<NewsPage>('/api/public/news-page', { query: { page, ...(perPage ? { per_page: perPage } : {}) } })
   }
 
   async getNewsBySlug(slug: string): Promise<NewsArticle | null> {

@@ -81,6 +81,48 @@
             </div>
           </NuxtLink>
         </div>
+        <!-- Página fuera de rango (p. ej. ?pagina=999): hay noticias pero no en esta página. -->
+        <p v-if="total && !news.length" data-testid="news-out-of-range" class="text-center text-gray-500 font-light py-16 mb-12 border border-dashed border-[#e5e2e1] bg-white">
+          Esta página no existe.
+          <NuxtLink :to="pageTo(1)" class="font-bold text-black underline underline-offset-4">Ver las noticias más recientes</NuxtLink>
+        </p>
+
+        <!-- PAGINACIÓN -->
+        <nav v-if="lastPage > 1" data-testid="news-pagination" aria-label="Paginación de noticias" class="-mt-12 mb-24 flex flex-col items-center gap-4">
+          <ul class="flex flex-wrap items-center justify-center gap-2 text-sm font-bold">
+            <li>
+              <NuxtLink
+                v-if="page > 1"
+                :to="pageTo(page - 1)"
+                rel="prev"
+                class="inline-flex min-h-[44px] items-center px-4 border border-[#e5e2e1] bg-white text-black hover:bg-[#0C2619] hover:text-white transition-colors"
+              >Anterior</NuxtLink>
+            </li>
+            <li v-for="(p, i) in pages" :key="`${p}-${i}`">
+              <span v-if="p === 'gap'" class="inline-flex min-h-[44px] items-center px-2 text-gray-400" aria-hidden="true">…</span>
+              <span
+                v-else-if="p === page"
+                aria-current="page"
+                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-[#0C2619] bg-[#0C2619] text-white"
+              >{{ p }}</span>
+              <NuxtLink
+                v-else
+                :to="pageTo(p)"
+                :aria-label="`Ir a la página ${p}`"
+                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-[#e5e2e1] bg-white text-black hover:border-[#D3A76A] hover:text-[#0C2619] transition-colors"
+              >{{ p }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink
+                v-if="page < lastPage"
+                :to="pageTo(page + 1)"
+                rel="next"
+                class="inline-flex min-h-[44px] items-center px-4 border border-[#e5e2e1] bg-white text-black hover:bg-[#0C2619] hover:text-white transition-colors"
+              >Siguiente</NuxtLink>
+            </li>
+          </ul>
+          <p class="text-xs text-gray-500 font-light">Página {{ page }} de {{ lastPage }} · {{ total }} artículos</p>
+        </nav>
       </template>
 
     </div>
@@ -91,20 +133,35 @@
 import { useSeoMeta, useAsyncData } from '#imports'
 import { publicNewsService } from '~/services/PublicNewsService'
 import { richHtmlToText } from '~/utils/richText'
+import { pageWindow, parsePage } from '#shared/utils/pagination'
+import type { NewsPage } from '~/types/news'
 
 // Fuente de verdad: Wellezy Hub (vía Nitro). Mismo resultado en SSR, navegación interna, recarga e incógnito.
-const { data: news, error, refresh, status } = await useAsyncData('news-list', () => publicNewsService.getNews(), {
-  default: () => []
-})
+// Paginado (?pagina=N): Hub entrega como máximo 50 por página, así que se pide una página a la vez en lugar de «solo las primeras 50».
+const route = useRoute()
+const page = computed(() => parsePage(route.query.pagina))
+const emptyPage: NewsPage = { items: [], page: 1, perPage: 12, total: 0, lastPage: 1 }
+const { data, error, refresh, status } = await useAsyncData(
+  () => `news-list-${page.value}`,
+  () => publicNewsService.getNewsPage(page.value),
+  { default: () => emptyPage, watch: [page] }
+)
 useServiceUnavailable(error)
 
+const news = computed(() => data.value.items)
+const total = computed(() => data.value.total)
+const lastPage = computed(() => data.value.lastPage)
+const pages = computed(() => pageWindow(page.value, lastPage.value))
+const pageTo = (n: number) => ({ path: '/noticias', query: n > 1 ? { pagina: String(n) } : {} })
+
 const formatDate = (d?: string | null) => d ? new Date(d).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : ''
-const featured = computed(() => news.value[0])
-const rest = computed(() => news.value.slice(1))
+// La destacada solo aparece en la primera página; en las demás todo va a la cuadrícula.
+const featured = computed(() => (page.value === 1 ? news.value[0] : undefined))
+const rest = computed(() => (page.value === 1 ? news.value.slice(1) : news.value))
 const heroFacts = computed(() => {
-  const last = news.value[0]?.publishedAt
+  const last = page.value === 1 ? news.value[0]?.publishedAt : undefined
   return [
-    { value: String(news.value.length), label: news.value.length === 1 ? 'Artículo publicado' : 'Artículos publicados' },
+    { value: String(total.value), label: total.value === 1 ? 'Artículo publicado' : 'Artículos publicados' },
     ...(last ? [{ value: new Date(last).toLocaleDateString('es-CO', { month: 'short', year: 'numeric' }).replace('.', ''), label: 'Última publicación' }] : [])
   ]
 })

@@ -1,5 +1,5 @@
 import type { PublicNewsProvider } from '~/providers/PublicNewsProvider'
-import type { NewsArticle } from '~/types/news'
+import type { NewsArticle, NewsPage } from '~/types/news'
 import { HubPublicNewsProvider } from '~/providers/HubPublicNewsProvider'
 
 export class PublicNewsService {
@@ -11,6 +11,10 @@ export class PublicNewsService {
 
   async getNews(): Promise<NewsArticle[]> {
     return this.provider.getNews();
+  }
+
+  async getNewsPage(page: number, perPage?: number): Promise<NewsPage> {
+    return this.provider.getNewsPage(page, perPage);
   }
 
   async getNewsBySlug(slug: string): Promise<NewsArticle | null> {
