@@ -43,11 +43,11 @@ before(async () => {
   g.MSG_UNAVAILABLE = 'unavailable'
   g.wellezyLogout = async (...args) => { hubCalls.push(args); return 0 }
 
-  for (const rel of ['server/utils/origin.ts', 'server/utils/news.ts', 'server/utils/procedures.ts', 'server/utils/prp.ts', 'server/utils/patients.ts', 'server/utils/recommendations.ts', 'server/utils/recommendationAdmin.ts', 'shared/utils/aboutContent.ts', 'server/utils/aboutStore.ts', 'shared/utils/sitePages.ts', 'server/utils/sitePages.ts', 'shared/utils/clinics.ts', 'server/utils/clinics.ts', 'shared/utils/financing.ts', 'server/utils/financingRate.ts']) {
+  for (const rel of ['server/utils/origin.ts', 'server/utils/news.ts', 'server/utils/procedures.ts', 'server/utils/prp.ts', 'server/utils/patients.ts', 'server/utils/recommendations.ts', 'server/utils/recommendationAdmin.ts', 'server/utils/newsSections.ts', 'server/utils/procedureSections.ts', 'server/utils/procedureOrientation.ts', 'server/utils/passwordChange.ts', 'shared/utils/aboutContent.ts', 'server/utils/aboutStore.ts', 'shared/utils/sitePages.ts', 'server/utils/sitePages.ts', 'shared/utils/clinics.ts', 'server/utils/clinics.ts', 'shared/utils/financing.ts', 'server/utils/financingRate.ts']) {
     Object.assign(g, await imp(rel))
   }
 
-  const files = [...walk(join(ROOT, 'server/api/admin')), join(ROOT, 'server/api/auth/login.post.ts'), join(ROOT, 'server/api/auth/logout.post.ts')]
+  const files = [...walk(join(ROOT, 'server/api/admin')), join(ROOT, 'server/api/auth/login.post.ts'), join(ROOT, 'server/api/auth/logout.post.ts'), join(ROOT, 'server/api/auth/password.post.ts')]
     // access.get, line-users.get, line-users.post y line-users/options.get usan requireAreaLeader (consulta /auth/me a Hub); se cubren aparte
     // (tests/about/line-users.test.ts y tests/about/line-users-create.test.ts: origen, 401, 403 de no líder y de superadmin).
     .filter(f => !f.endsWith(`config${sep}access.get.ts`) && !f.endsWith(`config${sep}line-users.get.ts`) && !f.endsWith(`config${sep}line-users.post.ts`) && !f.endsWith(`line-users${sep}options.get.ts`))
@@ -64,9 +64,9 @@ const loggedIn = { token: 'hub-secret-token', user: { id: 1, name: 'U', email: '
 
 describe('inventario', () => {
   test('se auditan todas las rutas admin (no hay ninguna sin cubrir)', () => {
-    assert.equal(handlers.length, 36, `rutas auditadas: ${handlers.length} (si se agrega una ruta admin, esta matriz debe cubrirla)`)
+    assert.equal(handlers.length, 45, `rutas auditadas: ${handlers.length} (si se agrega una ruta admin, esta matriz debe cubrirla)`)
     const names = handlers.map(h => h.rel)
-    for (const must of ['server/api/admin/recommendations/[slug].put.ts', 'server/api/admin/about.put.ts', 'server/api/admin/pages/[slug].put.ts', 'server/api/admin/clinics.put.ts', 'server/api/admin/clinics/upload.post.ts', 'server/api/admin/patient-section.put.ts', 'server/api/admin/procedures/index.post.ts', 'server/api/admin/news/index.post.ts', 'server/api/admin/prp/index.post.ts', 'server/api/admin/config/financing-rate.put.ts', 'server/api/admin/config/financing-rate.get.ts', 'server/api/auth/login.post.ts', 'server/api/admin/recommendation-tree/[...path].get.ts', 'server/api/admin/recommendation-tree/[...path].post.ts', 'server/api/admin/recommendation-tree/[...path].put.ts', 'server/api/admin/recommendation-tree/[...path].delete.ts']) {
+    for (const must of ['server/api/admin/recommendations/[slug].put.ts', 'server/api/admin/about.put.ts', 'server/api/admin/pages/[slug].put.ts', 'server/api/admin/clinics.put.ts', 'server/api/admin/clinics/upload.post.ts', 'server/api/admin/patient-section.put.ts', 'server/api/admin/procedures/index.post.ts', 'server/api/admin/news/index.post.ts', 'server/api/admin/prp/index.post.ts', 'server/api/admin/config/financing-rate.put.ts', 'server/api/admin/config/financing-rate.get.ts', 'server/api/auth/login.post.ts', 'server/api/auth/password.post.ts', 'server/api/admin/news-sections/[...path].get.ts', 'server/api/admin/news-sections/[...path].delete.ts', 'server/api/admin/recommendation-tree/[...path].get.ts', 'server/api/admin/recommendation-tree/[...path].post.ts', 'server/api/admin/recommendation-tree/[...path].put.ts', 'server/api/admin/recommendation-tree/[...path].delete.ts']) {
       assert.ok(names.includes(must), must)
     }
   })
@@ -168,5 +168,62 @@ describe('login y logout', () => {
       assert.equal(error?.statusCode, 403, rel)
       assert.equal(hubCalls.length, 0)
     }
+  })
+})
+
+describe('cambio de contraseña (password.post.ts): reglas propias, distintas de login', () => {
+  const pw = () => handlers.find(x => x.rel === 'server/api/auth/password.post.ts')
+  const body = { current_password: 'a', password: 'b', password_confirmation: 'b' }
+
+  test('el endpoint forma parte del inventario auditado', () => {
+    assert.ok(pw(), 'password.post.ts debe estar en la matriz')
+    assert.equal(pw().method, 'POST')
+  })
+
+  test('sin Origin, Sec-Fetch-Site ni Referer, o con un origen ajeno => 403 y Hub no se toca', async () => {
+    const cases = [
+      {}, { origin: 'https://evil.example' }, { origin: 'null' }, { origin: 'https://planmed.test.evil.example' },
+      { 'sec-fetch-site': 'cross-site' }, { 'sec-fetch-site': 'same-site' }, { 'sec-fetch-site': 'none' },
+      { referer: 'https://evil.example/page' }
+    ]
+    for (const headers of cases) {
+      hubCalls.length = 0
+      const { error } = await call(pw().fn, event('POST', { headers: { host: HOST, ...headers }, session: loggedIn, body }))
+      assert.equal(error?.statusCode, 403, JSON.stringify(headers))
+      assert.equal(hubCalls.length, 0)
+    }
+  })
+
+  test('origen válido sin sesión => 401 y nada llega a Hub', async () => {
+    hubCalls.length = 0
+    const { error } = await call(pw().fn, event('POST', { headers: { host: HOST, origin: `https://${HOST}` }, body }))
+    assert.equal(error?.statusCode, 401)
+    assert.equal(hubCalls.length, 0)
+  })
+
+  test('una sesión incompleta (sin token o sin usuario) no cuenta como autenticada', async () => {
+    for (const session of [{}, { token: 'x' }, { user: loggedIn.user }]) {
+      hubCalls.length = 0
+      const { error } = await call(pw().fn, event('POST', { headers: { host: HOST, origin: `https://${HOST}` }, session, body }))
+      assert.equal(error?.statusCode, 401, JSON.stringify(Object.keys(session)))
+      assert.equal(hubCalls.length, 0)
+    }
+  })
+
+  test('con origen legítimo y sesión completa supera el control de origen y la autenticación (el cuerpo vacío se rechaza con 422 antes de Hub)', async () => {
+    for (const headers of [{ origin: `https://${HOST}` }, { 'sec-fetch-site': 'same-origin' }, { referer: `https://${HOST}/admin/cambiar-clave` }]) {
+      hubCalls.length = 0
+      const { error } = await call(pw().fn, event('POST', { headers: { host: HOST, ...headers }, session: loggedIn, body: {} }))
+      assert.equal(error?.statusCode, 422, JSON.stringify(headers))
+      assert.equal(hubCalls.length, 0)
+    }
+  })
+
+  test('con origen y sesión válidos y cuerpo completo reenvía a Hub (comprobado con un Hub simulado que no responde)', async () => {
+    hubCalls.length = 0
+    const { error } = await call(pw().fn, event('POST', { headers: { host: HOST, origin: `https://${HOST}` }, session: loggedIn, body }))
+    assert.notEqual(error?.statusCode, 401)
+    assert.notEqual(error?.statusCode, 403)
+    assert.equal(hubCalls.length, 1)
   })
 })
