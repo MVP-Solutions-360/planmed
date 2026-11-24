@@ -1,7 +1,7 @@
 import type { H3Event } from 'h3'
-import { createHmac } from 'node:crypto'
 import { resolveClientIp } from '#shared/utils/clientIp'
 import { buildHubPayload, normalizeEnrollment, validateEnrollment } from '#shared/utils/prpEnrollment'
+import { enrollmentKey, notifyReferralByEmail } from './referral'
 
 // Inscripción al PRP → Wellezy Hub (POST /v1/web/prp-enrollments). Solo servidor.
 //  · Valida TODO antes de llamar a Hub; la empresa y la línea las resuelve Hub por el tenant de la configuración del servidor.
@@ -10,6 +10,7 @@ import { buildHubPayload, normalizeEnrollment, validateEnrollment } from '#share
 //  · Límite de peticiones por IP del cliente: X-Forwarded-For solo se usa con `trustedProxyHops` > 0 (ver shared/utils/clientIp.ts).
 //  · Éxito definitivo SOLO si Hub informa `completed` (CRM médico confirmado); `received` significa «guardada, pendiente».
 //  · Sin logs de datos personales ni bancarios (solo el estado HTTP de Hub).
+//  · Tras la confirmación de Hub se envía un correo COMPLEMENTARIO de respaldo (./referral): nunca sustituye a Hub ni altera su resultado.
 
 const RATE = { max: 6, windowMs: 10 * 60_000 }
 const MAX_TRACKED = 5000
@@ -55,13 +56,18 @@ export async function handlePrpEnrollment(event: H3Event) {
     console.error('[prp-enrollment] NUXT_SESSION_PASSWORD no está configurada: no se puede generar la clave de idempotencia.')
     fail(503, 'No pudimos registrar tu inscripción en este momento. Inténtalo de nuevo en unos minutos.', { reason: 'hub_unavailable', retryable: true })
   }
-  const key = createHmac('sha256', secret).update(`prp-enrollment-v1|${JSON.stringify(payload)}`).digest('hex').slice(0, 48)
+  const key = enrollmentKey(secret, payload)
 
   const res = await wellezyPublicPost<any>(event, '/v1/web/prp-enrollments', payload, { 'Idempotency-Key': key })
 
   if (res.status === 201 || res.status === 200) {
     const status = res.data?.data?.status
-    if (status === 'completed' || status === 'received') return { ok: true, status }
+    if (status === 'completed' || status === 'received') {
+      // Hub confirmó. Correo de RESPALDO (complementario) en segundo plano: la respuesta NO espera al SMTP ni depende de su resultado; si falla queda en cola
+      // de reintento y el usuario no ve ningún error. `notifyReferralByEmail` no lanza (captura también los errores de configuración).
+      void notifyReferralByEmail(event, value, key)
+      return { ok: true, status }
+    }
     console.error('[prp-enrollment] respuesta de Hub sin estado válido')
     fail(502, 'No recibimos la confirmación de tu inscripción. Inténtalo de nuevo: no se duplicará.', { reason: 'unconfirmed', retryable: true })
   }

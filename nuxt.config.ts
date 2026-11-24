@@ -25,6 +25,31 @@ export default defineNuxtConfig({
     planmedContentDir: '',
     // Formulario de valoración → CRM médico (POST multipart desde el SERVIDOR; el navegador nunca lo llama). NUXT_CRM_VALUATION_URL.
     crmValuationUrl: 'https://pdtclientsolutions.com/crm-public/api/clients/forms',
+    // Correo SMTP (SOLO servidor, nunca en `public`) del formulario «Estudio de créditos» (POST /api/forms/credit-study). SIN credenciales por defecto:
+    // las define el administrador por entorno con NUXT_MAIL_HOST / _PORT / _USERNAME / _PASSWORD / _FROM_ADDRESS / _FROM_NAME. Sin ellas el envío responde
+    // 503 `not_configured`. Conexión cifrada obligatoria (puerto 465 = TLS; otros puertos exigen STARTTLS).
+    mailHost: '',
+    mailPort: '',
+    mailUsername: '',
+    mailPassword: '',
+    mailFromAddress: '',
+    mailFromName: 'Planmed',
+    // Destinatarios del estudio de crédito: SIN valor por defecto a propósito. El negocio aún no ha indicado los de Planmed y NO se reutilizan los de otra
+    // marca. Mientras falte NUXT_CREDIT_STUDY_TO el envío permanece bloqueado (503 `not_configured`). NUXT_CREDIT_STUDY_CC es opcional. Varias direcciones
+    // se separan con coma. Solo servidor: el navegador no puede cambiarlos.
+    creditStudyTo: '',
+    creditStudyCc: '',
+    // Destinatarios de la solicitud de financiación (LeadForm → POST /api/forms/lead): SIN valor por defecto a propósito (el negocio aún no los ha indicado y no se
+    // reutilizan los de otra marca). Mientras falte NUXT_LEAD_FORM_TO el envío permanece bloqueado (503 `not_configured`). NUXT_LEAD_FORM_CC es opcional.
+    leadFormTo: '',
+    leadFormCc: '',
+    // Destinatarios de la notificación complementaria por correo de la valoración (después de que el CRM confirme) y de la inscripción al programa de referidos
+    // (después de que Hub confirme): SIN valor por defecto a propósito (pendientes de confirmación del negocio). Mientras falte el Para, el correo complementario simplemente
+    // no se envía; el CRM y Hub siguen siendo el destino principal y NO dependen de él.
+    valuationTo: '',
+    valuationCc: '',
+    referralTo: '',
+    referralCc: '',
     public: {
       appName: 'Planmed',
       localDomain: 'planmed.com.co',

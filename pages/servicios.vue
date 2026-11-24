@@ -11,7 +11,7 @@
             <p>Nuestro principal compromiso es con su salud y satisfacción, por tanto, ponemos a su disposición espacios óptimos y adecuados de acuerdo a sus necesidades.</p>
           </div>
         </div>
-        <img src="/images/team/equipo-planmed.png" alt="Equipo de asesores de Planmed" loading="lazy" class="w-full aspect-[4/3] object-cover border border-[#e5e2e1]" />
+        <img src="/images/web/servicios.png" alt="Asesora de Planmed explicando la financiación a una paciente" width="1983" height="793" loading="lazy" class="w-full h-auto border border-[#e5e2e1]" />
       </section>
 
       <div class="video">

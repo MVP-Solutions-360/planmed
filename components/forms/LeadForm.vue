@@ -250,7 +250,7 @@
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useTracking } from '~/composables/useTracking'
-import { leadService } from '~/services/LeadService'
+import { leadService, LeadError } from '~/services/LeadService'
 import { quotationService } from '~/services/QuotationService'
 import { FinancingRateUnavailableError } from '~/services/FinancingRateService'
 import { formatPesos } from '#shared/utils/financing'
@@ -414,7 +414,7 @@ const validateForm = () => {
 }
 
 const submitLead = async () => {
-  if (!validateForm()) return
+  if (isSubmitting.value || !validateForm()) return
 
   isSubmitting.value = true
 
@@ -427,6 +427,8 @@ const submitLead = async () => {
     requested_amount: form.requested_amount,
     installments: form.installments,
     comments: form.comments,
+    // Consentimiento: el servidor lo exige y lo deja constar en el correo.
+    accepted_habeas_data: form.accepted_habeas_data === true,
     metadata: {
       // Condiciones con las que se cotizó: una solicitud conserva su tasa aunque la tasa vigente cambie después.
       quote_rate_percent: currentQuote.value?.ratePercent ?? null,
@@ -462,8 +464,8 @@ const submitLead = async () => {
     trackFormSubmit(route.fullPath, form.procedure, form.requested_amount, form.installments, currentQuote.value?.monthlyPayment || null)
     isSuccess.value = true
   } catch (error) {
-    console.error('Error al enviar el lead', error)
-    errors.api = 'Ocurrió un error al procesar tu solicitud. Por favor intenta nuevamente.'
+    // Sin registrar datos de la solicitud. El mensaje de LeadError ya es apto para el usuario (nunca detalles del servidor de correo).
+    errors.api = error instanceof LeadError ? error.message : 'Ocurrió un error al procesar tu solicitud. Por favor intenta nuevamente.'
   } finally {
     isSubmitting.value = false
   }
