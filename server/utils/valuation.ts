@@ -6,14 +6,14 @@ import {
   VALUATION_RECIPIENTS, cleanLine, notifyComplementary, renderFormEmail, resolveMailConfig,
   type MailSection, type NotifyResult
 } from './formMail'
-import { buildCrmClientPayload, crmPhone, registerCrmClient, resolveCrmClientConfig, type CrmClientResult } from './crmClient'
+import { registerCrmClient, resolveCrmClientConfig, type CrmClientResult } from './crmClient'
 
-// Solicitud de valoración → registro del CLIENTE en el CRM Médico (ver ./crmClient). Solo servidor. La solicitud en sí no se registra en el CRM.
+// Solicitud de valoración → CRM Médico (formulario multipart, ver ./crmClient). Solo servidor.
 //  · Valida TODO antes de llamar al CRM (una petición inválida nunca llega a él).
-//  · Sin reintentos: un timeout o una respuesta ambigua puede haber creado el cliente; repetirlo duplicaría.
+//  · Sin reintentos: un timeout, un error del servidor del CRM o una respuesta ambigua pueden haber creado el registro; repetirlo duplicaría.
 //  · No se registra ningún dato personal ni el payload (solo el resultado: estado HTTP del CRM y el motivo).
 //  · Límite por IP y bloqueo de reenvíos por huella SHA-256 de cédula + teléfono (sin guardar los datos): 2 minutos tras un registro confirmado y
-//    24 horas tras un resultado incierto. Vive en memoria: se pierde al reiniciar y no se comparte entre instancias.
+//    24 horas tras un resultado incierto o un error 5xx del CRM. Vive en memoria: se pierde al reiniciar y no se comparte entre instancias.
 
 //  · CORREO COMPLEMENTARIO: después de que el CRM CONFIRMA el registro se envía un correo con la solicitud (NUXT_VALUATION_TO/CC). Nunca sustituye al CRM ni
 //    altera su resultado: si el correo falla el registro sigue vigente y el usuario no ve error (cola de reintento en memoria, ver ./formMail).
@@ -51,19 +51,26 @@ function rateLimited(key: string, now: number): boolean {
   return false
 }
 
+/** Mismo celular colombiano escrito con o sin indicativo (3001234567, +57 300 123 4567) => misma huella. */
+const phoneKey = (phone: string) => phone.replace(/\D/g, '').replace(/^57(?=3\d{9}$)/, '')
+
 const fingerprint = (v: { identificacion: string, telefono: string }) =>
-  createHash('sha256').update(`${v.identificacion.toUpperCase()}|${crmPhone(v.telefono)}`).digest('hex')
+  createHash('sha256').update(`${v.identificacion.toUpperCase()}|${phoneKey(v.telefono)}`).digest('hex')
 
 const MSG_UNCERTAIN = 'No pudimos confirmar el registro. Antes de reenviar, comunícate con nosotros para evitar duplicados.'
 const MSG_NOT_REGISTERED = 'No pudimos registrar tus datos. Inténtalo de nuevo en unos minutos.'
 
-/** Campos del CRM → campos del formulario, para señalar un error de validación (422) sin repetir el cuerpo del CRM. */
+/** Campos que el CRM y el formulario llaman igual. Los identificadores internos (id_user, id_line…) no son campos del usuario. */
+const CRM_FORM_FIELDS: ReadonlyArray<keyof ValuationInput> = [
+  'nombres', 'apellidos', 'identificacion', 'fecha_nacimiento', 'direccion', 'telefono', 'email', 'name_surgery', 'forma_pago', 'accept'
+]
+
+/** Errores del CRM por campo, para señalar un error de validación (422) sin repetir el cuerpo del CRM. */
 function crmFieldErrors(body: unknown): ValuationErrors {
   const src = ((body && typeof body === 'object' ? (body as { errors?: unknown }).errors : null) ?? {}) as Record<string, unknown>
-  const map: Array<[string, keyof ValuationInput]> = [['name', 'nombres'], ['phone', 'telefono'], ['identificacion', 'identificacion'], ['city', 'direccion']]
   const out: Record<string, string> = {}
-  for (const [crmField, field] of map) {
-    const raw = src[crmField]
+  for (const field of CRM_FORM_FIELDS) {
+    const raw = src[field]
     const msg = Array.isArray(raw) ? raw[0] : raw
     if (typeof msg === 'string' && msg.length < 200) out[field] = msg
   }
@@ -77,13 +84,16 @@ function failFromCrm(result: CrmClientResult): never {
     if (result.reason === 'no_response') fail(503, MSG_UNCERTAIN, { reason: 'network', uncertain: true })
     fail(502, MSG_UNCERTAIN, { reason: result.reason === 'unconfirmed_response' ? 'unconfirmed' : 'crm_error', uncertain: true })
   }
+  if (result.reason === 'internal_error') fail(500, MSG_NOT_REGISTERED, { reason: 'internal_error' })
+  // No se pudo abrir la sesión: los datos del paciente no llegaron a enviarse y se puede reintentar.
+  if (result.reason.startsWith('session_')) fail(503, MSG_NOT_REGISTERED, { reason: 'crm_session' })
   if (result.reason === 'no_connection') fail(503, 'No pudimos conectar para registrar tus datos. Inténtalo de nuevo en unos minutos.', { reason: 'network' })
   if (result.status === 422) fail(422, 'El registro no pudo validarse. Revisa los datos ingresados.', { reason: 'crm_validation', errors: crmFieldErrors(result.body) })
   if (result.reason === 'http_retryable') fail(502, MSG_NOT_REGISTERED, { reason: 'crm_error' })
   fail(502, 'No pudimos registrar tus datos. Comunícate con nosotros para completar tu solicitud.', { reason: 'crm_error' })
 }
 
-/** Manejador de POST /api/forms/valuation. Devuelve { ok: true } solo si el CRM confirma el registro del cliente. */
+/** Manejador de POST /api/forms/valuation. Devuelve { ok: true } solo si el CRM confirma el registro. */
 export async function handleValuation(event: H3Event) {
   assertSameOrigin(event)
   setHeader(event, 'Cache-Control', 'no-store')
@@ -112,10 +122,11 @@ export async function handleValuation(event: H3Event) {
 
   inflight.add(print)
   try {
-    const result = await registerCrmClient(crm.config, buildCrmClientPayload(value, crm.config))
+    const result = await registerCrmClient(crm.config, value)
     if (result.state !== 'sent') {
       console.error(`[${TAG}] CRM: ${result.state} (${result.reason}${result.status ? `, HTTP ${result.status}` : ''})`)
-      if (result.state === 'unknown') {
+      // Un 5xx se informa como error, pero el CRM pudo haber guardado el registro antes de fallar: tampoco se permite reenviar.
+      if (result.state === 'unknown' || result.reason === 'http_server_error') {
         if (uncertain.size > 5000) for (const [k, t] of uncertain) if (now - t >= UNCERTAIN_WINDOW_MS) uncertain.delete(k)
         uncertain.set(print, now)
       }

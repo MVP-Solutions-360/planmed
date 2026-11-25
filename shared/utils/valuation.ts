@@ -1,12 +1,13 @@
 // Formulario «Pide tu cita de valoración». Módulo PURO (sin imports): lo usan el formulario (validación en el navegador), la ruta de Nitro
-// (validación OBLIGATORIA en el servidor) y las pruebas. El registro del cliente en el CRM Médico se arma SOLO en el servidor (server/utils/crmClient.ts).
+// (validación OBLIGATORIA en el servidor) y las pruebas. El envío al CRM Médico se arma SOLO en el servidor (server/utils/crmClient.ts).
 
 /**
- * Forma de pago: opciones visibles. El CRM no la recibe (solo se registra al cliente); viaja en el correo complementario.
+ * Forma de pago: opciones visibles → `value` es lo que recibe el CRM. En el formulario público del CRM es un campo de texto libre rotulado
+ * «Forma de pago (Contado/Financiación)»; en una solicitud real se observó `Financiacion` (sin tilde) y «Contado» se envía como dice el rótulo.
  */
 export const PAYMENT_OPTIONS = [
-  { label: 'Contado', value: 'contado' },
-  { label: 'Financiación', value: 'financiacion' }
+  { label: 'Contado', value: 'Contado' },
+  { label: 'Financiación', value: 'Financiacion' }
 ] as const
 export type PaymentLabel = typeof PAYMENT_OPTIONS[number]['label']
 
@@ -15,7 +16,7 @@ export interface ValuationInput {
   apellidos: string
   identificacion: string
   fecha_nacimiento: string
-  /** Ciudad (campo visible «Ciudad»); el CRM la recibe como `city`. */
+  /** Ciudad (campo visible «Ciudad»); el CRM la recibe como `direccion`. */
   direccion: string
   telefono: string
   email: string

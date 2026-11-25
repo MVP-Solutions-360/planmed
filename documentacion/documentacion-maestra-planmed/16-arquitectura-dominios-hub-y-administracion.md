@@ -95,7 +95,7 @@ Este documento fija tres ideas que no deben confundirse:
 | Login, `me`, logout | Navegador → Nitro | Nitro → Hub `/auth/*` | `providers/WellezyAuthProvider.ts`, `server/api/auth/*` |
 | Administración (Hub) | Navegador → Nitro (con cookie) | Nitro → Hub `/cms/*`, `/prp-referrers` con Bearer | `providers/Hub*Provider.ts`, `server/api/admin/**`, `wellezyRequest` |
 | Colaboradores (lectura) | Navegador → Nitro | Nitro → Hub `GET /cms/line-users` | `services/LineUsersService.ts`, `server/utils/lineUsers.ts` |
-| Valoración | Navegador → Nitro `POST /api/forms/valuation` | Nitro → CRM médico externo, alta de cliente (`crmClientUrl`; ver `07` §3.5) | `services/ValuationService.ts`, `server/utils/valuation.ts`, `server/utils/crmClient.ts` |
+| Valoración | Navegador → Nitro `POST /api/forms/valuation` | Nitro → CRM médico externo, formulario multipart (`crmFormUrl`; ver `docs/integrations/crm-medico-clientes.md`; sesión y CSRF del formulario público) | `services/ValuationService.ts`, `server/utils/valuation.ts`, `server/utils/crmClient.ts` |
 | Inscripción PRP | Navegador → Nitro `POST /api/forms/prp-enrollment` | Nitro → Hub | `services/ReferralService.ts`, `server/utils/prpEnrollment.ts` |
 | Formulario PRP del CRM médico | **Navegador → CRM externo directamente** | `crmPrpFormUrl` | `providers/CrmPrpLeadProvider.ts` (única llamada directa del navegador a un tercero; requiere CORS en ese CRM) |
 | Contenido local | Navegador → Nitro | Disco del servidor | `server/utils/aboutStore.ts`, `clinics.ts`, `sitePages.ts` |
@@ -123,9 +123,9 @@ Verificadas en `nuxt.config.ts` (`runtimeConfig`) y `.env.example`. Nuxt convier
 | `NUXT_PLANMED_CONTENT_EDITOR_ROLE_IDS` | `planmedContentEditorRoleIds` | IDs de rol adicionales que **escriben contenido local** (no dan acceso al panel) | runtime | vacío |
 | `NUXT_PLANMED_RATE_EDITOR_ROLE_IDS` | `planmedRateEditorRoleIds` | IDs de rol que además del líder editan la tasa (no dan acceso al panel) | runtime | `19` por defecto |
 | `NUXT_PLANMED_ADMIN_ROLE_IDS` | `planmedAdminRoleIds` | **Ya no interviene en el acceso** (ver §7.4) | — | existe por compatibilidad |
-| `NUXT_CRM_CLIENT_URL` | `crmClientUrl` | Destino servidor→CRM del registro de cliente (formulario de valoración) | runtime | sin valor por defecto; producción: `https://crmedic.pdtclientsolutions.com/api/chat/create/client` |
-| `NUXT_CRM_CLIENT_LINE_ID` | `crmClientLineId` | Sustituye la línea enviada al CRM | runtime | vacío = `12` |
-| `NUXT_CRM_CLIENT_ADVISOR_EMAIL` | `crmClientAdvisorEmail` | Sustituye la asesora enviada al CRM | runtime | vacío = valor del servidor (`07` §3.5) |
+| `NUXT_CRM_FORM_URL` | `crmFormUrl` | Destino servidor→CRM del formulario de valoración | runtime | sin valor por defecto; producción: `https://pdtclientsolutions.com/crm-public/api/clients/forms` |
+| `NUXT_CRM_FORM_USER_ID`, `NUXT_CRM_FORM_LINE_ID` | `crmFormUserId`, `crmFormLineId` | Usuario responsable y línea en el CRM | runtime | por defecto `73` y `16` (`docs/integrations/crm-medico-clientes.md`) |
+| `NUXT_CRM_FORM_ADVISOR_ID` | `crmFormAdvisorId` | Asesora en el CRM | runtime | por defecto `73` (`docs/integrations/crm-medico-clientes.md`) |
 | `NUXT_PUBLIC_CRM_PRP_FORM_URL` | `public.crmPrpFormUrl` | Destino navegador→CRM del formulario PRP (público) | runtime | URL por defecto en el código |
 
 `NUXT_PUBLIC_API_BASE_URL` **no** pertenece a Planmed (es de Crediestética).
@@ -344,6 +344,8 @@ Nuxt 4.4.7 exige Node ^22.12 o ^24.11. La versión instalada en el servidor: **N
 - **En runtime (proceso Node):** todas las de §6. En particular `NUXT_WELLEZY_API_BASE_URL`, `NUXT_SESSION_PASSWORD`, los slugs y, si se quiere sobrescribir el canónico, `NUXT_PUBLIC_SITE_URL`.
 
 ### 11.5 Procedimiento de build y entrega (descriptivo; no ejecutado)
+
+Procedimiento operativo vigente para UAT, con paquete, verificaciones y vuelta atrás: [`../despliegue-uat-planmed.md`](../despliegue-uat-planmed.md). Lo que sigue es la descripción general.
 
 1. Partir de `main` limpio y de la versión de Node correcta.
 2. `npm ci` (usa `package-lock.json`) y `npm run build`.

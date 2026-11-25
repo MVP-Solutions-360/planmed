@@ -56,76 +56,15 @@ Datos estáticos: `data/clinics.ts` (respaldo de logos de la home), `data/allies
 ### 3.4 Wellezy Hub — escritura pública
 `POST /v1/web/prp-enrollments` con `Idempotency-Key` = HMAC(`NUXT_SESSION_PASSWORD`, payload). Éxito `201/200` con `data.status ∈ {completed, received}`; 422/409/429/otros traducidos; **sin reintento automático** (el usuario puede reintentar con la misma clave). Vista: Programa de referidos.
 
-### 3.5 CRM médico — registro de cliente desde la valoración (servidor)
+### 3.5 CRM médico — solicitud de valoración (servidor)
 
-Estado (2026-11-25): implementado y probado **solo con un CRM simulado**; nunca se ha llamado al CRM real.
+Referencia única (contrato, mapeo, configuración, sesión/CSRF, respuestas, seguridad, pruebas y diagnóstico): [crm-medico-clientes.md](../../docs/integrations/crm-medico-clientes.md).
 
-| Aspecto | Detalle |
-|---|---|
-| Archivos | `server/api/forms/valuation.post.ts`, `server/utils/valuation.ts`, `server/utils/crmClient.ts`, `shared/utils/valuation.ts` |
-| Destino | **Solo** `NUXT_CRM_CLIENT_URL` (sin valor por defecto). Producción: `https://crmedic.pdtclientsolutions.com/api/chat/create/client`. Exige `https` (`http` solo en la propia máquina) y rechaza usuario o contraseña en la URL |
-| Petición | `POST` desde el servidor, `Content-Type` y `Accept` `application/json`, sin autenticación, sin seguir redirecciones |
-| Alcance | Registra **solo al cliente**. La solicitud de valoración no se registra en el CRM |
-| Referencia | Mecanismo de Crediestética (`server/utils/valuationPayment.ts`, commit `536c1f8`), sin las piezas propias del pago |
+Resumen (2026-11-25): por cada envío, el servidor carga el formulario público del CRM (`…/crm-public/forms/73/16`) para obtener sesión y `_token`, y hace `POST` `multipart/form-data` a `NUXT_CRM_FORM_URL` (`…/crm-public/api/clients/forms`) con identificadores `73/16/73` (configurables); éxito solo con el `mensagge` de confirmación; sin reintentos; correo complementario solo tras confirmar.
 
-Cuerpo exacto (datos ficticios):
+**Pendiente:** implementado y probado solo con CRM simulado; falta la prueba real controlada, commit y despliegue.
 
-```json
-{
-  "name": "Ana María Ficticia Prueba",
-  "phone": "+573001234567",
-  "city": 5,
-  "identificacion": "10000002",
-  "ad_headline": "Quiero más info",
-  "advisor_email": "disenadoraplanmed@gmail.com",
-  "id_line": 12
-}
-```
-
-| Campo | Origen |
-|---|---|
-| `name` | Nombres y apellidos del formulario, con espacios normalizados |
-| `phone` | Teléfono con `+57` sin duplicar el indicativo (celular de 10 dígitos que empieza por 3, o número ya escrito con 57). Fijos y extranjeros: **sin regla confirmada**, se envían solo sus dígitos |
-| `city` | Entero fijo `5`, constante de esta integración (`CRM_CLIENT_CITY_ID`). No sale del formulario: la ciudad escrita por el paciente no sustituye este identificador |
-| `identificacion` | Número de documento |
-| `ad_headline` | Fijo: `Quiero más info` |
-| `advisor_email` | `disenadoraplanmed@gmail.com`; `NUXT_CRM_CLIENT_ADVISOR_EMAIL` lo sustituye |
-| `id_line` | `12`; `NUXT_CRM_CLIENT_LINE_ID` lo sustituye |
-
-No se envían `origen`, fecha de nacimiento, correo, cirugía, forma de pago ni la aceptación de datos: esos datos del formulario viajan solo en el correo complementario (`NUXT_VALUATION_TO/CC`), que sale únicamente después de que el CRM confirma. Si el correo falla, el registro no cambia. La ciudad escrita por el paciente se conserva en el formulario y en ese correo (fila «Ciudad»).
-
-**Confirmación (criterio provisional: el formato de respuesta del CRM no está confirmado).**
-
-| Resultado | Cuándo | Respuesta de la ruta |
-|---|---|---|
-| Éxito | 2xx con objeto JSON que trae `success: true`, `ok: true` o `status` = `success`/`ok`/`created`, sin marcas de error | `200 {ok:true}` |
-| Validación del CRM | 422 | 422 `crm_validation` |
-| Rechazo | Otros 4xx / sin conexión (`ECONNREFUSED`, `ENOTFOUND`, `EAI_AGAIN`) | 502 `crm_error` / 503 `network` |
-| Incierto | 2xx sin marca, 3xx o 5xx / tiempo agotado / conexión cortada | 502 / 504 / 503, con `uncertain: true` |
-| Sin configuración | URL, línea o asesora inválidas | 503 `not_configured`, sin petición |
-
-**Protecciones:** mismo origen; 8 intentos cada 10 min por IP (usa `X-Forwarded-For` y **no** aplica `NUXT_TRUSTED_PROXY_HOPS`, así que el proxy debe controlar esa cabecera); timeout 15 s; **sin reintentos**; bloqueo de reenvío por huella SHA-256 de cédula y teléfono durante 2 min tras un éxito y 24 h tras un resultado incierto, solo en memoria (se pierde al reiniciar y no se comparte entre instancias). Los logs no contienen datos personales, payload ni cuerpo de respuesta.
-
-**Traza (solo en el log del servidor; nada llega al navegador).** Una línea por petición enviada al CRM; los éxitos salen por la salida estándar y el resto por la de error:
-
-```text
-[valuation] crm-registro id=<uuid> clasificacion=confirmado motivo=confirmed http=201 duracion_ms=412 respuesta=json claves=success,id
-```
-
-| Campo | Valores |
-|---|---|
-| `id` | identificador de correlación aleatorio, uno por petición |
-| `clasificacion` | `confirmado`, `rechazado`, `incierto` |
-| `motivo` | `confirmed`, `unconfirmed_response`, `http_rejected`, `http_retryable`, `redirect_not_followed`, `http_other`, `no_connection`, `timeout`, `no_response` |
-| `http` | código recibido o `-` |
-| `respuesta` | `json`, `json_no_objeto`, `no_json`, `ilegible`, `sin_respuesta` |
-| `claves` | solo **nombres** de las claves de primer nivel (máximo 20); se muestra `[omitida]` si el nombre no parece un campo o repite un dato enviado |
-
-El cuerpo se lee para obtener esas claves en cualquier código; en los que no son 2xx no cambia la clasificación, aunque una respuesta que tarde en completarse puede demorar el resultado hasta los 15 s. Un 503 `not_configured` no genera esta línea porque no sale ninguna petición.
-
-**Pendientes:** confirmar con el CRM el formato de éxito y la regla de teléfonos fijos y extranjeros; configurar `NUXT_CRM_CLIENT_URL` en producción. En local debe quedar vacía: la URL real crea clientes reales. `NUXT_CRM_VALUATION_URL` ya no se lee.
-
-Prueba: `tests/security/valuation.test.ts` (CRM y SMTP simulados).
+**Limitación conocida:** un 422 del CRM puede señalar un campo que no es la causa (detalle en la sección 9 del documento de referencia).
 
 ### 3.6 CRM médico — PRP (navegador)
 `POST` multipart directo a `NUXT_PUBLIC_CRM_PRP_FORM_URL` (por defecto `…/crm-public/api/forms-px-prp`) con `code_prp`. Timeout 20 s. URL expuesta al cliente. Sin límite propio.
@@ -146,8 +85,8 @@ YouTube (`youtube-nocookie`/`youtube.com/embed`), Instagram (`embed.js`), Google
 | `NUXT_SESSION_PASSWORD` | servidor | secreto de cookie e idempotencia (≥32 caracteres; obligatorio) |
 | `NUXT_TRUSTED_PROXY_HOPS` | servidor | proxies de confianza para la IP del cliente (0 = ignorar `X-Forwarded-For`); la valoración no lo aplica (ver 3.5) |
 | `NUXT_PLANMED_CONTENT_DIR` | servidor | directorio persistente del contenido local |
-| `NUXT_CRM_CLIENT_URL` | servidor | destino del registro de cliente en el CRM Médico (sin valor por defecto) |
-| `NUXT_CRM_CLIENT_LINE_ID`, `NUXT_CRM_CLIENT_ADVISOR_EMAIL` | servidor | opcionales; sustituyen la línea 12 y la asesora definidas en el servidor |
+| `NUXT_CRM_FORM_URL` | servidor | destino del formulario de valoración en el CRM Médico (sin valor por defecto) |
+| `NUXT_CRM_FORM_USER_ID`, `NUXT_CRM_FORM_LINE_ID`, `NUXT_CRM_FORM_ADVISOR_ID` | servidor | opcionales; identificadores del CRM (por defecto `73`, `16`, `73`) |
 | `NUXT_PUBLIC_CRM_PRP_FORM_URL` | **público** | CRM del formulario PRP |
 | `NUXT_PUBLIC_SITE_URL` | público (nuxt-site-config) | dominio canónico (def. `https://planmed.com.co`) |
 `.env.example` solo documenta una parte (ver `.env.example`); `.env` real **no se leyó por valor**.

@@ -195,7 +195,7 @@ Contexto: los **otros** formularios de Planmed sí tienen rutas propias (p. ej. 
 | `_token` | El formulario histórico enviaba este campo | Se desconoce si es solo un token CSRF de sesión o hay un mecanismo para integraciones externas. **No se documenta ni conserva ningún valor de token.** |
 | `id_form` | `16900` aparece en el SQL del error | Valor observado durante el intento **fallido**; **no** es la confirmación de un estudio registrado. |
 
-Hechos sobre el repositorio `[Código]`: la cadena `form/credit` y los nombres de campo históricos **no aparecen en ningún archivo** del código de Crediestética, de Planmed ni del Hub (búsqueda de texto realizada en esta tarea). El endpoint `crm-public/api/clients/forms` (valoración) está bloqueado como «heredado» en `shared/utils/crmDestination.ts`; `form/credit` **no** figura en esa lista de bloqueo. Hoy ningún código envía a ninguno de los dos.
+Hechos sobre el repositorio `[Código]`: la cadena `form/credit` y los nombres de campo históricos **no aparecen en ningún archivo** del código de Crediestética, de Planmed ni del Hub (búsqueda de texto realizada en esta tarea). El endpoint `crm-public/api/clients/forms` (valoración) está bloqueado como «heredado» en `shared/utils/crmDestination.ts`; `form/credit` **no** figura en esa lista de bloqueo. Hoy ningún código envía a ninguno de los dos. *(Nota 2026-11-25: esto describe la fecha de aquel análisis; el código actual de Planmed sí implementa el envío de valoración a `clients/forms`, aún sin prueba real ni despliegue: `docs/integrations/crm-medico-clientes.md`.)*
 
 ### 6.1 Nombres de campo históricos recuperados
 
@@ -403,6 +403,6 @@ No hay base de datos, disco ni migraciones, así que **no se garantiza «exactam
 **Variables:** `NUXT_VALUATION_TO/CC` y `NUXT_REFERRAL_TO/CC` (destinatarios del respaldo; varias direcciones separadas por coma, máximo 5), `NUXT_CREDIT_STUDY_TO/CC`, `NUXT_LEAD_FORM_TO/CC` y las `NUXT_MAIL_*` comunes.
 
 ### Valoración en Planmed
-Desde el 2026-11-25 la valoración registra **solo al cliente** en el CRM médico (`POST` JSON a `…/api/chat/create/client`, destino `NUXT_CRM_CLIENT_URL`); sustituye al envío anterior a `clients/forms`. Payload, criterio de confirmación y pendientes: `documentacion-maestra-planmed/07-modelo-datos-integraciones.md` §3.5. El correo es una notificación complementaria que sale solo después de que el CRM confirma y es el único que lleva la solicitud completa; si el CRM no confirma no se envía correo.
+La valoración se envía al CRM médico como formulario multipart a `…/crm-public/api/clients/forms` (destino `NUXT_CRM_FORM_URL`). Sesión, contrato, confirmación y pendientes: `docs/integrations/crm-medico-clientes.md`. El correo es una notificación complementaria que sale solo después de que el CRM confirma; si el CRM no confirma no se envía correo.
 
 **Destinatarios (Planmed): PENDIENTES de confirmación.** Ninguno tiene valor por defecto ni se reutilizan los de Crediestética. Con `NUXT_VALUATION_TO` / `NUXT_REFERRAL_TO` vacíos el correo de respaldo simplemente no se envía y Hub/CRM siguen funcionando. Estudio de crédito y financiación (sin integración previa) quedan bloqueados (503) hasta definir `NUXT_CREDIT_STUDY_TO` y `NUXT_LEAD_FORM_TO`.

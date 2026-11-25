@@ -1,67 +1,57 @@
-// Registro del cliente en el CRM Médico (POST JSON a …/api/chat/create/client). SOLO servidor.
+// Registro del paciente desde la valoración en el CRM Médico, igual que el formulario público de Planmed (…/crm-public/forms/{usuario}/{línea}). SOLO servidor.
 //
-// Mecanismo tomado de Crediestética (server/utils/valuationPayment.ts, commit 536c1f8: crmPhone, buildCrmClientPayload, crmChatConfirmed, registerCrmClient)
-// y adaptado a Planmed: se añade `city` (identificador entero), `ad_headline` es «Quiero más info» y el teléfono lleva «+57». No se portan las piezas propias del
-// pago (idempotencia persistente por pago, ejecución en segundo plano): aquí el usuario espera el resultado y el bloqueo de reenvíos vive en ./valuation.
+// Por cada envío: 1) GET de ese formulario, que entrega las cookies de sesión (Laravel) y el campo oculto `_token`; 2) POST multipart/form-data a
+// …/crm-public/api/clients/forms con esas cookies y ese token. Éxito: JSON con `mensagge` (así, con la errata).
 //
-//  · Sin reintentos y sin seguir redirecciones (reenviarían datos personales a otro host).
-//  · No se registra ningún dato personal, ni el payload ni el cuerpo de la respuesta.
-//  · TRAZA: una sola línea por petición (identificador, clasificación, motivo, código HTTP, duración y NOMBRES de las claves de primer nivel de la respuesta;
-//    nunca sus valores, cabeceras ni la URL). Se queda en el servidor: nada de esto llega al navegador.
-//  · El destino es configuración (NUXT_CRM_CLIENT_URL), vacío por defecto: sin él no sale ninguna petición.
+//  · Cookies y token viven solo en memoria durante el envío: no se guardan, no se reutilizan entre pacientes, no se registran ni llegan al navegador.
+//  · Sin reintentos y sin seguir redirecciones (reenviarían datos personales o la sesión a otro destino).
+//  · Si falla el paso 1 no se envió ningún dato del paciente.
+//  · No se registra ningún dato personal, ni el formulario ni el cuerpo de las respuestas.
+//  · TRAZA: una sola línea por envío (identificador, clasificación, motivo, código HTTP, duración y NOMBRES de las claves de primer nivel de la respuesta;
+//    nunca sus valores, cabeceras, cookies ni la URL). Se queda en el servidor: nada de esto llega al navegador.
+//  · El destino es configuración (NUXT_CRM_FORM_URL), vacío por defecto: sin él no sale ninguna petición.
 
-import type { ValuationInput } from '#shared/utils/valuation'
+import { PAYMENT_OPTIONS, type ValuationInput } from '#shared/utils/valuation'
 import { randomUUID } from 'node:crypto'
 
 import { cleanLine } from './formMail'
 
-/** Valores confirmados para Planmed. Se pueden sustituir por entorno (NUXT_CRM_CLIENT_LINE_ID / NUXT_CRM_CLIENT_ADVISOR_EMAIL). */
-export const CRM_CLIENT_DEFAULTS = { lineId: 12, advisorEmail: 'disenadoraplanmed@gmail.com' } as const
-export const CRM_CLIENT_AD_HEADLINE = 'Quiero más info'
-/** El CRM exige `city` como IDENTIFICADOR entero; el de Planmed es 5. El texto del campo «Ciudad» del formulario no se envía (va en el correo complementario). */
-export const CRM_CLIENT_CITY_ID = 5
+export const CRM_FORM_STATE = 'No Contactada'
+export const CRM_FORM_ORIGIN = 'Formulario Web'
+/** Frase de `mensagge` con la que el CRM confirma el registro. */
+export const CRM_SUCCESS_TEXT = 'los datos fueron registrados satisfactoriamente'
 export const CRM_CLIENT_TIMEOUT_MS = 15_000
 
-export interface CrmClientConfig { url: string, lineId: number, advisorEmail: string }
+/** Destino, formulario público (derivado del destino y los identificadores) e identificadores del CRM. Salen de la configuración del servidor. */
+export interface CrmClientConfig { url: string, formUrl: string, userId: number, lineId: number, advisorId: number }
 
-export interface CrmClientPayload {
-  name: string
-  phone: string
-  city: number
-  identificacion: string
-  ad_headline: string
-  advisor_email: string
-  id_line: number
-}
+const CRM_SUBMIT_PATH = '/api/clients/forms'
 
 const oneLine = (s: string) => cleanLine(s).replace(/\s+/g, ' ')
 
-/**
- * Teléfono para el CRM. Un celular colombiano sale con «+57» sin duplicar el indicativo (3001234567, 573001234567 o +57 300 123 4567), y se respeta un número
- * que ya venga escrito con «+57». Para cualquier otro (fijo, extranjero) no hay regla confirmada: igual que en la referencia, se envían solo sus dígitos.
- */
-export function crmPhone(phone: string): string {
-  const raw = phone.trim()
-  const digits = raw.replace(/\D/g, '')
-  const international = raw.startsWith('+')
-  if (!international && digits.length === 10 && digits.startsWith('3')) return `+57${digits}`
-  if (digits.length === 12 && digits.startsWith('573')) return `+${digits}`
-  if (international && digits.startsWith('57')) return `+${digits}`
-  return digits
-}
-
-/** Cuerpo EXACTO que recibe el CRM, a partir del formulario ya validado. */
-export function buildCrmClientPayload(v: ValuationInput, cfg: Pick<CrmClientConfig, 'lineId' | 'advisorEmail'>): CrmClientPayload {
-  if (!v.accept) throw new Error('Formulario no validado.')
-  return {
-    name: oneLine(`${v.nombres} ${v.apellidos}`),
-    phone: crmPhone(v.telefono),
-    city: CRM_CLIENT_CITY_ID,
-    identificacion: v.identificacion,
-    ad_headline: CRM_CLIENT_AD_HEADLINE,
-    advisor_email: cfg.advisorEmail,
-    id_line: cfg.lineId
-  }
+/** Campos EXACTOS (nombre → valor), en el orden observado, a partir del formulario ya validado. */
+export function buildCrmFields(v: ValuationInput, cfg: Pick<CrmClientConfig, 'userId' | 'lineId' | 'advisorId'>, token: string): Array<[string, string]> {
+  const pago = PAYMENT_OPTIONS.find(o => o.label === v.forma_pago)
+  if (!v.accept || !pago || !token) throw new Error('Formulario no validado o sin token.')
+  return [
+    ['_token', token],
+    ['_method', 'post'],
+    ['nombres', oneLine(v.nombres)],
+    ['apellidos', oneLine(v.apellidos)],
+    ['identificacion', v.identificacion],
+    ['fecha_nacimiento', v.fecha_nacimiento], // AAAA-MM-DD, tal como la entrega y valida el formulario
+    ['direccion', oneLine(v.direccion)],
+    ['telefono', v.telefono.replace(/\D/g, '')], // el formulario original usa un campo numérico: solo dígitos
+    ['email', v.email],
+    ['name_surgery', oneLine(v.name_surgery)],
+    ['forma_pago', pago.value],
+    ['state', CRM_FORM_STATE],
+    ['origen', CRM_FORM_ORIGIN],
+    ['id_user', String(cfg.userId)],
+    ['id_line', String(cfg.lineId)],
+    ['id_user_asesora', String(cfg.advisorId)],
+    ['accept', '1']
+  ]
 }
 
 /** Solo https (o http en la propia máquina, para pruebas) y sin usuario ni contraseña en la URL. */
@@ -71,33 +61,35 @@ function validDestination(url: string): boolean {
   if (u.username || u.password) return false
   const host = u.hostname.toLowerCase()
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(host) || host.endsWith('.localhost') || host.endsWith('.test')
+  if (!u.pathname.endsWith(CRM_SUBMIT_PATH) || u.search || u.hash) return false
   return u.protocol === 'https:' || (u.protocol === 'http:' && local)
 }
 
 /** Configuración del servidor. `invalid` lista las variables que impiden enviar (nunca sus valores). */
 export function resolveCrmClientConfig(runtime: Record<string, unknown>): { ok: true, config: CrmClientConfig } | { ok: false, invalid: string[] } {
-  const url = String(runtime.crmClientUrl ?? '').trim()
-  const rawLine = String(runtime.crmClientLineId ?? '').trim()
-  const lineId = rawLine ? Number(rawLine) : CRM_CLIENT_DEFAULTS.lineId
-  const advisorEmail = String(runtime.crmClientAdvisorEmail ?? '').trim() || CRM_CLIENT_DEFAULTS.advisorEmail
+  const text = (k: string) => String(runtime[k] ?? '').trim()
+  const id = (k: string) => (/^[1-9]\d{0,9}$/.test(text(k)) ? Number(text(k)) : 0)
+  const config: CrmClientConfig = { url: text('crmFormUrl'), formUrl: '', userId: id('crmFormUserId'), lineId: id('crmFormLineId'), advisorId: id('crmFormAdvisorId') }
   const invalid: string[] = []
-  if (!validDestination(url)) invalid.push('NUXT_CRM_CLIENT_URL')
-  if (!Number.isInteger(lineId) || lineId <= 0) invalid.push('NUXT_CRM_CLIENT_LINE_ID')
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(advisorEmail)) invalid.push('NUXT_CRM_CLIENT_ADVISOR_EMAIL')
-  return invalid.length ? { ok: false, invalid } : { ok: true, config: { url, lineId, advisorEmail } }
+  if (!validDestination(config.url)) invalid.push('NUXT_CRM_FORM_URL')
+  if (!config.userId) invalid.push('NUXT_CRM_FORM_USER_ID')
+  if (!config.lineId) invalid.push('NUXT_CRM_FORM_LINE_ID')
+  if (!config.advisorId) invalid.push('NUXT_CRM_FORM_ADVISOR_ID')
+  if (invalid.length) return { ok: false, invalid }
+  // …/crm-public/api/clients/forms → …/crm-public/forms/{usuario}/{línea}, siempre en el mismo origen que el destino.
+  const form = new URL(config.url)
+  form.pathname = `${form.pathname.slice(0, -CRM_SUBMIT_PATH.length)}/forms/${config.userId}/${config.lineId}`
+  return { ok: true, config: { ...config, formUrl: form.href } }
 }
 
 /**
- * Criterio de éxito, copiado de Crediestética. PROVISIONAL: el contrato de respuesta del CRM NO está confirmado. Solo vale un cuerpo JSON (objeto) con una marca
- * POSITIVA explícita (`success: true`, `ok: true` o `status` = success/ok/created) y ninguna marca de fallo. Cualquier otra cosa es ambigua.
+ * Confirmación del CRM: un 2xx NO basta. Solo vale un objeto JSON cuyo `mensagge` contenga la frase de registro satisfactorio (sin distinguir
+ * mayúsculas ni espacios repetidos). Cualquier otra respuesta es ambigua.
  */
-export function crmChatConfirmed(data: unknown): boolean {
+export function crmConfirmed(data: unknown): boolean {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return false
-  const d = data as Record<string, unknown>
-  if (d.success === false || d.ok === false || d.status === false) return false
-  if (d.error || (Array.isArray(d.errors) ? d.errors.length : d.errors)) return false
-  if (typeof d.status === 'string' && /^(error|fail|failed|failure)$/i.test(d.status)) return false
-  return d.success === true || d.ok === true || (typeof d.status === 'string' && /^(success|ok|created)$/i.test(d.status))
+  const text = (data as Record<string, unknown>).mensagge
+  return typeof text === 'string' && text.toLowerCase().replace(/\s+/g, ' ').trim().startsWith(CRM_SUCCESS_TEXT)
 }
 
 /** Códigos de red que demuestran que NO se llegó a conectar (la petición no salió). */
@@ -124,11 +116,12 @@ export function classifyCrmError(error: unknown): 'failed' | 'unknown' {
 const CRM_RETRYABLE_HTTP = new Set([408, 429])
 
 export type CrmClientReason =
-  | 'confirmed' | 'unconfirmed_response' | 'http_rejected' | 'http_retryable' | 'redirect_not_followed' | 'http_other'
-  | 'no_connection' | 'timeout' | 'no_response'
+  | 'confirmed' | 'unconfirmed_response' | 'http_rejected' | 'http_retryable' | 'http_server_error' | 'redirect_not_followed' | 'http_other'
+  | 'no_connection' | 'timeout' | 'no_response' | 'internal_error'
+  | 'session_unreachable' | 'session_rejected' | 'session_invalid'
 
 export interface CrmClientResult {
-  /** `sent` = confirmado · `failed` = rechazado o nunca salió · `unknown` = no se sabe si el cliente quedó creado. */
+  /** `sent` = confirmado · `failed` = respuesta de error o la petición nunca salió · `unknown` = no se sabe si quedó registrado. */
   state: 'sent' | 'failed' | 'unknown'
   reason: CrmClientReason
   status?: number
@@ -142,15 +135,16 @@ export type CrmResponseKind = 'json' | 'json_no_objeto' | 'no_json' | 'ilegible'
 const LOG_KEY_RE = /^[A-Za-z_][A-Za-z0-9_.-]{0,39}$/
 const LOG_MAX_KEYS = 20
 const HIDDEN_KEY = '[omitida]'
+const PERSONAL_FIELDS: ReadonlyArray<keyof ValuationInput> = ['nombres', 'apellidos', 'identificacion', 'direccion', 'telefono', 'email', 'name_surgery']
 
 /**
  * Nombres de las claves de primer nivel, NUNCA sus valores. Una respuesta podría usar datos como nombre de clave, así que se oculta la que no parezca un nombre
- * de campo (caracteres raros, más de 40, 4 o más cifras seguidas) o que repita una palabra del nombre o el documento enviados.
+ * de campo (caracteres raros, más de 40, 4 o más cifras seguidas) o que repita una palabra de los datos personales enviados.
  */
-export function crmResponseKeys(data: unknown, payload: CrmClientPayload): string[] {
+export function crmResponseKeys(data: unknown, value: ValuationInput): string[] {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return []
-  const words = (s: string) => s.toLowerCase().split(/[\s_.-]+/).filter(Boolean)
-  const personal = new Set([payload.name, payload.identificacion].flatMap(words))
+  const words = (s: string) => s.toLowerCase().split(/[\s@_.-]+/).filter(Boolean)
+  const personal = new Set(PERSONAL_FIELDS.flatMap(f => words(String(value[f]))))
   const keys = Object.keys(data)
   const shown = keys.slice(0, LOG_MAX_KEYS).map(k => (LOG_KEY_RE.test(k) && !/\d{4}/.test(k) && !words(k).some(w => personal.has(w)) ? k : HIDDEN_KEY))
   return keys.length > LOG_MAX_KEYS ? [...shown, `(+${keys.length - LOG_MAX_KEYS})`] : shown
@@ -168,44 +162,111 @@ function logCrmCall(entry: { id: string, result: CrmClientResult, ms: number, ki
   } catch { /* la traza es accesoria */ }
 }
 
-/** Una única petición al CRM. Nunca lanza: devuelve la clasificación del resultado. */
-export async function registerCrmClient(config: CrmClientConfig, payload: CrmClientPayload): Promise<CrmClientResult> {
-  const id = randomUUID()
-  const started = performance.now()
+/** Atributos de una etiqueta HTML (comillas simples o dobles). */
+const attributes = (tag: string) =>
+  Object.fromEntries([...tag.matchAll(/([a-zA-Z_:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)].map(m => [m[1]!.toLowerCase(), m[2] ?? m[3] ?? '']))
+
+/** Valor del campo oculto `_token` del formulario; cadena vacía si no está o no tiene forma de token. */
+export function extractCsrfToken(html: string): string {
+  for (const [tag] of html.matchAll(/<input\b[^>]*>/gi)) {
+    const a = attributes(tag)
+    if (a.name === '_token') return /^[A-Za-z0-9+/=_-]{16,256}$/.test(a.value ?? '') ? a.value! : ''
+  }
+  return ''
+}
+
+/** Cabecera `Cookie` a partir de las `Set-Cookie` recibidas (solo nombre=valor; las borradas se omiten). */
+export function cookieHeader(setCookies: string[]): string {
+  const jar = new Map<string, string>()
+  for (const line of setCookies) {
+    const pair = line.split(';', 1)[0]!.trim()
+    const eq = pair.indexOf('=')
+    if (eq < 1) continue
+    const name = pair.slice(0, eq), value = pair.slice(eq + 1)
+    if (value && value !== 'deleted') jar.set(name, value)
+    else jar.delete(name)
+  }
+  return [...jar].map(([name, value]) => `${name}=${value}`).join('; ')
+}
+
+type CrmSession = { ok: true, token: string, cookie: string } | { ok: false, reason: 'session_unreachable' | 'session_rejected' | 'session_invalid', status?: number }
+
+/** Paso 1: carga el formulario público y obtiene sesión y token. No envía ningún dato del paciente. Nunca lanza. */
+async function openCrmSession(config: CrmClientConfig): Promise<CrmSession> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), CRM_CLIENT_TIMEOUT_MS)
+  let status: number | undefined
+  try {
+    const res = await fetch(config.formUrl, { method: 'GET', headers: { Accept: 'text/html' }, redirect: 'manual', signal: controller.signal })
+    status = res.status
+    if (status !== 200) {
+      await res.body?.cancel().catch(() => {})
+      return { ok: false, reason: 'session_rejected', status }
+    }
+    const cookie = cookieHeader(res.headers.getSetCookie())
+    const token = extractCsrfToken(await res.text())
+    return cookie && token ? { ok: true, token, cookie } : { ok: false, reason: 'session_invalid', status }
+  } catch {
+    return { ok: false, reason: 'session_unreachable', status }
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+/** Abre sesión y envía el paciente UNA sola vez. Nunca lanza: devuelve la clasificación del resultado. */
+export async function registerCrmClient(config: CrmClientConfig, value: ValuationInput): Promise<CrmClientResult> {
+  const id = randomUUID()
+  const started = performance.now()
   let kind: CrmResponseKind = 'sin_respuesta'
   let keys: string[] = []
   const done = (result: CrmClientResult): CrmClientResult => {
     logCrmCall({ id, result, ms: Math.round(performance.now() - started), kind, keys })
     return result
   }
+
+  const session = await openCrmSession(config)
+  if (!session.ok) return done({ state: 'failed', reason: session.reason, status: session.status })
+
+  // Un fallo al preparar el envío ocurre ANTES de enviar los datos: es seguro afirmar que no se registró nada.
+  let form: FormData
   try {
-    const res = await fetch(config.url, {
-      method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      redirect: 'manual',
-      signal: controller.signal
-    })
+    form = new FormData()
+    for (const [name, field] of buildCrmFields(value, config, session.token)) form.append(name, field)
+  } catch {
+    return done({ state: 'failed', reason: 'internal_error' })
+  }
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), CRM_CLIENT_TIMEOUT_MS)
+  try {
+    // Las mismas cabeceras relevantes que el envío AJAX del formulario original. Sin Content-Type manual: fetch genera el multipart con su boundary.
+    const headers = {
+      Accept: 'application/json',
+      Cookie: session.cookie,
+      'X-Requested-With': 'XMLHttpRequest',
+      Origin: new URL(config.formUrl).origin,
+      Referer: config.formUrl
+    }
+    const res = await fetch(config.url, { method: 'POST', headers, body: form, redirect: 'manual', signal: controller.signal })
     const status = res.status
     // El cuerpo se lee una vez para la traza; en los códigos que no son 2xx NO influye en la clasificación.
     let data: unknown = null
     try {
       data = await res.json()
       kind = data && typeof data === 'object' && !Array.isArray(data) ? 'json' : 'json_no_objeto'
-      keys = crmResponseKeys(data, payload)
+      keys = crmResponseKeys(data, value)
     } catch (error) {
       kind = !controller.signal.aborted && (error as Error)?.name === 'SyntaxError' ? 'no_json' : 'ilegible'
     }
     if (status >= 200 && status < 300) {
-      return done(crmChatConfirmed(data) ? { state: 'sent', reason: 'confirmed', status } : { state: 'unknown', reason: 'unconfirmed_response', status })
+      return done(crmConfirmed(data) ? { state: 'sent', reason: 'confirmed', status } : { state: 'unknown', reason: 'unconfirmed_response', status })
     }
     if (status >= 400 && status < 500) {
       const body = status === 422 ? data : undefined
       return done({ state: 'failed', reason: CRM_RETRYABLE_HTTP.has(status) ? 'http_retryable' : 'http_rejected', status, body })
     }
-    if (status >= 300 && status < 400) return done({ state: 'unknown', reason: 'redirect_not_followed', status })
+    if (status >= 500) return done({ state: 'failed', reason: 'http_server_error', status })
+    if (status >= 300) return done({ state: 'unknown', reason: 'redirect_not_followed', status })
     return done({ state: 'unknown', reason: 'http_other', status })
   } catch (error) {
     if (classifyCrmError(error) === 'failed') return done({ state: 'failed', reason: 'no_connection' })
