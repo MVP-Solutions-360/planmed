@@ -15,10 +15,12 @@
       </div>
     </div>
 
-    <!-- Micrositio -->
-    <div v-else class="grid lg:grid-cols-[55fr_45fr]">
+    <!-- Micrositio. En escritorio tiene altura fija (la pantalla menos el menú de 88px y su borde): el mensaje queda quieto
+         y solo se desplaza la columna del formulario; al llegar a su final, la página sigue hasta el footer.
+         En móvil las columnas van una debajo de otra y se desplaza la página completa. -->
+    <div v-else data-testid="prp-hero" class="grid lg:grid-cols-[55fr_45fr] lg:grid-rows-[minmax(0,1fr)] lg:h-[calc(100dvh-89px)] lg:min-h-[480px]">
       <!-- Mensaje -->
-      <section class="bg-[#0C2619] text-white px-6 py-10 md:py-16 lg:py-20 lg:pl-14 lg:pr-12 xl:pl-24 xl:pr-16 flex flex-col justify-center">
+      <section class="bg-[#0C2619] text-white px-6 py-10 md:py-16 lg:py-8 lg:pl-14 lg:pr-12 xl:pl-24 xl:pr-16 flex flex-col justify-center lg:min-h-0">
         <div class="max-w-xl mx-auto lg:mx-0 w-full">
           <p class="text-[11px] font-bold tracking-[0.15em] text-white/60 uppercase flex items-center gap-3 mb-6">
             <span class="w-2 h-2 rounded-full bg-[#D3A76A]"></span>
@@ -34,9 +36,9 @@
         </div>
       </section>
 
-      <!-- Formulario -->
-      <section class="bg-[#fcf9f8] px-6 py-10 md:py-14 lg:py-16 lg:pl-12 lg:pr-14 xl:pl-16 xl:pr-24 flex flex-col justify-center">
-        <div class="max-w-lg mx-auto lg:mx-0 w-full bg-white border border-[#e5e2e1] shadow-2xl shadow-black/5 p-6 md:p-10">
+      <!-- Formulario. Se centra con `my-auto` (no con justify-center) para que, si no cabe, el desplazamiento no corte el inicio. -->
+      <section data-testid="prp-form-column" class="bg-[#fcf9f8] px-6 py-10 md:py-14 lg:py-10 lg:pl-12 lg:pr-14 xl:pl-16 xl:pr-24 flex flex-col lg:min-h-0 lg:overflow-y-auto">
+        <div class="max-w-lg mx-auto my-auto shrink-0 lg:mx-0 w-full bg-white border border-[#e5e2e1] shadow-2xl shadow-black/5 p-6 md:p-10">
           <h2 class="font-serif text-2xl md:text-3xl font-medium text-black uppercase tracking-tight mb-2">Déjanos tus datos</h2>
           <p class="text-gray-500 font-light mb-8">Déjanos tus datos y nos pondremos en contacto contigo.</p>
           <PrpLeadForm :code-prp="prp.externalCode" />
