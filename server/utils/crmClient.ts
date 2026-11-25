@@ -6,9 +6,12 @@
 //
 //  · Sin reintentos y sin seguir redirecciones (reenviarían datos personales a otro host).
 //  · No se registra ningún dato personal, ni el payload ni el cuerpo de la respuesta.
+//  · TRAZA: una sola línea por petición (identificador, clasificación, motivo, código HTTP, duración y NOMBRES de las claves de primer nivel de la respuesta;
+//    nunca sus valores, cabeceras ni la URL). Se queda en el servidor: nada de esto llega al navegador.
 //  · El destino es configuración (NUXT_CRM_CLIENT_URL), vacío por defecto: sin él no sale ninguna petición.
 
 import type { ValuationInput } from '#shared/utils/valuation'
+import { randomUUID } from 'node:crypto'
 
 import { cleanLine } from './formMail'
 
@@ -131,10 +134,50 @@ export interface CrmClientResult {
   body?: unknown
 }
 
+/** Qué se pudo leer de la respuesta. `ilegible` = el cuerpo no terminó de llegar (corte o tiempo agotado). */
+export type CrmResponseKind = 'json' | 'json_no_objeto' | 'no_json' | 'ilegible' | 'sin_respuesta'
+
+const LOG_KEY_RE = /^[A-Za-z_][A-Za-z0-9_.-]{0,39}$/
+const LOG_MAX_KEYS = 20
+const HIDDEN_KEY = '[omitida]'
+
+/**
+ * Nombres de las claves de primer nivel, NUNCA sus valores. Una respuesta podría usar datos como nombre de clave, así que se oculta la que no parezca un nombre
+ * de campo (caracteres raros, más de 40, 4 o más cifras seguidas) o que repita una palabra del nombre, la ciudad o el documento enviados.
+ */
+export function crmResponseKeys(data: unknown, payload: CrmClientPayload): string[] {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return []
+  const words = (s: string) => s.toLowerCase().split(/[\s_.-]+/).filter(Boolean)
+  const personal = new Set([payload.name, payload.city, payload.identificacion].flatMap(words))
+  const keys = Object.keys(data)
+  const shown = keys.slice(0, LOG_MAX_KEYS).map(k => (LOG_KEY_RE.test(k) && !/\d{4}/.test(k) && !words(k).some(w => personal.has(w)) ? k : HIDDEN_KEY))
+  return keys.length > LOG_MAX_KEYS ? [...shown, `(+${keys.length - LOG_MAX_KEYS})`] : shown
+}
+
+const LOG_CLASS = { sent: 'confirmado', failed: 'rechazado', unknown: 'incierto' } as const
+
+/** Línea de traza. Solo recibe datos ya saneados; un fallo al escribirla no puede alterar el resultado del registro. */
+function logCrmCall(entry: { id: string, result: CrmClientResult, ms: number, kind: CrmResponseKind, keys: string[] }) {
+  const { id, result, ms, kind, keys } = entry
+  const line = `[valuation] crm-registro id=${id} clasificacion=${LOG_CLASS[result.state]} motivo=${result.reason} http=${result.status ?? '-'} duracion_ms=${ms} respuesta=${kind} claves=${keys.join(',') || '-'}`
+  try {
+    if (result.state === 'sent') console.info(line)
+    else console.warn(line)
+  } catch { /* la traza es accesoria */ }
+}
+
 /** Una única petición al CRM. Nunca lanza: devuelve la clasificación del resultado. */
 export async function registerCrmClient(config: CrmClientConfig, payload: CrmClientPayload): Promise<CrmClientResult> {
+  const id = randomUUID()
+  const started = performance.now()
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), CRM_CLIENT_TIMEOUT_MS)
+  let kind: CrmResponseKind = 'sin_respuesta'
+  let keys: string[] = []
+  const done = (result: CrmClientResult): CrmClientResult => {
+    logCrmCall({ id, result, ms: Math.round(performance.now() - started), kind, keys })
+    return result
+  }
   try {
     const res = await fetch(config.url, {
       method: 'POST',
@@ -144,19 +187,27 @@ export async function registerCrmClient(config: CrmClientConfig, payload: CrmCli
       signal: controller.signal
     })
     const status = res.status
+    // El cuerpo se lee una vez para la traza; en los códigos que no son 2xx NO influye en la clasificación.
+    let data: unknown = null
+    try {
+      data = await res.json()
+      kind = data && typeof data === 'object' && !Array.isArray(data) ? 'json' : 'json_no_objeto'
+      keys = crmResponseKeys(data, payload)
+    } catch (error) {
+      kind = !controller.signal.aborted && (error as Error)?.name === 'SyntaxError' ? 'no_json' : 'ilegible'
+    }
     if (status >= 200 && status < 300) {
-      const body = await res.json().catch(() => null)
-      return crmChatConfirmed(body) ? { state: 'sent', reason: 'confirmed', status } : { state: 'unknown', reason: 'unconfirmed_response', status }
+      return done(crmChatConfirmed(data) ? { state: 'sent', reason: 'confirmed', status } : { state: 'unknown', reason: 'unconfirmed_response', status })
     }
     if (status >= 400 && status < 500) {
-      const body = status === 422 ? await res.json().catch(() => null) : undefined
-      return { state: 'failed', reason: CRM_RETRYABLE_HTTP.has(status) ? 'http_retryable' : 'http_rejected', status, body }
+      const body = status === 422 ? data : undefined
+      return done({ state: 'failed', reason: CRM_RETRYABLE_HTTP.has(status) ? 'http_retryable' : 'http_rejected', status, body })
     }
-    if (status >= 300 && status < 400) return { state: 'unknown', reason: 'redirect_not_followed', status }
-    return { state: 'unknown', reason: 'http_other', status }
+    if (status >= 300 && status < 400) return done({ state: 'unknown', reason: 'redirect_not_followed', status })
+    return done({ state: 'unknown', reason: 'http_other', status })
   } catch (error) {
-    if (classifyCrmError(error) === 'failed') return { state: 'failed', reason: 'no_connection' }
-    return { state: 'unknown', reason: controller.signal.aborted ? 'timeout' : 'no_response' }
+    if (classifyCrmError(error) === 'failed') return done({ state: 'failed', reason: 'no_connection' })
+    return done({ state: 'unknown', reason: controller.signal.aborted ? 'timeout' : 'no_response' })
   } finally {
     clearTimeout(timer)
   }

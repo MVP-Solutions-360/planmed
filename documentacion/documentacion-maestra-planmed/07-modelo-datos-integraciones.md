@@ -106,6 +106,23 @@ No se envían `origen`, fecha de nacimiento, correo, cirugía, forma de pago ni 
 
 **Protecciones:** mismo origen; 8 intentos cada 10 min por IP (usa `X-Forwarded-For` y **no** aplica `NUXT_TRUSTED_PROXY_HOPS`, así que el proxy debe controlar esa cabecera); timeout 15 s; **sin reintentos**; bloqueo de reenvío por huella SHA-256 de cédula y teléfono durante 2 min tras un éxito y 24 h tras un resultado incierto, solo en memoria (se pierde al reiniciar y no se comparte entre instancias). Los logs no contienen datos personales, payload ni cuerpo de respuesta.
 
+**Traza (solo en el log del servidor; nada llega al navegador).** Una línea por petición enviada al CRM; los éxitos salen por la salida estándar y el resto por la de error:
+
+```text
+[valuation] crm-registro id=<uuid> clasificacion=confirmado motivo=confirmed http=201 duracion_ms=412 respuesta=json claves=success,id
+```
+
+| Campo | Valores |
+|---|---|
+| `id` | identificador de correlación aleatorio, uno por petición |
+| `clasificacion` | `confirmado`, `rechazado`, `incierto` |
+| `motivo` | `confirmed`, `unconfirmed_response`, `http_rejected`, `http_retryable`, `redirect_not_followed`, `http_other`, `no_connection`, `timeout`, `no_response` |
+| `http` | código recibido o `-` |
+| `respuesta` | `json`, `json_no_objeto`, `no_json`, `ilegible`, `sin_respuesta` |
+| `claves` | solo **nombres** de las claves de primer nivel (máximo 20); se muestra `[omitida]` si el nombre no parece un campo o repite un dato enviado |
+
+El cuerpo se lee para obtener esas claves en cualquier código; en los que no son 2xx no cambia la clasificación, aunque una respuesta que tarde en completarse puede demorar el resultado hasta los 15 s. Un 503 `not_configured` no genera esta línea porque no sale ninguna petición.
+
 **Pendientes:** confirmar con el CRM el formato de éxito y la regla de teléfonos fijos y extranjeros; configurar `NUXT_CRM_CLIENT_URL` en producción. En local debe quedar vacía: la URL real crea clientes reales. `NUXT_CRM_VALUATION_URL` ya no se lee.
 
 Prueba: `tests/security/valuation.test.ts` (CRM y SMTP simulados).
