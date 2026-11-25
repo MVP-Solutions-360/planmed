@@ -320,7 +320,7 @@ La integración con el CRM queda **aplazada**. Cuando se retome, sin repetir el 
 3. **Confirmar con el responsable del CRM** si quedó alguna fila parcial de la prueba fallida.
 4. Diseñar el envío **desde el servidor** (no desde el navegador), con la configuración del CRM por variables de entorno sin valores por defecto, igual que el formulario de valoración (`server/utils/valuation.ts`, `shared/utils/crmDestination.ts`), validando todo antes de llamar al CRM, sin reintentos automáticos (podrían duplicar el registro) y sin registrar datos personales.
 5. Hacer **una** prueba autorizada, con datos ficticios y destino de pruebas del CRM, y documentar la respuesta real en este documento.
-6. No dar el estudio por registrado salvo que el CRM devuelva una confirmación explícita (patrón ya usado: `crmConfirmed`).
+6. No dar el estudio por registrado salvo que el CRM devuelva una confirmación explícita (patrón ya usado: `crmChatConfirmed`).
 
 ## 12. Referencias a los archivos inspeccionados
 
@@ -397,12 +397,12 @@ No hay base de datos, disco ni migraciones, así que **no se garantiza «exactam
 - **Varias instancias:** cada una tiene su propia memoria. Un reintento (`POST /api/forms/referral`) en otra instancia responde 409, y un reenvío allí puede duplicar el correo; la instancia original puede además reintentar su pendiente.
 - **SMTP caído:** tras 4 intentos (unos 12 minutos) el correo se abandona y solo queda un aviso en el log; un nuevo reenvío del usuario reinicia la cola.
 - **Pasadas 24 h** de una entrega, un reenvío puede volver a enviarla.
-- **Valoración:** el bloqueo de doble envío del CRM también es de memoria (comportamiento original).
+- **Valoración:** el bloqueo de doble envío del CRM también es de memoria (2 minutos tras un registro confirmado, 24 horas tras un resultado incierto).
 - Eliminar estos límites exigiría una bandeja de salida persistente (tabla/migración), que **requiere autorización**.
 
 **Variables:** `NUXT_VALUATION_TO/CC` y `NUXT_REFERRAL_TO/CC` (destinatarios del respaldo; varias direcciones separadas por coma, máximo 5), `NUXT_CREDIT_STUDY_TO/CC`, `NUXT_LEAD_FORM_TO/CC` y las `NUXT_MAIL_*` comunes.
 
 ### Valoración en Planmed
-Conserva la integración original con el CRM médico (`crmValuationUrl` y los campos fijos de `buildCrmFields`, sin cambios). El correo es una notificación complementaria que sale solo después de que el CRM confirma; si el CRM falla se mantienen los errores originales y no se envía correo. No se modificó ningún identificador del CRM.
+Desde el 2026-11-25 la valoración registra **solo al cliente** en el CRM médico (`POST` JSON a `…/api/chat/create/client`, destino `NUXT_CRM_CLIENT_URL`); sustituye al envío anterior a `clients/forms`. Payload, criterio de confirmación y pendientes: `documentacion-maestra-planmed/07-modelo-datos-integraciones.md` §3.5. El correo es una notificación complementaria que sale solo después de que el CRM confirma y es el único que lleva la solicitud completa; si el CRM no confirma no se envía correo.
 
 **Destinatarios (Planmed): PENDIENTES de confirmación.** Ninguno tiene valor por defecto ni se reutilizan los de Crediestética. Con `NUXT_VALUATION_TO` / `NUXT_REFERRAL_TO` vacíos el correo de respaldo simplemente no se envía y Hub/CRM siguen funcionando. Estudio de crédito y financiación (sin integración previa) quedan bloqueados (503) hasta definir `NUXT_CREDIT_STUDY_TO` y `NUXT_LEAD_FORM_TO`.

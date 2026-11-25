@@ -158,7 +158,7 @@ La página alterna fondos blanco/verde para marcar cada sección:
 | Lead del micrositio PRP | `/prp/[slug]` | **Funcional** | CRM del referidor (envío directo) |
 | Solicitud de financiación (ventana «Inicia tu proceso ahora») | Simulador | **No envía**: solo `console.log` | Por definir |
 | Cotización del simulador | `/financiacion` | **Tasa de ejemplo** (2 % mensual), no es la real | Por definir (regla de negocio, no modificar sin decisión) |
-| Pide tu cita de valoración | Botón flotante | Envía al CRM médico (`/crm-public/api/clients/forms`) desde el servidor; éxito solo si el CRM confirma. Procedimientos desde Hub. | Registro en el CRM (validado con prueba real pendiente de autorización) |
+| Pide tu cita de valoración | Botón flotante | Registra al cliente en el CRM médico (`/api/chat/create/client`) desde el servidor; éxito solo si el CRM confirma. La solicitud (cirugía, forma de pago) llega por correo complementario. Procedimientos desde Hub. | Alta de cliente en el CRM (requiere `NUXT_CRM_CLIENT_URL`; prueba real pendiente de autorización) |
 | Formulario de crédito paciente | `/estudio-de-creditos` | **Maqueta**, con aviso en pantalla | CRM médico |
 | Registro del Programa de referidos | `/testimonios/programa-de-referidos` | Envía la inscripción a Wellezy Hub (empresa y línea Planmed). Con efectivo no pide datos bancarios. El envío al CRM médico está **pendiente de contrato**: hasta entonces la web confirma «Recibimos tu inscripción» (no definitiva). | Hub (CRM médico pendiente) |
 

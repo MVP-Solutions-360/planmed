@@ -62,7 +62,7 @@ flowchart LR
   B -.->|"solo PrpLeadForm<br/>multipart directo"| CRM2[(CRM médico<br/>forms-px-prp)]
   N -->|"Bearer de sesión<br/>/cms/*, /prp-referrers, /auth/*"| HUB[(Wellezy Hub)]
   N -->|"X-Tenant-Linea<br/>/v1/web/* (público)"| HUB
-  N -->|"POST multipart<br/>/clients/forms"| CRM1[(CRM médico<br/>valoración)]
+  N -->|"POST JSON<br/>/api/chat/create/client"| CRM1[(CRM médico<br/>alta de cliente)]
   N <-->|"JSON atómico<br/>.data/planmed-content"| FS[(Disco local)]
   B -->|"cookie httpOnly planmed-admin"| N
 ```

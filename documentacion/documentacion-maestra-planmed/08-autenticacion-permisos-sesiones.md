@@ -39,7 +39,7 @@ sequenceDiagram
 | Tasa | `requireRateEditor`/`canManageFinancingRate`: líder **o** rol en `NUXT_PLANMED_RATE_EDITOR_ROLE_IDS` | `financingRate.ts` |
 | Hub | Cada ruta `/cms/*` y `/prp-referrers` valida permisos y línea con el token; Planmed traduce 403 ⇒ «No tienes permiso…» | `server/utils/*` |
 | Lecturas públicas | sin sesión, `X-Tenant-Linea`, 503 ≠ vacío | `wellezy.ts`, `publicErrors.ts` |
-| Límites | valoración 8/10 min/IP; inscripción PRP 6/10 min/IP (IP de proxy según `NUXT_TRUSTED_PROXY_HOPS`) | `valuation.ts`, `prpEnrollment.ts`, `shared/utils/clientIp.ts` |
+| Límites | valoración 8/10 min/IP (según `X-Forwarded-For`); inscripción PRP 6/10 min/IP (IP de proxy según `NUXT_TRUSTED_PROXY_HOPS`) | `valuation.ts`, `prpEnrollment.ts`, `shared/utils/clientIp.ts` |
 
 ## 4. Matriz de permisos (módulo × perfil)
 | Módulo / acción | Visitante | Rol CMS (p. ej. 19) | Líder de línea | Rol de tasa |

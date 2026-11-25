@@ -95,7 +95,7 @@ Este documento fija tres ideas que no deben confundirse:
 | Login, `me`, logout | Navegador → Nitro | Nitro → Hub `/auth/*` | `providers/WellezyAuthProvider.ts`, `server/api/auth/*` |
 | Administración (Hub) | Navegador → Nitro (con cookie) | Nitro → Hub `/cms/*`, `/prp-referrers` con Bearer | `providers/Hub*Provider.ts`, `server/api/admin/**`, `wellezyRequest` |
 | Colaboradores (lectura) | Navegador → Nitro | Nitro → Hub `GET /cms/line-users` | `services/LineUsersService.ts`, `server/utils/lineUsers.ts` |
-| Valoración | Navegador → Nitro `POST /api/forms/valuation` | Nitro → CRM médico externo (`crmValuationUrl`) | `services/ValuationService.ts`, `server/utils/valuation.ts` |
+| Valoración | Navegador → Nitro `POST /api/forms/valuation` | Nitro → CRM médico externo, alta de cliente (`crmClientUrl`; ver `07` §3.5) | `services/ValuationService.ts`, `server/utils/valuation.ts`, `server/utils/crmClient.ts` |
 | Inscripción PRP | Navegador → Nitro `POST /api/forms/prp-enrollment` | Nitro → Hub | `services/ReferralService.ts`, `server/utils/prpEnrollment.ts` |
 | Formulario PRP del CRM médico | **Navegador → CRM externo directamente** | `crmPrpFormUrl` | `providers/CrmPrpLeadProvider.ts` (única llamada directa del navegador a un tercero; requiere CORS en ese CRM) |
 | Contenido local | Navegador → Nitro | Disco del servidor | `server/utils/aboutStore.ts`, `clinics.ts`, `sitePages.ts` |
@@ -119,11 +119,13 @@ Verificadas en `nuxt.config.ts` (`runtimeConfig`) y `.env.example`. Nuxt convier
 | `NUXT_WELLEZY_LINE_SLUG` | `wellezyLineSlug` | Slug de línea: login, `X-Tenant-Linea` y pertenencia | runtime | `planmed` (por defecto) |
 | `NUXT_SESSION_PASSWORD` | `sessionPassword` | Sella la cookie de sesión (≥32 caracteres) | runtime | secreto, no documentado aquí |
 | `NUXT_PLANMED_CONTENT_DIR` | `planmedContentDir` | Carpeta persistente del contenido local, fuera de `.output/`. Vacío = `./.data/planmed-content` | runtime | por definir en cada servidor |
-| `NUXT_TRUSTED_PROXY_HOPS` | `trustedProxyHops` | Proxies de confianza para leer la IP real (límites de PRP/valoración) | runtime | 0 por defecto |
+| `NUXT_TRUSTED_PROXY_HOPS` | `trustedProxyHops` | Proxies de confianza para leer la IP real (límite de PRP; la valoración no lo aplica) | runtime | 0 por defecto |
 | `NUXT_PLANMED_CONTENT_EDITOR_ROLE_IDS` | `planmedContentEditorRoleIds` | IDs de rol adicionales que **escriben contenido local** (no dan acceso al panel) | runtime | vacío |
 | `NUXT_PLANMED_RATE_EDITOR_ROLE_IDS` | `planmedRateEditorRoleIds` | IDs de rol que además del líder editan la tasa (no dan acceso al panel) | runtime | `19` por defecto |
 | `NUXT_PLANMED_ADMIN_ROLE_IDS` | `planmedAdminRoleIds` | **Ya no interviene en el acceso** (ver §7.4) | — | existe por compatibilidad |
-| `NUXT_CRM_VALUATION_URL` | `crmValuationUrl` | Destino servidor→CRM del formulario de valoración | runtime | URL por defecto en el código |
+| `NUXT_CRM_CLIENT_URL` | `crmClientUrl` | Destino servidor→CRM del registro de cliente (formulario de valoración) | runtime | sin valor por defecto; producción: `https://crmedic.pdtclientsolutions.com/api/chat/create/client` |
+| `NUXT_CRM_CLIENT_LINE_ID` | `crmClientLineId` | Sustituye la línea enviada al CRM | runtime | vacío = `12` |
+| `NUXT_CRM_CLIENT_ADVISOR_EMAIL` | `crmClientAdvisorEmail` | Sustituye la asesora enviada al CRM | runtime | vacío = valor del servidor (`07` §3.5) |
 | `NUXT_PUBLIC_CRM_PRP_FORM_URL` | `public.crmPrpFormUrl` | Destino navegador→CRM del formulario PRP (público) | runtime | URL por defecto en el código |
 
 `NUXT_PUBLIC_API_BASE_URL` **no** pertenece a Planmed (es de Crediestética).
@@ -370,7 +372,7 @@ Node.js compatible; proceso persistente con reinicio; proxy inverso con TLS que 
 - **CSRF:** `assertSameOrigin` en toda mutación; falla cerrado (`server/utils/origin.ts`). IMPL, PROB.
 - **Secretos:** solo en el servidor; el Bearer nunca llega al navegador; `.env` está ignorado por Git.
 - **Revalidación:** el servidor reconsulta al Hub en operaciones sensibles; no confía en la cookie.
-- **Límites de uso:** valoración 8 por 10 min por IP; PRP 6 por 10 min por IP (`NUXT_TRUSTED_PROXY_HOPS`).
+- **Límites de uso:** valoración 8 por 10 min por IP (según `X-Forwarded-For`, que el proxy debe controlar); PRP 6 por 10 min por IP (`NUXT_TRUSTED_PROXY_HOPS`).
 - **Indexación:** panel con `noindex`; sin bloqueo en `robots.txt` a propósito.
 - **Principio de menor privilegio:** el rol `admin` no da acceso global; el superadmin no es líder; el Hub impone permisos por acción.
 - **Cuidado:** el token del Hub dura 8 h (`API_AUTH_TOKEN_TTL_MINUTES`, por defecto 480) y la cookie 8 h; se revocan en logout.
