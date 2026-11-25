@@ -14,7 +14,7 @@ const fileUrl = rel => pathToFileURL(join(ROOT, rel)).href
 const read = rel => readFileSync(join(ROOT, rel), 'utf8')
 
 const PAYLOAD = {
-  name: 'Zoraida Ficticia Quimbayo', phone: '+573009998877', city: 'Medellín', identificacion: 'PRUEBA90817263',
+  name: 'Zoraida Ficticia Quimbayo', phone: '+573009998877', city: 5, identificacion: 'PRUEBA90817263',
   ad_headline: 'Quiero más info', advisor_email: 'asesora@example.test', id_line: 12
 }
 // Cualquiera de estos textos en un log sería una fuga.

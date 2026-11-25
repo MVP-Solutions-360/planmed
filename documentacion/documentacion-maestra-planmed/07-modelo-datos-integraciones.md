@@ -74,7 +74,7 @@ Cuerpo exacto (datos ficticios):
 {
   "name": "Ana María Ficticia Prueba",
   "phone": "+573001234567",
-  "city": "Bogotá",
+  "city": 5,
   "identificacion": "10000002",
   "ad_headline": "Quiero más info",
   "advisor_email": "disenadoraplanmed@gmail.com",
@@ -86,13 +86,13 @@ Cuerpo exacto (datos ficticios):
 |---|---|
 | `name` | Nombres y apellidos del formulario, con espacios normalizados |
 | `phone` | Teléfono con `+57` sin duplicar el indicativo (celular de 10 dígitos que empieza por 3, o número ya escrito con 57). Fijos y extranjeros: **sin regla confirmada**, se envían solo sus dígitos |
-| `city` | Campo «Ciudad», texto |
+| `city` | Entero fijo `5`, constante de esta integración (`CRM_CLIENT_CITY_ID`). No sale del formulario: la ciudad escrita por el paciente no sustituye este identificador |
 | `identificacion` | Número de documento |
 | `ad_headline` | Fijo: `Quiero más info` |
 | `advisor_email` | `disenadoraplanmed@gmail.com`; `NUXT_CRM_CLIENT_ADVISOR_EMAIL` lo sustituye |
 | `id_line` | `12`; `NUXT_CRM_CLIENT_LINE_ID` lo sustituye |
 
-No se envían `origen`, fecha de nacimiento, correo, cirugía, forma de pago ni la aceptación de datos: esos datos del formulario viajan solo en el correo complementario (`NUXT_VALUATION_TO/CC`), que sale únicamente después de que el CRM confirma. Si el correo falla, el registro no cambia.
+No se envían `origen`, fecha de nacimiento, correo, cirugía, forma de pago ni la aceptación de datos: esos datos del formulario viajan solo en el correo complementario (`NUXT_VALUATION_TO/CC`), que sale únicamente después de que el CRM confirma. Si el correo falla, el registro no cambia. La ciudad escrita por el paciente se conserva en el formulario y en ese correo (fila «Ciudad»).
 
 **Confirmación (criterio provisional: el formato de respuesta del CRM no está confirmado).**
 

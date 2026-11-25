@@ -105,13 +105,37 @@ describe('CRM principal + correo complementario', () => {
     assert.equal(init.headers.Accept, 'application/json')
     assert.equal(init.headers.Authorization, undefined)
     assert.deepEqual(sentBody(), {
-      name: 'Ana María Prueba Ficticia', phone: '+573001234567', city: 'Santa Rosa de Osos', identificacion: '12345678',
+      name: 'Ana María Prueba Ficticia', phone: '+573001234567', city: 5, identificacion: '12345678',
       ad_headline: 'Quiero más info', advisor_email: 'disenadoraplanmed@gmail.com', id_line: 12
     })
     assert.deepEqual(Object.keys(sentBody()), ['name', 'phone', 'city', 'identificacion', 'ad_headline', 'advisor_email', 'id_line'])
     assert.equal('origen' in sentBody(), false, '`origen` no se envía')
-    assert.equal(typeof sentBody().city, 'string')
+    assert.equal(typeof sentBody().city, 'number')
     assert.equal(typeof sentBody().id_line, 'number')
+    assert.match(init.body, /"city":5,/, 'entero JSON, sin comillas')
+    assert.doesNotMatch(init.body, /Santa|Rosa|Osos/, 'el texto de la ciudad no viaja al CRM')
+  })
+
+  test('city es siempre el entero 5, sea cual sea la ciudad escrita; los demás campos salen del formulario y de la configuración', () => {
+    const cfg = { lineId: 99, advisorEmail: 'otra@example.test' }
+    for (const direccion of ['Medellín', 'Cali', '  Santa   Rosa de Osos ', '76001', '5']) {
+      const input = { ...VALID, nombres: ' Ana  María ', apellidos: ' Prueba ', telefono: '300 123 4567', direccion }
+      const payload = crm.buildCrmClientPayload(input, cfg)
+      assert.deepEqual(payload, {
+        name: 'Ana María Prueba', phone: '+573001234567', city: 5, identificacion: '12345678',
+        ad_headline: 'Quiero más info', advisor_email: 'otra@example.test', id_line: 99
+      }, direccion)
+      assert.strictEqual(payload.city, 5)
+      assert.match(JSON.stringify(payload), /"city":5,/)
+      assert.equal(input.direccion, direccion, 'el dato del formulario no se modifica')
+    }
+  })
+
+  test('el correo complementario conserva la ciudad escrita en el formulario', async () => {
+    await submit({ ...VALID, direccion: 'Santa Rosa de Osos' })
+    assert.equal(sentBody().city, 5)
+    assert.match(state.sent[0].text, /Ciudad: Santa Rosa de Osos/)
+    assert.match(state.sent[0].html, /Santa Rosa de Osos/)
   })
 
   test('el teléfono lleva +57 sin duplicarlo, con espacios y separadores', async () => {

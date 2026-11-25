@@ -1,7 +1,7 @@
 // Registro del cliente en el CRM Médico (POST JSON a …/api/chat/create/client). SOLO servidor.
 //
 // Mecanismo tomado de Crediestética (server/utils/valuationPayment.ts, commit 536c1f8: crmPhone, buildCrmClientPayload, crmChatConfirmed, registerCrmClient)
-// y adaptado a Planmed: se añade `city`, `ad_headline` es «Quiero más info» y el teléfono lleva «+57». No se portan las piezas propias del
+// y adaptado a Planmed: se añade `city` (identificador entero), `ad_headline` es «Quiero más info» y el teléfono lleva «+57». No se portan las piezas propias del
 // pago (idempotencia persistente por pago, ejecución en segundo plano): aquí el usuario espera el resultado y el bloqueo de reenvíos vive en ./valuation.
 //
 //  · Sin reintentos y sin seguir redirecciones (reenviarían datos personales a otro host).
@@ -18,6 +18,8 @@ import { cleanLine } from './formMail'
 /** Valores confirmados para Planmed. Se pueden sustituir por entorno (NUXT_CRM_CLIENT_LINE_ID / NUXT_CRM_CLIENT_ADVISOR_EMAIL). */
 export const CRM_CLIENT_DEFAULTS = { lineId: 12, advisorEmail: 'disenadoraplanmed@gmail.com' } as const
 export const CRM_CLIENT_AD_HEADLINE = 'Quiero más info'
+/** El CRM exige `city` como IDENTIFICADOR entero; el de Planmed es 5. El texto del campo «Ciudad» del formulario no se envía (va en el correo complementario). */
+export const CRM_CLIENT_CITY_ID = 5
 export const CRM_CLIENT_TIMEOUT_MS = 15_000
 
 export interface CrmClientConfig { url: string, lineId: number, advisorEmail: string }
@@ -25,7 +27,7 @@ export interface CrmClientConfig { url: string, lineId: number, advisorEmail: st
 export interface CrmClientPayload {
   name: string
   phone: string
-  city: string
+  city: number
   identificacion: string
   ad_headline: string
   advisor_email: string
@@ -54,7 +56,7 @@ export function buildCrmClientPayload(v: ValuationInput, cfg: Pick<CrmClientConf
   return {
     name: oneLine(`${v.nombres} ${v.apellidos}`),
     phone: crmPhone(v.telefono),
-    city: oneLine(v.direccion),
+    city: CRM_CLIENT_CITY_ID,
     identificacion: v.identificacion,
     ad_headline: CRM_CLIENT_AD_HEADLINE,
     advisor_email: cfg.advisorEmail,
@@ -143,12 +145,12 @@ const HIDDEN_KEY = '[omitida]'
 
 /**
  * Nombres de las claves de primer nivel, NUNCA sus valores. Una respuesta podría usar datos como nombre de clave, así que se oculta la que no parezca un nombre
- * de campo (caracteres raros, más de 40, 4 o más cifras seguidas) o que repita una palabra del nombre, la ciudad o el documento enviados.
+ * de campo (caracteres raros, más de 40, 4 o más cifras seguidas) o que repita una palabra del nombre o el documento enviados.
  */
 export function crmResponseKeys(data: unknown, payload: CrmClientPayload): string[] {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return []
   const words = (s: string) => s.toLowerCase().split(/[\s_.-]+/).filter(Boolean)
-  const personal = new Set([payload.name, payload.city, payload.identificacion].flatMap(words))
+  const personal = new Set([payload.name, payload.identificacion].flatMap(words))
   const keys = Object.keys(data)
   const shown = keys.slice(0, LOG_MAX_KEYS).map(k => (LOG_KEY_RE.test(k) && !/\d{4}/.test(k) && !words(k).some(w => personal.has(w)) ? k : HIDDEN_KEY))
   return keys.length > LOG_MAX_KEYS ? [...shown, `(+${keys.length - LOG_MAX_KEYS})`] : shown
