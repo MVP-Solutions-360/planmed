@@ -2,8 +2,8 @@ import { defineNuxtRouteMiddleware, navigateTo, useRequestFetch, createError } f
 import { authService } from '~/services/AuthService'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  // Only protect /admin routes
-  if (!to.path.startsWith('/admin')) {
+  // Only protect /admin routes (también sus variantes en mayúsculas: el router abre la misma pantalla)
+  if (!to.path.startsWith('/admin') && !isAdminPanelPath(to.path)) {
     return
   }
 

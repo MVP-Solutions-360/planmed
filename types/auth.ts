@@ -19,4 +19,6 @@ export interface AdminUser {
   canEditContent: boolean;
   /** Contraseña temporal pendiente de cambio: solo se permite /admin/cambiar-contrasena (la impone el servidor). */
   mustChangePassword: boolean;
+  /** Solo presente para el superadmin global (lo informa el servidor). */
+  isGlobalAdmin?: boolean;
 }

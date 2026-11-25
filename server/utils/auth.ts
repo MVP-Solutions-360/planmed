@@ -18,6 +18,8 @@ export interface PublicAdminUser {
   canEditContent: boolean
   /** Contraseña temporal sin cambiar: el panel solo permite la pantalla de cambio obligatorio. La impone el servidor (middleware) y Hub (403). */
   mustChangePassword: boolean
+  /** Presente SOLO para el superadmin global verificado por Hub: lo exime de la limitación a Micrositios. */
+  isGlobalAdmin?: true
 }
 
 interface AdminSessionData {
@@ -37,6 +39,9 @@ function sessionOptions(event: H3Event) {
     name: 'planmed-admin',
     password,
     maxAge: SESSION_MAX_AGE,
+    // La sesión viaja SOLO en la cookie httpOnly. h3 la aceptaría además en la cabecera `x-<nombre>-session`, y los middlewares que protegen
+    // el panel deciden a partir de la cookie: se desactiva para que no haya una segunda vía que los esquive.
+    sessionHeader: false as const,
     cookie: {
       httpOnly: true,
       sameSite: 'lax' as const,
@@ -123,7 +128,8 @@ export function toPublicUser(user: WellezyUser, event?: H3Event): PublicAdminUse
     canEditPrp: hasHubPermission(user, 'prp_referrers.editar'),
     canDeletePrp: hasHubPermission(user, 'prp_referrers.eliminar'),
     canEditContent: canEditLocalContent(event, user),
-    mustChangePassword: user.must_change_password === true
+    mustChangePassword: user.must_change_password === true,
+    ...(user.is_global_admin === true ? { isGlobalAdmin: true as const } : {})
   }
 }
 

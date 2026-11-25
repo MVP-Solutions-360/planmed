@@ -10,7 +10,7 @@
 
       <nav class="flex-grow p-4 space-y-8 mt-4">
         
-        <div>
+        <div v-if="!micrositesOnly">
           <NuxtLink to="/admin" class="block px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Dashboard
           </NuxtLink>
@@ -18,6 +18,7 @@
 
         <div>
           <p class="px-4 text-[10px] tracking-[0.15em] text-white/50 uppercase font-bold mb-2">Contenido</p>
+          <template v-if="!micrositesOnly">
           <NuxtLink to="/admin/procedimientos" class="block px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Procedimientos
           </NuxtLink>
@@ -38,12 +39,13 @@
           <div v-if="user?.canEditContent" v-show="pagesOpen" id="admin-pages-submenu" class="ml-3 pl-3 border-l border-white/10 space-y-1 mt-1">
             <NuxtLink v-for="l in pageLinks" :key="l.to" :to="l.to" class="block px-4 py-2 rounded-lg text-sm transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">{{ l.label }}</NuxtLink>
           </div>
+          </template>
           <NuxtLink to="/admin/micrositios" class="block px-4 py-2 mt-1 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" exact-active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Micrositios
           </NuxtLink>
         </div>
 
-        <div v-if="user?.isAreaLeader || user?.canEditRate">
+        <div v-if="!micrositesOnly && (user?.isAreaLeader || user?.canEditRate)">
           <p class="px-4 text-[10px] tracking-[0.15em] text-white/50 uppercase font-bold mb-2">Administración</p>
           <NuxtLink to="/admin/configuracion" class="block px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/10" active-class="bg-[#D3A76A] text-[#0C2619] hover:bg-[#D3A76A]">
             Configuración
@@ -105,6 +107,8 @@ import { authService } from '~/services/AuthService'
 const router = useRouter()
 const user = authService.getUser()
 const route = useRoute()
+// Roles limitados a Micrositios (la ruta la protegen el middleware y el servidor).
+const micrositesOnly = computed(() => isMicrositesOnlyUser(user.value))
 
 // Submenú «Nosotros»: solo páginas con pantalla de edición en este panel.
 const pageLinks = [
