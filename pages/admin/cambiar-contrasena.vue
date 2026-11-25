@@ -18,15 +18,14 @@
 
           <div v-for="f in fields" :key="f.key">
             <label :for="`cp-${f.key}`" class="block text-xs font-bold tracking-wider text-gray-700 uppercase mb-2">{{ f.label }}</label>
-            <input
+            <CommonPasswordInput
               :id="`cp-${f.key}`"
               v-model="form[f.key]"
-              type="password"
+              :label="f.label.toLowerCase()"
               :autocomplete="f.auto"
               maxlength="1024"
               :aria-invalid="fieldErrors[f.key] ? 'true' : 'false'"
               :aria-describedby="fieldErrors[f.key] ? `cp-${f.key}-err` : undefined"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0C2619] focus:border-transparent transition-all"
             />
             <p v-if="fieldErrors[f.key]" :id="`cp-${f.key}-err`" class="mt-1 text-xs text-red-700">{{ fieldErrors[f.key] }}</p>
           </div>
