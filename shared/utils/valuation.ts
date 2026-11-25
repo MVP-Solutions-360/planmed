@@ -1,19 +1,8 @@
-// Formulario «Pide tu cita de valoración» → CRM médico (POST /crm-public/api/clients/forms). Módulo PURO (sin imports): lo usan el
-// formulario (validación en el navegador), la ruta de Nitro (validación OBLIGATORIA en el servidor) y las pruebas.
-//
-// Contrato de la petición observada del CRM (multipart/form-data): nombres, apellidos, identificacion, fecha_nacimiento, direccion,
-// telefono, email, name_surgery, forma_pago, state, origen, id_user, id_line, id_user_asesora, accept. `_token` y `_method` NO se envían:
-// el endpoint hermano de PRP funciona sin ellos y no hay evidencia de que este los exija (ver informe: se confirma en la prueba real).
-
-export const VALUATION_STATE = 'No Contactada'
-export const VALUATION_ORIGIN = 'Formulario Web'
-
-/** Identificadores del CRM médico indicados por el responsable (formulario de referencia). Se envían desde el SERVIDOR. */
-export const VALUATION_CRM_IDS = { id_user: '73', id_line: '16', id_user_asesora: '73' } as const
+// Formulario «Pide tu cita de valoración». Módulo PURO (sin imports): lo usan el formulario (validación en el navegador), la ruta de Nitro
+// (validación OBLIGATORIA en el servidor) y las pruebas. El registro del cliente en el CRM Médico se arma SOLO en el servidor (server/utils/crmClient.ts).
 
 /**
- * Forma de pago: opciones visibles → valor que recibe el CRM. La única convención observada en la petición real es
- * `forma_pago=financiacion` (minúsculas, sin tilde); `contado` sigue esa misma convención y debe confirmarse con el CRM.
+ * Forma de pago: opciones visibles. El CRM no la recibe (solo se registra al cliente); viaja en el correo complementario.
  */
 export const PAYMENT_OPTIONS = [
   { label: 'Contado', value: 'contado' },
@@ -26,7 +15,7 @@ export interface ValuationInput {
   apellidos: string
   identificacion: string
   fecha_nacimiento: string
-  /** Ciudad (campo visible «Ciudad»); el CRM la recibe como `direccion`. */
+  /** Ciudad (campo visible «Ciudad»); el CRM la recibe como `city`. */
   direccion: string
   telefono: string
   email: string
@@ -39,10 +28,6 @@ export interface ValuationInput {
 }
 
 export type ValuationErrors = Partial<Record<keyof ValuationInput, string>>
-
-export const VALUATION_FIELDS: ReadonlyArray<keyof ValuationInput> = [
-  'nombres', 'apellidos', 'identificacion', 'fecha_nacimiento', 'direccion', 'telefono', 'email', 'name_surgery', 'forma_pago', 'accept'
-]
 
 const text = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
@@ -106,38 +91,4 @@ export function validateValuation(v: ValuationInput, today: Date = new Date()): 
   if (!v.accept) e.accept = 'Debes aceptar la política de tratamiento de datos personales para continuar.'
 
   return e
-}
-
-/** Campos EXACTOS (nombre → valor) que recibe el CRM, ya validado el formulario. Los datos personales vienen solo del formulario. */
-export function buildCrmFields(v: ValuationInput): Array<[string, string]> {
-  const pago = PAYMENT_OPTIONS.find(o => o.label === v.forma_pago)
-  if (!pago || !v.accept) throw new Error('Formulario no validado.')
-  return [
-    ['nombres', v.nombres],
-    ['apellidos', v.apellidos],
-    ['identificacion', v.identificacion],
-    ['fecha_nacimiento', v.fecha_nacimiento],
-    ['direccion', v.direccion],
-    ['telefono', v.telefono],
-    ['email', v.email],
-    ['name_surgery', v.name_surgery],
-    ['forma_pago', pago.value],
-    ['state', VALUATION_STATE],
-    ['origen', VALUATION_ORIGIN],
-    ['id_user', VALUATION_CRM_IDS.id_user],
-    ['id_line', VALUATION_CRM_IDS.id_line],
-    ['id_user_asesora', VALUATION_CRM_IDS.id_user_asesora],
-    ['accept', '1']
-  ]
-}
-
-/**
- * Confirmación del CRM: un 2xx NO basta. El cuerpo debe traer el texto de éxito observado en `mensagge` (así lo devuelve hoy) o, como
- * respaldo, un `message` que hable de registro; un `message` cualquiera podría ser un error con estado 200.
- */
-export function crmConfirmed(body: unknown): boolean {
-  if (!body || typeof body !== 'object') return false
-  const b = body as Record<string, unknown>
-  if (typeof b.mensagge === 'string' && b.mensagge.trim() !== '') return true
-  return typeof b.message === 'string' && /registrad/i.test(b.message)
 }

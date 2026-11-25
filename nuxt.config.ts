@@ -23,8 +23,12 @@ export default defineNuxtConfig({
     // Directorio persistente del contenido administrado localmente en la web (página «Nosotros»). NUXT_PLANMED_CONTENT_DIR.
     // Vacío => `<directorio de trabajo>/.data/planmed-content`. Debe quedar FUERA de `.output/` para sobrevivir a los despliegues.
     planmedContentDir: '',
-    // Formulario de valoración → CRM médico (POST multipart desde el SERVIDOR; el navegador nunca lo llama). NUXT_CRM_VALUATION_URL.
-    crmValuationUrl: 'https://pdtclientsolutions.com/crm-public/api/clients/forms',
+    // Formulario de valoración → registro del cliente en el CRM Médico (POST JSON desde el SERVIDOR; el navegador nunca lo llama). NUXT_CRM_CLIENT_URL.
+    // Destino VACÍO a propósito: sin él no sale ninguna petición (503 `not_configured`), así un entorno local no crea clientes reales.
+    // Línea y asesora: vacías = valores confirmados de Planmed (server/utils/crmClient.ts); NUXT_CRM_CLIENT_LINE_ID / _ADVISOR_EMAIL los sustituyen.
+    crmClientUrl: '',
+    crmClientLineId: '',
+    crmClientAdvisorEmail: '',
     // Correo SMTP (SOLO servidor, nunca en `public`) del formulario «Estudio de créditos» (POST /api/forms/credit-study). SIN credenciales por defecto:
     // las define el administrador por entorno con NUXT_MAIL_HOST / _PORT / _USERNAME / _PASSWORD / _FROM_ADDRESS / _FROM_NAME. Sin ellas el envío responde
     // 503 `not_configured`. Conexión cifrada obligatoria (puerto 465 = TLS; otros puertos exigen STARTTLS).
