@@ -71,7 +71,7 @@ export function aboutDefaultContent(): AboutContent {
       building: 'One Plaza',
       city: 'Medellín',
       region: 'Antioquia, Colombia',
-      phone: '+57 318 8043382',
+      phone: '+57 301 1409597',
       email: 'planmedequipodetrabajo@gmail.com',
       schedule: '',
       socials: {

@@ -254,6 +254,7 @@ import { leadService, LeadError } from '~/services/LeadService'
 import { quotationService } from '~/services/QuotationService'
 import { FinancingRateUnavailableError } from '~/services/FinancingRateService'
 import { formatPesos } from '#shared/utils/financing'
+import { whatsappUrlWithText } from '#shared/utils/contact'
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
@@ -265,10 +266,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:isOpen'])
 const route = useRoute()
-
-// Configuración Constants
-// (En producción estos datos deberían venir del entorno o tenant base)
-const WHATSAPP_NUMBER = '573188043382' 
 
 const { getVisitorUuid, trackFormStart, trackFormSubmit, trackWhatsAppClick, trackPolicyView } = useTracking()
 
@@ -474,7 +471,7 @@ const submitLead = async () => {
 const openWhatsApp = () => {
   trackWhatsAppClick(route.fullPath)
   const text = `Nuevo lead generado desde Planmed\n\nNombre:\n${form.full_name}\n\nTeléfono:\n${form.phone}\n\nProcedimiento:\n${form.procedure}\n\nMonto:\n$${form.requested_amount.toLocaleString('es-CO')}`
-  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`
+  const url = whatsappUrlWithText(text)
   window.open(url, '_blank')
   closeModal()
 }

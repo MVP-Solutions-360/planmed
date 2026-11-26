@@ -27,8 +27,8 @@
         <li>
           <span>Puedes referirnos de las siguientes maneras:</span>
           <ul class="bullets mt-3">
-            <li>Entregándole a tu referida nuestro número de atención: <a href="https://wa.me/573188043382" target="_blank" rel="noopener noreferrer" class="num">318 804 3382</a> y recordarle que mencione tu nombre o código al contactarnos.</li>
-            <li>Compartiendo el número de tu referida con nuestras asesoras vía WhatsApp al <a href="https://wa.me/573188043382" target="_blank" rel="noopener noreferrer" class="num">318 804 3382</a>. Nuestro equipo se encargará del resto.</li>
+            <li>Entregándole a tu referida nuestro número de atención: <a :href="WHATSAPP_URL" target="_blank" rel="noopener noreferrer" class="num">{{ WHATSAPP_DISPLAY }}</a> y recordarle que mencione tu nombre o código al contactarnos.</li>
+            <li>Compartiendo el número de tu referida con nuestras asesoras vía WhatsApp al <a :href="WHATSAPP_URL" target="_blank" rel="noopener noreferrer" class="num">{{ WHATSAPP_DISPLAY }}</a>. Nuestro equipo se encargará del resto.</li>
           </ul>
         </li>
       </ol>
@@ -45,6 +45,10 @@
     </section>
   </div>
 </template>
+
+<script setup lang="ts">
+import { WHATSAPP_DISPLAY, WHATSAPP_URL } from '#shared/utils/contact'
+</script>
 
 <style scoped>
 .card { background: #fff; border: 1px solid #e5e2e1; border-top: 4px solid #D3A76A; padding: 2rem; }

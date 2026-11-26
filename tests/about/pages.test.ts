@@ -186,7 +186,7 @@ describe('menú y páginas', () => {
     const page = readFileSync(join(ROOT, 'pages/testimonios/programa-de-referidos.vue'), 'utf8')
     assert.ok(page.includes('<ReferralProgramContent') && page.includes('<ReferralForm'))
     const content = readFileSync(join(ROOT, 'components/referral/ProgramContent.vue'), 'utf8')
-    for (const t of ['Programa de Remisión de Pacientes', 'hasta 10 días hábiles', '315 785 7783', 'después de 4 meses']) assert.ok(content.includes(t), t)
+    for (const t of ['Programa de Remisión de Pacientes', 'hasta 10 días hábiles', '{{ WHATSAPP_DISPLAY }}', 'después de 4 meses']) assert.ok(content.includes(t), t)
     const form = readFileSync(join(ROOT, 'components/referral/ReferralForm.vue'), 'utf8')
     assert.ok(form.includes('data-testid="referral-form-not-functional"') && form.includes('role="alert"'))
     assert.ok(form.includes('@submit.prevent') && !/\$fetch|useFetch|fetch\(|axios/.test(form), 'no envía datos')

@@ -51,7 +51,7 @@ const handleReject = () => {
       <div class="p-4 md:p-8 overflow-y-auto space-y-6 text-gray-700 leading-relaxed text-sm">
 
 
-        <p v-html="'El presente documento es suministrado por <strong>PLANMED S.A.S.</strong>, sociedad identificada con <strong>NIT. 901532790</strong>, con domicilio principal en la ciudad de Medellín y cuyos canales oficiales para la atención de Peticiones, Quejas y Reclamos se encuentran disponibles en el correo electrónico institucional: <a href=&quot;mailto:pqrs.institucional{\'@\'}gmail.com&quot; class=&quot;text-primary hover:underline font-semibold&quot;>pqrs.institucional{\'@\'}gmail.com</a>.'"></p>
+        <p v-html="'El presente documento es suministrado por <strong>PLANMED S.A.S.</strong>, sociedad identificada con <strong>NIT. 901532790</strong>, con domicilio principal en la ciudad de Medellín y cuyos canales oficiales para la atención de Peticiones, Quejas y Reclamos se encuentran disponibles en el correo electrónico institucional: <a href=&quot;mailto:planmedequipodetrabajo{\'@\'}gmail.com&quot; class=&quot;text-primary hover:underline font-semibold&quot;>planmedequipodetrabajo{\'@\'}gmail.com</a>.'"></p>
 
         <p v-html="'Al continuar con este proceso, usted reconoce y acepta que <strong>PLANMED S.A.S.</strong> es una sociedad comercial que otorga créditos exclusivamente con recursos propios y que su actividad no es la de una entidad financiera regulada, ni la de una Institución Prestadora de Servicios de Salud (IPS) o clínica.'"></p>
 

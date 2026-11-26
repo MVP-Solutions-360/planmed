@@ -20,12 +20,14 @@
 </template>
 
 <script setup>
+import { WHATSAPP_URL } from '#shared/utils/contact'
+
 defineProps({
   title: { type: String, default: null },
   description: { type: String, default: null },
   primaryText: { type: String, default: null },
   primaryLink: { type: String, default: '/financiacion#calculadora' },
   secondaryText: { type: String, default: null },
-  secondaryLink: { type: String, default: 'https://wa.me/573188043382' }
+  secondaryLink: { type: String, default: WHATSAPP_URL }
 })
 </script>
