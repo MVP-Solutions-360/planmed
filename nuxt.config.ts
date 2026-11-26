@@ -109,6 +109,7 @@ export default defineNuxtConfig({
     // El simulador vive ahora dentro de /financiacion (sección #calculadora): la ruta anterior redirige.
     '/simulador': { redirect: { to: '/financiacion', statusCode: 301 } },
     '/recursos': { ssr: true },
+    '/recursos/**': { ssr: true },
     '/blog/**': { isr: 3600 },
     '/procedimientos/**': { ssr: true },
     '/prp/**': { ssr: true },

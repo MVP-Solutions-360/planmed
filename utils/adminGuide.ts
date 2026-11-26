@@ -197,7 +197,7 @@ export const GUIDE_FIXED_PAGES: { name: string, route: string, note: string }[] 
   { name: 'Estudio de créditos', route: '/estudio-de-creditos', note: 'Formulario maquetado (aún no funcional).' },
   { name: 'Información precontractual', route: '/informacion-precontractual', note: 'Texto legal fijo.' },
   { name: 'Política de datos personales', route: '/politica-datos-personales', note: 'Texto y enlaces a PDF fijos.' },
-  { name: 'Recursos', route: '/recursos', note: 'Aún sin contenido.' }
+  { name: 'Recursos', route: '/recursos', note: 'Documentos legales fijos, cada uno con su vista y su PDF.' }
 ]
 
 /** Resumen por origen: qué módulos viven dónde. */
